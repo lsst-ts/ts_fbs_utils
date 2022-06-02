@@ -1,0 +1,35 @@
+{% set data= load_setup_py_data() %}
+package:
+  name: ts-fbs-utils
+  version: {{ data.get('version') }}
+
+source:
+  path: ../
+
+build:
+  noarch: python
+  script: python -m pip install --no-deps --ignore-installed .
+
+test:
+  requires:
+    - ts-conda-build =0.3
+    - rubin-sim
+  source_files:
+    - python
+    - tests
+    - setup.cfg
+    - pyproject.toml
+  commands:
+    - py.test -vsx
+
+requirements:
+  host:
+    - python
+    - pip
+    - setuptools_scm
+    - setuptools
+  run:
+    - python
+    - setuptools
+    - setuptools_scm
+    - rubin-sim
