@@ -5,10 +5,10 @@ For more information, see:
 https://developer.lsst.io/stack/building-single-package-docs.html
 """
 
-from documenteer.conf.pipelinespkg import *
+from documenteer.conf.pipelinespkg import *  # type: ignore # noqa
 
 
 project = "ts_fbs_utils"
-html_theme_options["logotext"] = project
+html_theme_options["logotext"] = project  # type: ignore # noqa
 html_title = project
 html_short_title = project
