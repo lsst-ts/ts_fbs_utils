@@ -1,4 +1,4 @@
-# This file is part of ts_fbs_utils.
+# This file is part of ts_fbs_utils
 #
 # Developed for the Vera Rubin Observatory Telescope and Site System.
 # This product includes software developed by the LSST Project
@@ -19,14 +19,33 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import typing
+__all__ = [
+    "get_data_dir",
+    "get_auxtel_tiles",
+]
 
-if typing.TYPE_CHECKING:
-    __version__ = "?"
-else:
-    try:
-        from .version import *
-    except ImportError:
-        __version__ = "?"
+import pathlib
 
-from .utils import *
+from astropy.table import Table
+from astropy.io import ascii
+
+
+def get_data_dir() -> pathlib.Path:
+    """Return the data directory of this package."""
+    return pathlib.Path(__file__).resolve().parents[0] / "data"
+
+
+def get_auxtel_tiles() -> Table:
+    """Get auxtel tiles.
+
+    Returns
+    -------
+    `Table`
+        AuxTel tiles as astropy table.
+    """
+    return ascii.read(
+        str(get_data_dir() / "auxtel_tiles.txt"),
+        format="basic",
+        fast_reader=False,
+        guess=False,
+    )
