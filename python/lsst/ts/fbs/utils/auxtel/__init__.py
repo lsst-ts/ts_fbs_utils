@@ -21,3 +21,4 @@
 
 from .basis_functions import *
 from .surveys import *
+from .make_scheduler import *
