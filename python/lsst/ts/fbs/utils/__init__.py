@@ -30,3 +30,4 @@ else:
         __version__ = "?"
 
 from .utils import *
+from .target import *
