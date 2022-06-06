@@ -31,3 +31,4 @@ else:
 
 from .utils import *
 from .target import *
+from .tiles import *
