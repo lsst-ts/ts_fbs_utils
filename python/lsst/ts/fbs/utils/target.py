@@ -19,15 +19,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+__all__ = ["Target"]
+
 import typing
 
-if typing.TYPE_CHECKING:
-    __version__ = "?"
-else:
-    try:
-        from .version import *
-    except ImportError:
-        __version__ = "?"
+from astropy.coordinates import Angle
+from dataclasses import dataclass
 
-from .utils import *
-from .target import *
+
+@dataclass
+class Target:
+    target_name: str
+    survey_name: str
+    ra: Angle
+    dec: Angle
+    hour_angle_limit: typing.List[typing.Tuple[float, float]]
+    reward_value: float
+    filters: typing.List[str]
+    visit_gap: float
+    exptime: float
+    nexp: int
