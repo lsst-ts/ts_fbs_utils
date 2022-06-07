@@ -44,7 +44,7 @@ def get_basis_functions_image_survey(
     Parameters
     ----------
     ra : `float`
-        Right Ascention for the observavtions, in hours.
+        Right Ascention for the observavtions, in degrees.
     nside : `int`
         The nside value for the healpix grid.
     note : `str`
@@ -152,7 +152,7 @@ def get_basis_functions_spectroscopic_survey(
     Parameters
     ----------
     ra : float
-        RA of the target, in hours.
+        RA of the target, in degrees.
     nside : int
         Healpix maps resolution.
     note : str
