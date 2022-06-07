@@ -19,17 +19,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import typing
+import os
 
-if typing.TYPE_CHECKING:
-    __version__ = "?"
-else:
-    try:
-        from .version import *
-    except ImportError:
-        __version__ = "?"
+from lsst.ts.fbs.utils import (
+    get_data_dir,
+    get_auxtel_tiles,
+)
 
-from .utils import *
-from .target import *
-from .tiles import *
-from .typing_utils import *
+
+def test_get_data_dir() -> None:
+
+    assert os.path.exists(get_data_dir())
+
+
+def test_get_auxtel_tiles() -> None:
+
+    auxtel_tiles = get_auxtel_tiles()
+    assert "Survey" in auxtel_tiles.colnames
+    assert "Name" in auxtel_tiles.colnames
+    assert "RA" in auxtel_tiles.colnames
+    assert "Dec" in auxtel_tiles.colnames

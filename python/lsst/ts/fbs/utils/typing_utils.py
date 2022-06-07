@@ -1,4 +1,4 @@
-# This file is part of ts_fbs_utils.
+# This file is part of ts_fbs_utils
 #
 # Developed for the Vera Rubin Observatory Telescope and Site System.
 # This product includes software developed by the LSST Project
@@ -19,17 +19,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+__all__ = ["AssertSurvey"]
+
 import typing
 
-if typing.TYPE_CHECKING:
-    __version__ = "?"
-else:
-    try:
-        from .version import *
-    except ImportError:
-        __version__ = "?"
+from .target import Target
+from .tiles import Tiles
 
-from .utils import *
-from .target import *
-from .tiles import *
-from .typing_utils import *
+
+class AssertSurvey(typing.Protocol):
+    """Utility class for type checking.
+
+    This class defines the interface for methods that asserts inputs for
+    surveys.
+    """
+
+    def __call__(
+        self, spec_targets: typing.List[Target], image_tiles: typing.List[Tiles]
+    ) -> None:
+        pass

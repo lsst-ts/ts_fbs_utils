@@ -1,6 +1,6 @@
 # This file is part of ts_fbs_utils.
 #
-# Developed for the Vera Rubin Observatory Telescope and Site System.
+# Developed for the LSST Data Management System.
 # This product includes software developed by the LSST Project
 # (https://www.lsst.org).
 # See the COPYRIGHT file at the top-level directory of this distribution
@@ -19,17 +19,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import typing
+from setuptools import setup
+import setuptools_scm
 
-if typing.TYPE_CHECKING:
-    __version__ = "?"
-else:
-    try:
-        from .version import *
-    except ImportError:
-        __version__ = "?"
-
-from .utils import *
-from .target import *
-from .tiles import *
-from .typing_utils import *
+setup(
+    version=setuptools_scm.get_version(),
+)
