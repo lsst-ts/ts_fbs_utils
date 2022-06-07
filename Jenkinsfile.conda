@@ -1,0 +1,2 @@
+@Library('JenkinsShared')_
+CondaPipeline([], "ts-fbs-utils", "lsst.ts.fbs.utils", "noarch")

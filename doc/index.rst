@@ -38,6 +38,15 @@ You can find Jira issues for this module under the `ts_fbs_utils <https://jira.l
 
 .. .. TODO: Add an item to this toctree for each script reference topic in the scripts subdirectory.
 
+.. _Version_History:
+
+Version History
+===============
+
+.. toctree::
+    version-history
+    :maxdepth: 1
+
 .. .. toctree::
 ..    :maxdepth: 1
 
