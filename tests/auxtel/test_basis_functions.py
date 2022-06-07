@@ -62,4 +62,4 @@ def test_get_basis_functions_spectroscopic_survey() -> None:
         gap_min=3600.0,
     )
 
-    assert len(basis_functions) == 8
+    assert len(basis_functions) == 10
