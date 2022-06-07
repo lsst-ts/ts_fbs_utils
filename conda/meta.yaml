@@ -20,7 +20,8 @@ test:
     - setup.cfg
     - pyproject.toml
   commands:
-    - py.test -vsx
+    - rs_download_data
+    - pytest -vsx tests/
 
 requirements:
   host:
