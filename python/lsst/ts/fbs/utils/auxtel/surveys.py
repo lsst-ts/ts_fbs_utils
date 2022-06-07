@@ -70,7 +70,7 @@ def generate_image_survey(
     """
 
     basis_functions = get_basis_functions_image_survey(
-        ra=target.ra.to(unit=u.hourangle).value,
+        ra=target.ra.to(unit=u.deg).value,
         nside=nside,
         note=target.target_name,
         note_interest=target.survey_name,
@@ -174,7 +174,7 @@ def generate_spectroscopic_survey(
         Spectroscopic survey.
     """
     basis_functions = get_basis_functions_spectroscopic_survey(
-        ra=target.ra.to(u.hourangle).value,
+        ra=target.ra.to(u.deg).value,
         nside=nside,
         note=target.target_name,
         ha_limits=target.hour_angle_limit,
