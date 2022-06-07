@@ -13,7 +13,7 @@ build:
 test:
   requires:
     - ts-conda-build =0.3
-    - rubin-sim
+    - rubin-sim =0.8.0a2
   source_files:
     - python
     - tests
@@ -32,4 +32,4 @@ requirements:
     - python
     - setuptools
     - setuptools_scm
-    - rubin-sim
+    - rubin-sim 0.8.0a2
