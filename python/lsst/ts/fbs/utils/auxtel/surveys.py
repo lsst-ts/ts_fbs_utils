@@ -65,7 +65,7 @@ def generate_image_survey(
 
     Returns
     -------
-    `FieldSurvey`
+    image_survey : `FieldSurvey`
         Image survey.
     """
 
@@ -91,7 +91,7 @@ def generate_image_survey(
         observation["nexp"] = target.nexp
         observation["note"] = f"{target.survey_name}:{target.target_name}"
 
-    return FieldSurvey(
+    image_survey = FieldSurvey(
         basis_functions,
         np.array(
             [
@@ -110,6 +110,10 @@ def generate_image_survey(
         nexp=target.nexp,
         detailers=survey_detailers,
     )
+
+    image_survey.basis_weights *= target.reward_value
+
+    return image_survey
 
 
 def generate_cwfs_survey(
@@ -170,7 +174,7 @@ def generate_spectroscopic_survey(
 
     Returns
     -------
-    `BaseSurvey`
+    spectroscopic_survey : `BaseSurvey`
         Spectroscopic survey.
     """
     basis_functions = get_basis_functions_spectroscopic_survey(
@@ -191,7 +195,7 @@ def generate_spectroscopic_survey(
     observation["note"] = f"{target.survey_name}:{target.target_name}"
     sequence = [observation]
 
-    return FieldSurvey(
+    spectroscopic_survey = FieldSurvey(
         basis_functions,
         np.array(
             [
@@ -210,3 +214,7 @@ def generate_spectroscopic_survey(
         nexp=target.nexp,
         detailers=survey_detailers,
     )
+
+    spectroscopic_survey.basis_weights *= target.reward_value
+
+    return spectroscopic_survey
