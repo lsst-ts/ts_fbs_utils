@@ -175,7 +175,9 @@ def get_basis_functions_spectroscopic_survey(
         basis_functions.Not_twilight_basis_function(sun_alt_limit=sun_alt_limit),
         basis_functions.Hour_Angle_limit_basis_function(RA=ra, ha_limits=ha_limits),
         basis_functions.M5_diff_basis_function(nside=nside),
-        basis_functions.Slewtime_basis_function(nside=nside),
+        basis_functions.Slewtime_basis_function(nside=nside, filtername="g"),
+        basis_functions.Slewtime_basis_function(nside=nside, filtername="r"),
+        basis_functions.Slewtime_basis_function(nside=nside, filtername="i"),
         basis_functions.Moon_avoidance_basis_function(nside=nside),
         basis_functions.Zenith_shadow_mask_basis_function(
             min_alt=28.0, max_alt=85.0, nside=nside
