@@ -186,8 +186,8 @@ def generate_spectroscopic_survey(
     observation["RA"] = target.ra.to(u.rad).value
     observation["dec"] = target.dec.to(u.rad).value
     observation["filter"] = "r"
-    observation["exptime"] = 360.0
-    observation["nexp"] = 1.0
+    observation["exptime"] = target.exptime
+    observation["nexp"] = target.nexp
     observation["note"] = f"{target.survey_name}:{target.target_name}"
     sequence = [observation]
 
