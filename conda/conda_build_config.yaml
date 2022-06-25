@@ -1,0 +1,9 @@
+python:
+  - 3.10
+  - 3.8
+rubin_sim:
+  - 0.10
+  - 0.8
+zip_keys:
+  - python
+  - rubin_sim
