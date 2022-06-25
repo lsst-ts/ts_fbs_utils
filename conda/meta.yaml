@@ -8,12 +8,14 @@ source:
 
 build:
   noarch: python
-  script: python -m pip install --no-deps --ignore-installed .
+  script: {{ PYTHON }} -m pip install --no-deps --ignore-installed .
+  script_env:
+    - RUBIN_SIM_DATA_DIR={{ PREFIX }}
 
 test:
   requires:
     - ts-conda-build =0.3
-    - rubin-sim =0.8.0a2
+    - rubin-sim {{ rubin_sim }}
   source_files:
     - python
     - tests
@@ -25,12 +27,15 @@ test:
 
 requirements:
   host:
-    - python
+    - python {{ python }}
     - pip
     - setuptools_scm
     - setuptools
-  run:
-    - python
+  build:
     - setuptools
     - setuptools_scm
-    - rubin-sim 0.8.0a2
+    - ts-conda-build
+    - rubin-sim {{ rubin_sim }}
+  run:
+    - python {{ python }}
+    - {{ pin_compatible('rubin-sim', min_pin='x.x', max_pin='x.x') }}
