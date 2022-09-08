@@ -4,6 +4,12 @@
 Version History
 ===============
 
+v0.2.0
+------
+
+* Add optional moon_distance attribute to target class
+* Add BalanceVisits basis function to spectroscopic survey class
+
 v0.1.1
 ------
 

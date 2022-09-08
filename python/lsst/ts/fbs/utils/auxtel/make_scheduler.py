@@ -220,6 +220,7 @@ class MakeScheduler:
                     nside=nside,
                     target=target,
                     wind_speed_maximum=wind_speed_maximum,
+                    nfields=len(spec_targets),
                     survey_detailers=[],
                 )
             )

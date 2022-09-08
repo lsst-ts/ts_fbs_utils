@@ -54,6 +54,8 @@ class Target:
         Total exposure time, in seconds.
     nexp : `int`
         Number of exposures.
+    moon_distance : `float`, Optional
+        Minimum allowed moon distance. (degrees). Default 30.0
 
     Notes
     -----
@@ -70,3 +72,4 @@ class Target:
     visit_gap: float
     exptime: float
     nexp: int
+    moon_distance: float = 30.0
