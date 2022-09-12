@@ -60,6 +60,9 @@ def test_get_basis_functions_spectroscopic_survey() -> None:
         ha_limits=(-6.0, 6.0),
         wind_speed_maximum=4.0,
         gap_min=3600.0,
+        note_interest="spec",
+        moon_distance=30.0,
+        nobs_reference=3,
     )
 
-    assert len(basis_functions) == 10
+    assert len(basis_functions) == 11

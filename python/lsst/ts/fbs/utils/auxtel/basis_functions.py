@@ -59,7 +59,7 @@ def get_basis_functions_image_survey(
     nobs_survey : `int`
         Total number of observations expected for the survey.
     note_interest : `str`
-        A substring that maps to surveys to be accounted for agains the
+        A substring that maps to surveys to be accounted for against the
         reference number of observations.
 
     Returns
@@ -146,6 +146,9 @@ def get_basis_functions_spectroscopic_survey(
     ha_limits: typing.List[typing.Tuple[float, float]],
     wind_speed_maximum: float,
     gap_min: float,
+    moon_distance: float,
+    nobs_reference: int,
+    note_interest: str,
 ) -> typing.List[basis_functions.Base_basis_function]:
     """Get basis functions for spectroscopic survey.
 
@@ -163,6 +166,11 @@ def get_basis_functions_spectroscopic_survey(
         Maximum wind speed, in m/s.
     gap_min : `float`
         Gap between subsequent observations, in minutes.
+    nobs_reference : `int`
+        Reference number of observations.
+    note_interest : `str`
+        A substring that maps to surveys to be accounted for against the
+        reference number of observations.
 
     Returns
     -------
@@ -178,12 +186,17 @@ def get_basis_functions_spectroscopic_survey(
         basis_functions.Slewtime_basis_function(nside=nside, filtername="g"),
         basis_functions.Slewtime_basis_function(nside=nside, filtername="r"),
         basis_functions.Slewtime_basis_function(nside=nside, filtername="i"),
-        basis_functions.Moon_avoidance_basis_function(nside=nside),
+        basis_functions.Moon_avoidance_basis_function(
+            nside=nside, moon_distance=moon_distance
+        ),
         basis_functions.Zenith_shadow_mask_basis_function(
             min_alt=28.0, max_alt=85.0, nside=nside
         ),
         basis_functions.VisitGap(note=note, gap_min=gap_min),
         basis_functions.AvoidDirectWind(
             wind_speed_maximum=wind_speed_maximum, nside=nside
+        ),
+        basis_functions.BalanceVisits(
+            nobs_reference=nobs_reference, note_survey=note, note_interest=note_interest
         ),
     ]

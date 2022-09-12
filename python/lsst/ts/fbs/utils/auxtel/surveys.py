@@ -157,6 +157,7 @@ def generate_spectroscopic_survey(
     nside: int,
     target: Target,
     wind_speed_maximum: float,
+    nfields: int,
     survey_detailers: typing.List[Base_detailer],
 ) -> BaseSurvey:
     """Generate Spectroscopic Survey.
@@ -181,9 +182,12 @@ def generate_spectroscopic_survey(
         ra=target.ra.to(u.deg).value,
         nside=nside,
         note=target.target_name,
+        note_interest="spec",
         ha_limits=target.hour_angle_limit,
         wind_speed_maximum=wind_speed_maximum,
         gap_min=target.visit_gap,
+        moon_distance=target.moon_distance,
+        nobs_reference=nfields,
     )
 
     observation = empty_observation()
