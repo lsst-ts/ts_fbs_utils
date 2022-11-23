@@ -63,7 +63,7 @@ def get_basis_functions_image_survey(
     note_interest : `str`
         A substring that maps to surveys to be accounted for against the
         reference number of observations.
-    filter_names : list [str]
+    filter_names : `list` [ `str` ]
          List of filter names that need be observed before activating.
     gap_min : `float`
         Gap between subsequent observations, in minutes.
