@@ -38,6 +38,8 @@ def get_basis_functions_image_survey(
     nobs_reference: int,
     nobs_survey: int,
     note_interest: str,
+    filter_names: list,
+    gap_min: float,
 ) -> typing.List[basis_functions.Base_basis_function]:
     """Get the basis functions for the image survey.
 
@@ -61,6 +63,10 @@ def get_basis_functions_image_survey(
     note_interest : `str`
         A substring that maps to surveys to be accounted for against the
         reference number of observations.
+    filter_names : list [str]
+         List of filter names that need be observed before activating.
+    gap_min : `float`
+        Gap between subsequent observations, in minutes.
 
     Returns
     -------
@@ -79,7 +85,7 @@ def get_basis_functions_image_survey(
         basis_functions.Zenith_shadow_mask_basis_function(
             min_alt=20.0, max_alt=85.0, nside=nside
         ),
-        basis_functions.VisitGap(note=note, gap_min=1440.0),
+        basis_functions.VisitGap(note=note, filter_names=filter_names, gap_min=gap_min),
         basis_functions.AvoidDirectWind(
             wind_speed_maximum=wind_speed_maximum, nside=nside
         ),
