@@ -78,6 +78,8 @@ def generate_image_survey(
         wind_speed_maximum=wind_speed_maximum,
         nobs_reference=nfields,
         nobs_survey=len(target.filters),
+        filter_names=target.filters,
+        gap_min=target.visit_gap,
     )
 
     sequence = [empty_observation() for i in range(len(target.filters))]
