@@ -4,6 +4,11 @@
 Version History
 ===============
 
+v0.2.1
+------
+
+* Add optional filter_list keyword to VisitGap imaging survey
+
 v0.2.0
 ------
 
