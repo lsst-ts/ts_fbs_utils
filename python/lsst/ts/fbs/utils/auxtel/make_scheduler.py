@@ -28,8 +28,8 @@ import dataclasses
 from astropy import units
 from astropy.coordinates import Angle
 
-from rubin_sim.scheduler.schedulers import Core_scheduler
-from rubin_sim.scheduler.detailers import Base_detailer
+from rubin_sim.scheduler.schedulers import CoreScheduler
+from rubin_sim.scheduler.detailers import BaseDetailer
 from rubin_sim.scheduler.surveys import BaseSurvey
 
 from .. import get_auxtel_tiles, Target, Tiles, AssertSurvey
@@ -172,7 +172,7 @@ class MakeScheduler:
         survey_type: SurveyType,
         spec_targets: typing.List[Target],
         image_tiles: typing.List[Tiles],
-    ) -> typing.Tuple[int, Core_scheduler]:
+    ) -> typing.Tuple[int, CoreScheduler]:
         """Construct feature based scheduler for spectroscopic survey with
         image survey in the background (with lower priority).
 
@@ -194,7 +194,7 @@ class MakeScheduler:
         -------
         nside : `int`
             Healpix map resolution.
-        scheduler : `Core_scheduler`
+        scheduler : `CoreScheduler`
             Feature based scheduler.
         """
 
@@ -232,7 +232,7 @@ class MakeScheduler:
 
         # Image surveys
         for image_targets in image_target_surveys:
-            survey_detailers: typing.List[Base_detailer] = []
+            survey_detailers: typing.List[BaseDetailer] = []
             for target in image_targets:
                 image_survey.append(
                     generate_image_survey(
@@ -260,7 +260,7 @@ class MakeScheduler:
             if len(survey) > 0
         ]
 
-        scheduler = Core_scheduler(surveys, nside=nside)
+        scheduler = CoreScheduler(surveys, nside=nside)
 
         return nside, scheduler
 

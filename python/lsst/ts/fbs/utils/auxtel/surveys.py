@@ -24,12 +24,12 @@ import numpy as np
 
 import astropy.units as u
 
-from rubin_sim.scheduler.detailers import Base_detailer
+from rubin_sim.scheduler.detailers import BaseDetailer
 from rubin_sim.scheduler.utils import empty_observation
 from rubin_sim.scheduler.surveys import (
     BaseSurvey,
     FieldSurvey,
-    Greedy_survey,
+    GreedySurvey,
 )
 
 
@@ -46,7 +46,7 @@ def generate_image_survey(
     target: Target,
     wind_speed_maximum: float,
     nfields: int,
-    survey_detailers: typing.List[Base_detailer],
+    survey_detailers: typing.List[BaseDetailer],
 ) -> BaseSurvey:
     """Generate image survey.
 
@@ -60,7 +60,7 @@ def generate_image_survey(
         Wind speed limit, in m/s.
     nfields : `int`
         Number of fields in the general survey.
-    survey_detailers : `list` of `detailers.Base_detailer`
+    survey_detailers : `list` of `detailers.BaseDetailer`
         List of survey detailers.
 
     Returns
@@ -136,7 +136,7 @@ def generate_cwfs_survey(
 
     Returns
     -------
-    `Greedy_survey`
+    `GreedySurvey`
         CWFS survey.
     """
     basis_functions = get_basis_functions_cwfs_survey(
@@ -146,7 +146,7 @@ def generate_cwfs_survey(
         wind_speed_maximum=wind_speed_maximum,
     )
 
-    return Greedy_survey(
+    return GreedySurvey(
         basis_functions,
         np.ones_like(basis_functions) * 10000.0,
         nside=nside,
@@ -160,7 +160,7 @@ def generate_spectroscopic_survey(
     target: Target,
     wind_speed_maximum: float,
     nfields: int,
-    survey_detailers: typing.List[Base_detailer],
+    survey_detailers: typing.List[BaseDetailer],
 ) -> BaseSurvey:
     """Generate Spectroscopic Survey.
 
@@ -172,7 +172,7 @@ def generate_spectroscopic_survey(
         Target for the image survey.
     wind_speed_maximu : `float`
         Maximum wind speed (in m/s).
-    survey_detailers : `list` of `detailers.Base_detailer`
+    survey_detailers : `list` of `detailers.BaseDetailer`
         List of survey detailers.
 
     Returns
