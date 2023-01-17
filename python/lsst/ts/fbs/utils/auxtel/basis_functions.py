@@ -83,7 +83,7 @@ def get_basis_functions_image_survey(
         basis_functions.Slewtime_basis_function(nside=nside, filtername="i"),
         basis_functions.Moon_avoidance_basis_function(nside=nside),
         basis_functions.Zenith_shadow_mask_basis_function(
-            min_alt=20.0, max_alt=85.0, nside=nside
+            min_alt=26.0, max_alt=85.0, nside=nside
         ),
         basis_functions.VisitGap(note=note, filter_names=filter_names, gap_min=gap_min),
         basis_functions.AvoidDirectWind(
@@ -136,7 +136,7 @@ def get_basis_functions_cwfs_survey(
         basis_functions.Slewtime_basis_function(nside=nside, filtername="i"),
         basis_functions.Moon_avoidance_basis_function(nside=nside),
         basis_functions.Zenith_shadow_mask_basis_function(
-            min_alt=28.0, max_alt=85.0, nside=nside
+            min_alt=26.0, max_alt=85.0, nside=nside
         ),
         basis_functions.VisitGap(note=note, gap_min=time_gap_min),
         basis_functions.AvoidDirectWind(
@@ -196,7 +196,7 @@ def get_basis_functions_spectroscopic_survey(
             nside=nside, moon_distance=moon_distance
         ),
         basis_functions.Zenith_shadow_mask_basis_function(
-            min_alt=28.0, max_alt=85.0, nside=nside
+            min_alt=26.0, max_alt=85.0, nside=nside
         ),
         basis_functions.VisitGap(note=note, gap_min=gap_min),
         basis_functions.AvoidDirectWind(
