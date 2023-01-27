@@ -3,7 +3,7 @@ python:
 numpy:
   - 1.22
 rubin_sim:
-  - 0
+  - 1
 zip_keys:
   - python
   - numpy

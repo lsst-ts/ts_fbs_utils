@@ -4,6 +4,11 @@
 Version History
 ===============
 
+v0.3.0
+------
+
+* Update rubin_sim dependencies to be consistent with v1.0+
+
 v0.2.1
 ------
 
