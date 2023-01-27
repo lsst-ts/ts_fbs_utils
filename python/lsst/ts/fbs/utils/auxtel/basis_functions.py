@@ -40,7 +40,7 @@ def get_basis_functions_image_survey(
     note_interest: str,
     filter_names: list,
     gap_min: float,
-) -> typing.List[basis_functions.Base_basis_function]:
+) -> typing.List[basis_functions.BaseBasisFunction]:
     """Get the basis functions for the image survey.
 
     Parameters
@@ -70,19 +70,19 @@ def get_basis_functions_image_survey(
 
     Returns
     -------
-    `list` of `basis_functions.Base_basis_function`
+    `list` of `basis_functions.BaseBasisFunction`
     """
 
     sun_alt_limit = -12.0
 
     return [
-        basis_functions.Not_twilight_basis_function(sun_alt_limit=sun_alt_limit),
-        basis_functions.Hour_Angle_limit_basis_function(RA=ra, ha_limits=ha_limits),
-        basis_functions.Slewtime_basis_function(nside=nside, filtername="g"),
-        basis_functions.Slewtime_basis_function(nside=nside, filtername="r"),
-        basis_functions.Slewtime_basis_function(nside=nside, filtername="i"),
-        basis_functions.Moon_avoidance_basis_function(nside=nside),
-        basis_functions.Zenith_shadow_mask_basis_function(
+        basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
+        basis_functions.HourAngleLimitBasisFunction(RA=ra, ha_limits=ha_limits),
+        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="g"),
+        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
+        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="i"),
+        basis_functions.MoonAvoidanceBasisFunction(nside=nside),
+        basis_functions.ZenithShadowMaskBasisFunction(
             min_alt=26.0, max_alt=85.0, nside=nside
         ),
         basis_functions.VisitGap(note=note, filter_names=filter_names, gap_min=gap_min),
@@ -105,7 +105,7 @@ def get_basis_functions_cwfs_survey(
     note: str,
     time_gap_min: float,
     wind_speed_maximum: float,
-) -> typing.List[basis_functions.Base_basis_function]:
+) -> typing.List[basis_functions.BaseBasisFunction]:
     """Get the basis functions for the CWFS survey.
 
     This is a background survey that will activate at specific points in time
@@ -125,17 +125,17 @@ def get_basis_functions_cwfs_survey(
 
     Returns
     -------
-    `list` of `basis_functions.Base_basis_function`
+    `list` of `basis_functions.BaseBasisFunction`
     """
     sun_alt_limit = -12.0
 
     return [
-        basis_functions.Not_twilight_basis_function(sun_alt_limit=sun_alt_limit),
-        basis_functions.Slewtime_basis_function(nside=nside, filtername="g"),
-        basis_functions.Slewtime_basis_function(nside=nside, filtername="r"),
-        basis_functions.Slewtime_basis_function(nside=nside, filtername="i"),
-        basis_functions.Moon_avoidance_basis_function(nside=nside),
-        basis_functions.Zenith_shadow_mask_basis_function(
+        basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
+        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="g"),
+        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
+        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="i"),
+        basis_functions.MoonAvoidanceBasisFunction(nside=nside),
+        basis_functions.ZenithShadowMaskBasisFunction(
             min_alt=26.0, max_alt=85.0, nside=nside
         ),
         basis_functions.VisitGap(note=note, gap_min=time_gap_min),
@@ -155,7 +155,7 @@ def get_basis_functions_spectroscopic_survey(
     moon_distance: float,
     nobs_reference: int,
     note_interest: str,
-) -> typing.List[basis_functions.Base_basis_function]:
+) -> typing.List[basis_functions.BaseBasisFunction]:
     """Get basis functions for spectroscopic survey.
 
     Parameters
@@ -180,22 +180,22 @@ def get_basis_functions_spectroscopic_survey(
 
     Returns
     -------
-    list of basis_functions.Base_basis_function
+    list of basis_functions.BaseBasisFunction
         List of basis functions.
     """
     sun_alt_limit = -12.0
 
     return [
-        basis_functions.Not_twilight_basis_function(sun_alt_limit=sun_alt_limit),
-        basis_functions.Hour_Angle_limit_basis_function(RA=ra, ha_limits=ha_limits),
-        basis_functions.M5_diff_basis_function(nside=nside),
-        basis_functions.Slewtime_basis_function(nside=nside, filtername="g"),
-        basis_functions.Slewtime_basis_function(nside=nside, filtername="r"),
-        basis_functions.Slewtime_basis_function(nside=nside, filtername="i"),
-        basis_functions.Moon_avoidance_basis_function(
+        basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
+        basis_functions.HourAngleLimitBasisFunction(RA=ra, ha_limits=ha_limits),
+        basis_functions.M5DiffBasisFunction(nside=nside),
+        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="g"),
+        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
+        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="i"),
+        basis_functions.MoonAvoidanceBasisFunction(
             nside=nside, moon_distance=moon_distance
         ),
-        basis_functions.Zenith_shadow_mask_basis_function(
+        basis_functions.ZenithShadowMaskBasisFunction(
             min_alt=26.0, max_alt=85.0, nside=nside
         ),
         basis_functions.VisitGap(note=note, gap_min=gap_min),
