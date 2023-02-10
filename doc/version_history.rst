@@ -4,6 +4,13 @@
 Version History
 ===============
 
+v0.4.1
+------
+
+* Add target field to auxtel_tiles.txt data file.
+* Edit version history to match tag-released version history.  
+* Update .github/workflows/lint.yaml python version to 3.10
+
 v0.4.0
 ------
 
