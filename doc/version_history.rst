@@ -4,21 +4,34 @@
 Version History
 ===============
 
+v0.4.0
+------
+
+* Update rubin_sim dependencies to be consistent with v1.0+.
+* Update conda build.
+
+v0.3.1
+------
+
+* Update zenith_shadow_mask basis function min_alt for all surveys.
+
 v0.3.0
 ------
 
-* Update rubin_sim dependencies to be consistent with v1.0+
+* Add optional filter_list keyword to VisitGap imaging survey.
+* Update conda build recipe.
+* In ```test_basis_functions.py``` update unit tests with filter_list keyword.
 
 v0.2.1
 ------
 
-* Add optional filter_list keyword to VisitGap imaging survey
+* Reduce auxtel imaging survey target fields.
 
 v0.2.0
 ------
 
-* Add optional moon_distance attribute to target class
-* Add BalanceVisits basis function to spectroscopic survey class
+* Add optional moon_distance attribute to target class.
+* Add BalanceVisits basis function to spectroscopic survey class.
 
 v0.1.1
 ------
