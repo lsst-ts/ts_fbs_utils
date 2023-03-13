@@ -28,29 +28,36 @@ from astropy.coordinates import Angle
 from lsst.ts.fbs.utils import Target, Tiles
 from lsst.ts.fbs.utils.auxtel.make_scheduler import MakeScheduler, SurveyType
 
+from rubin_sim.scheduler.detailers import BaseDetailer, CameraRotDetailer
+
 
 class TestMakeScheduler(unittest.TestCase):
     make_scheduler: MakeScheduler
     spec_targets: typing.List[Target]
     image_tiles: typing.List[Tiles]
+    spec_detailers: typing.List[BaseDetailer]
+    image_detailers: typing.List[BaseDetailer]
 
     @classmethod
     def setUpClass(cls) -> None:
         cls.make_scheduler = MakeScheduler()
         cls.spec_targets = cls.get_spec_targets()
         cls.image_tiles = cls.get_image_tiles()
+        cls.spec_detailers = cls.get_spec_detailers()
+        cls.image_detailers = cls.get_image_detailers()
         return super().setUpClass()
 
     def test_get_scheduler_spec_image(
         self,
     ) -> None:
-
         nside, scheduler = self.make_scheduler.get_scheduler(
             nside=32,
             wind_speed_maximum=18.0,
             survey_type=SurveyType.SpecImage,
             spec_targets=self.spec_targets,
             image_tiles=self.image_tiles,
+            spec_detailers=self.spec_detailers,
+            image_detailers=self.image_detailers,
         )
 
         assert nside == 32
@@ -64,7 +71,6 @@ class TestMakeScheduler(unittest.TestCase):
         )
 
     def test_get_scheduler_spec_image_fail_no_spec_target(self) -> None:
-
         with self.assertRaises(AssertionError):
             self.make_scheduler.get_scheduler(
                 nside=32,
@@ -72,10 +78,11 @@ class TestMakeScheduler(unittest.TestCase):
                 survey_type=SurveyType.SpecImage,
                 spec_targets=[],
                 image_tiles=self.image_tiles,
+                spec_detailers=self.spec_detailers,
+                image_detailers=self.image_detailers,
             )
 
     def test_get_scheduler_spec_image_fail_no_image_tiles(self) -> None:
-
         with self.assertRaises(AssertionError):
             self.make_scheduler.get_scheduler(
                 nside=32,
@@ -83,16 +90,19 @@ class TestMakeScheduler(unittest.TestCase):
                 survey_type=SurveyType.SpecImage,
                 spec_targets=self.spec_targets,
                 image_tiles=[],
+                spec_detailers=self.spec_detailers,
+                image_detailers=self.image_detailers,
             )
 
     def test_get_scheduler_image_spec(self) -> None:
-
         nside, scheduler = self.make_scheduler.get_scheduler(
             nside=32,
             wind_speed_maximum=18.0,
             survey_type=SurveyType.ImageSpec,
             spec_targets=self.spec_targets,
             image_tiles=self.image_tiles,
+            spec_detailers=self.spec_detailers,
+            image_detailers=self.image_detailers,
         )
 
         assert nside == 32
@@ -106,7 +116,6 @@ class TestMakeScheduler(unittest.TestCase):
         )
 
     def test_get_scheduler_image_spec_fail_no_spec_target(self) -> None:
-
         with self.assertRaises(AssertionError):
             self.make_scheduler.get_scheduler(
                 nside=32,
@@ -114,10 +123,11 @@ class TestMakeScheduler(unittest.TestCase):
                 survey_type=SurveyType.ImageSpec,
                 spec_targets=[],
                 image_tiles=self.image_tiles,
+                spec_detailers=self.spec_detailers,
+                image_detailers=self.image_detailers,
             )
 
     def test_get_scheduler_image_spec_fail_no_image_tiles(self) -> None:
-
         with self.assertRaises(AssertionError):
             self.make_scheduler.get_scheduler(
                 nside=32,
@@ -125,16 +135,19 @@ class TestMakeScheduler(unittest.TestCase):
                 survey_type=SurveyType.ImageSpec,
                 spec_targets=self.spec_targets,
                 image_tiles=[],
+                spec_detailers=self.spec_detailers,
+                image_detailers=self.image_detailers,
             )
 
     def test_get_scheduler_spec(self) -> None:
-
         nside, scheduler = self.make_scheduler.get_scheduler(
             nside=32,
             wind_speed_maximum=18.0,
             survey_type=SurveyType.Spec,
             spec_targets=self.spec_targets,
             image_tiles=[],
+            spec_detailers=self.spec_detailers,
+            image_detailers=self.image_detailers,
         )
 
         assert nside == 32
@@ -145,7 +158,6 @@ class TestMakeScheduler(unittest.TestCase):
         )
 
     def test_get_scheduler_spec_fail_with_image_target(self) -> None:
-
         with self.assertRaises(AssertionError):
             self.make_scheduler.get_scheduler(
                 nside=32,
@@ -153,16 +165,19 @@ class TestMakeScheduler(unittest.TestCase):
                 survey_type=SurveyType.Spec,
                 spec_targets=self.spec_targets,
                 image_tiles=self.image_tiles,
+                spec_detailers=self.spec_detailers,
+                image_detailers=self.image_detailers,
             )
 
     def test_get_scheduler_image(self) -> None:
-
         nside, scheduler = self.make_scheduler.get_scheduler(
             nside=32,
             wind_speed_maximum=18.0,
             survey_type=SurveyType.Image,
             spec_targets=[],
             image_tiles=self.image_tiles,
+            spec_detailers=self.spec_detailers,
+            image_detailers=self.image_detailers,
         )
 
         assert nside == 32
@@ -173,7 +188,6 @@ class TestMakeScheduler(unittest.TestCase):
         )
 
     def test_get_scheduler_image_fail_with_spec_target(self) -> None:
-
         with self.assertRaises(AssertionError):
             self.make_scheduler.get_scheduler(
                 nside=32,
@@ -181,6 +195,8 @@ class TestMakeScheduler(unittest.TestCase):
                 survey_type=SurveyType.Image,
                 spec_targets=self.spec_targets,
                 image_tiles=self.image_tiles,
+                spec_detailers=self.spec_detailers,
+                image_detailers=self.image_detailers,
             )
 
     @staticmethod
@@ -213,3 +229,11 @@ class TestMakeScheduler(unittest.TestCase):
                 nexp=2,
             )
         ]
+
+    @staticmethod
+    def get_spec_detailers() -> typing.List[BaseDetailer]:
+        return []
+
+    @staticmethod
+    def get_image_detailers() -> typing.List[BaseDetailer]:
+        return [CameraRotDetailer(max_rot=5.0, min_rot=1.0, per_night=False)]

@@ -28,12 +28,10 @@ from lsst.ts.fbs.utils import (
 
 
 def test_get_data_dir() -> None:
-
     assert os.path.exists(get_data_dir())
 
 
 def test_get_auxtel_tiles() -> None:
-
     auxtel_tiles = get_auxtel_tiles()
     assert "Survey" in auxtel_tiles.colnames
     assert "Name" in auxtel_tiles.colnames
