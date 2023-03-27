@@ -46,14 +46,14 @@ def get_basis_functions_image_survey(
     Parameters
     ----------
     ra : `float`
-        Right Ascention for the observavtions, in degrees.
+        Right Ascension for the observations, in degrees.
     nside : `int`
         The nside value for the healpix grid.
     note : `str`
         A identifier string to be attached to the survey observations.
     ha_limits : 'list` of `float`
         A two-element list with the hour angle limits, in hours.
-    wind_speed_maximu : `float`
+    wind_speed_maximum : `float`
         Maximum wind speed tolerated for the observations of the survey,
         in m/s.
     nobs_reference : `int`
@@ -119,7 +119,7 @@ def get_basis_functions_cwfs_survey(
         A identifier string to be attached to the survey observations.
     time_gap_min : `float`
         The gap between observations of this survey, in minutes.
-    wind_speed_maximu : `float`
+    wind_speed_maximum : `float`
         Maximum wind speed tolerated for the observations of the survey,
         in m/s.
 
