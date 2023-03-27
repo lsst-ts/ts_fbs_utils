@@ -19,15 +19,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-__all__ = [
-    "get_data_dir",
-    "get_auxtel_tiles",
-]
+__all__ = ["get_data_dir", "get_auxtel_tiles", "get_maintel_tiles"]
 
 import pathlib
 
-from astropy.table import Table
 from astropy.io import ascii
+from astropy.table import Table
 
 
 def get_data_dir() -> pathlib.Path:
@@ -45,6 +42,22 @@ def get_auxtel_tiles() -> Table:
     """
     return ascii.read(
         str(get_data_dir() / "auxtel_tiles.txt"),
+        format="basic",
+        fast_reader=False,
+        guess=False,
+    )
+
+
+def get_maintel_tiles() -> Table:
+    """Get maintel tiles.
+
+    Returns
+    -------
+    `Table`
+        MainTel tiles as astropy table.
+    """
+    return ascii.read(
+        str(get_data_dir() / "maintel_tiles.txt"),
         format="basic",
         fast_reader=False,
         guess=False,
