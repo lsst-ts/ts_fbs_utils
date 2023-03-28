@@ -21,12 +21,8 @@
 
 from astropy import units
 from astropy.coordinates import Angle
-
 from lsst.ts.fbs.utils import Target
-from lsst.ts.fbs.utils.auxtel.surveys import (
-    generate_image_survey,
-    generate_cwfs_survey,
-)
+from lsst.ts.fbs.utils.auxtel.surveys import generate_cwfs_survey, generate_image_survey
 
 
 def test_generate_image_survey() -> None:

@@ -29,7 +29,7 @@ else:
     except ImportError:
         __version__ = "?"
 
-from .utils import *
 from .target import *
 from .tiles import *
 from .typing_utils import *
+from .utils import *

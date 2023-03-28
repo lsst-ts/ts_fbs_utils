@@ -22,9 +22,9 @@
 __all__ = ["Target"]
 
 import typing
+from dataclasses import dataclass
 
 from astropy.coordinates import Angle
-from dataclasses import dataclass
 
 
 @dataclass

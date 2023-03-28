@@ -4,6 +4,18 @@
 Version History
 ===============
 
+v0.5.0
+------
+
+* Add option to pass list of detailers to spec and image surveys.
+* Update git workflow to run ``pre-commit`` check using ``ts-pre-commit-config``.
+* Run ``black`` and ``isort`` in the entire package.
+* Update ``.gitignore`` with new ``ts-pre-commit-config``.
+* Add sub-module to configure maintel for star tracker survey using ``FieldSurvey``.
+* In ``auxtel/basis_functions``, fix typos in docstrings.
+* In ``utils``, add new method to read maintel tiles.
+* Add tiles for Main Telescope surveys.
+
 v0.4.1
 ------
 

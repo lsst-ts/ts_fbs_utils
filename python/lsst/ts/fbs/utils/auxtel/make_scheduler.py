@@ -21,19 +21,17 @@
 
 __all__ = ["MakeScheduler"]
 
+import dataclasses
 import enum
 import typing
-import dataclasses
 
 from astropy import units
 from astropy.coordinates import Angle
-
-from rubin_sim.scheduler.schedulers import CoreScheduler
 from rubin_sim.scheduler.detailers import BaseDetailer
+from rubin_sim.scheduler.schedulers import CoreScheduler
 from rubin_sim.scheduler.surveys import BaseSurvey
 
-from .. import get_auxtel_tiles, Target, Tiles, AssertSurvey
-
+from .. import AssertSurvey, Target, Tiles, get_auxtel_tiles
 from .surveys import (
     generate_cwfs_survey,
     generate_image_survey,
@@ -172,6 +170,8 @@ class MakeScheduler:
         survey_type: SurveyType,
         spec_targets: typing.List[Target],
         image_tiles: typing.List[Tiles],
+        spec_detailers: typing.List[BaseDetailer],
+        image_detailers: typing.List[BaseDetailer],
     ) -> typing.Tuple[int, CoreScheduler]:
         """Construct feature based scheduler for spectroscopic survey with
         image survey in the background (with lower priority).
@@ -187,8 +187,12 @@ class MakeScheduler:
             surveys in the scheduler.
         spec_targets : `list` of `Target`
             List of targets for spectroscopic survey.
-        image_targets : `list` of `Target`
+        tiles : `list` of `Tiles`
             List of targets for background image survey.
+        spec_detailers : `list` of `BaseDetailer`
+            List of Detailers used for spectroscopic survey.
+        image_detailers : `list` of `BaseDetailer`
+            List of Detailers used for image survey.
 
         Returns
         -------
@@ -221,7 +225,7 @@ class MakeScheduler:
                     target=target,
                     wind_speed_maximum=wind_speed_maximum,
                     nfields=len(spec_targets),
-                    survey_detailers=[],
+                    survey_detailers=spec_detailers,
                 )
             )
 
@@ -232,7 +236,6 @@ class MakeScheduler:
 
         # Image surveys
         for image_targets in image_target_surveys:
-            survey_detailers: typing.List[BaseDetailer] = []
             for target in image_targets:
                 image_survey.append(
                     generate_image_survey(
@@ -240,7 +243,7 @@ class MakeScheduler:
                         target=target,
                         wind_speed_maximum=wind_speed_maximum,
                         nfields=len(image_targets),
-                        survey_detailers=survey_detailers,
+                        survey_detailers=image_detailers,
                     )
                 )
 
