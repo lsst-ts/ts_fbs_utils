@@ -21,19 +21,17 @@
 
 __all__ = ["MakeScheduler"]
 
+import dataclasses
 import enum
 import typing
-import dataclasses
 
 from astropy import units
 from astropy.coordinates import Angle
-
-from rubin_sim.scheduler.schedulers import CoreScheduler
 from rubin_sim.scheduler.detailers import BaseDetailer
+from rubin_sim.scheduler.schedulers import CoreScheduler
 from rubin_sim.scheduler.surveys import BaseSurvey
 
-from .. import get_auxtel_tiles, Target, Tiles, AssertSurvey
-
+from .. import AssertSurvey, Target, Tiles, get_auxtel_tiles
 from .surveys import (
     generate_cwfs_survey,
     generate_image_survey,

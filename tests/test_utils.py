@@ -21,10 +21,7 @@
 
 import os
 
-from lsst.ts.fbs.utils import (
-    get_data_dir,
-    get_auxtel_tiles,
-)
+from lsst.ts.fbs.utils import get_auxtel_tiles, get_data_dir
 
 
 def test_get_data_dir() -> None:
