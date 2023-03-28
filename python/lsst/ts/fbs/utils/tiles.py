@@ -22,7 +22,6 @@
 __all__ = ["Tiles"]
 
 import typing
-
 from dataclasses import dataclass
 
 

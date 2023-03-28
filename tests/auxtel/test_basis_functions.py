@@ -20,8 +20,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from lsst.ts.fbs.utils.auxtel.basis_functions import (
-    get_basis_functions_image_survey,
     get_basis_functions_cwfs_survey,
+    get_basis_functions_image_survey,
     get_basis_functions_spectroscopic_survey,
 )
 

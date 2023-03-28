@@ -20,23 +20,17 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import typing
-import numpy as np
 
 import astropy.units as u
-
+import numpy as np
 from rubin_sim.scheduler.detailers import BaseDetailer
+from rubin_sim.scheduler.surveys import BaseSurvey, FieldSurvey, GreedySurvey
 from rubin_sim.scheduler.utils import empty_observation
-from rubin_sim.scheduler.surveys import (
-    BaseSurvey,
-    FieldSurvey,
-    GreedySurvey,
-)
-
 
 from ..target import Target
 from .basis_functions import (
-    get_basis_functions_image_survey,
     get_basis_functions_cwfs_survey,
+    get_basis_functions_image_survey,
     get_basis_functions_spectroscopic_survey,
 )
 

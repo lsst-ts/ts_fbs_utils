@@ -20,5 +20,5 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from .basis_functions import *
-from .surveys import *
 from .make_scheduler import *
+from .surveys import *

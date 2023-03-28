@@ -21,13 +21,11 @@
 
 import typing
 import unittest
+
 from astropy import units
-
 from astropy.coordinates import Angle
-
 from lsst.ts.fbs.utils import Target, Tiles
 from lsst.ts.fbs.utils.auxtel.make_scheduler import MakeScheduler, SurveyType
-
 from rubin_sim.scheduler.detailers import BaseDetailer, CameraRotDetailer
 
 

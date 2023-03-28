@@ -26,6 +26,7 @@ __all__ = [
 ]
 
 import typing
+
 from rubin_sim.scheduler import basis_functions
 
 
