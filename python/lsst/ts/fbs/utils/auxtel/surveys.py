@@ -85,7 +85,6 @@ def generate_image_survey(
     sequence = [empty_observation() for i in range(len(target.filters))]
 
     for filter_obs, observation in zip(target.filters, sequence):
-
         observation["RA"] = target.ra.to(u.rad).value
         observation["dec"] = target.dec.to(u.rad).value
         observation["filter"] = filter_obs

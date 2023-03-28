@@ -4,6 +4,11 @@
 Version History
 ===============
 
+v0.5.0
+------
+
+* Add option to pass list of detailers to spec and image surveys
+
 v0.4.1
 ------
 
