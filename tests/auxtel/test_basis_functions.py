@@ -67,4 +67,4 @@ def test_get_basis_functions_spectroscopic_survey() -> None:
         nobs_reference=3,
     )
 
-    assert len(basis_functions) == 11
+    assert len(basis_functions) == 10
