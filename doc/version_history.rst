@@ -4,6 +4,13 @@
 Version History
 ===============
 
+v0.5.1
+------
+
+* In ``auxtel/basis_functions``, remove balanceVisists from spec survey and update unit test. 
+* Add pre_commit_config file. 
+* Add new targets to auxtel_tiles.txt data file for photo-calib survey. 
+
 v0.5.0
 ------
 
