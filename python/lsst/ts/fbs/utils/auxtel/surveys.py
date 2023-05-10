@@ -74,6 +74,7 @@ def generate_image_survey(
         nobs_survey=len(target.filters),
         filter_names=target.filters,
         gap_min=target.visit_gap,
+        additional_notes=[(target.target_name.split("_")[0], 32)],
     )
 
     sequence = [empty_observation() for i in range(len(target.filters))]

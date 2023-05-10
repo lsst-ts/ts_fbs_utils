@@ -41,6 +41,7 @@ def get_basis_functions_image_survey(
     note_interest: str,
     filter_names: list,
     gap_min: float,
+    additional_notes: list[tuple[str, int]] | None = None,
 ) -> typing.List[basis_functions.BaseBasisFunction]:
     """Get the basis functions for the image survey.
 
@@ -68,7 +69,12 @@ def get_basis_functions_image_survey(
          List of filter names that need be observed before activating.
     gap_min : `float`
         Gap between subsequent observations, in minutes.
-
+    additional_notes : `list` [ `tuple` [`str`, `int`] ], optional
+        Optional list of additional notes to configure a second
+        RewardNObsSequence basis function to reward completing a set of tiles.
+        The first element should be the substring that defines the tile set,
+        and the second should be the number of tiles.
+        ...
     Returns
     -------
     `list` of `basis_functions.BaseBasisFunction`
@@ -76,7 +82,7 @@ def get_basis_functions_image_survey(
 
     sun_alt_limit = -12.0
 
-    return [
+    bfs = [
         basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
         basis_functions.HourAngleLimitBasisFunction(RA=ra, ha_limits=ha_limits),
         basis_functions.SlewtimeBasisFunction(nside=nside, filtername="g"),
@@ -99,6 +105,18 @@ def get_basis_functions_image_survey(
             nside=nside,
         ),
     ]
+
+    if additional_notes is not None:
+        for additional_note, additional_nobs in additional_notes:
+            bfs.append(
+                basis_functions.RewardNObsSequence(
+                    n_obs_survey=additional_nobs,
+                    note_survey=additional_note,
+                    nside=nside,
+                ),
+            )
+
+    return bfs
 
 
 def get_basis_functions_cwfs_survey(

@@ -38,9 +38,10 @@ def test_get_basis_functions_image_survey() -> None:
         note_interest="unit_test",
         filter_names=["g", "r", "i"],
         gap_min=144.0,
+        additional_notes=[["unit_test", 32]],
     )
 
-    assert len(basis_functions) == 11
+    assert len(basis_functions) == 12
 
 
 def test_get_basis_functions_cwfs_survey() -> None:
