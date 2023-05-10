@@ -4,6 +4,13 @@
 Version History
 ===============
 
+v0.6.0
+------
+
+* In ``auxtel/basis_functions``, add second RewardNObs sequence to reward completing a region of tiles
+* Update targets in to auxtel_tiles.txt data file for photo-calib survey. 
+
+
 v0.5.1
 ------
 
