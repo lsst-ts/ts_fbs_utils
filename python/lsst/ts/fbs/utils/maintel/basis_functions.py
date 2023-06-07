@@ -42,6 +42,8 @@
 
 __all__ = [
     "get_basis_functions_star_tracker_survey",
+    "get_basis_functions_blob_survey",
+    "get_basis_functions_ddf_survey",
 ]
 
 from rubin_sim.scheduler import basis_functions
@@ -113,4 +115,87 @@ def get_basis_functions_star_tracker_survey(
             note_survey=note,
             nside=nside,
         ),
+    ]
+
+
+def get_basis_functions_blob_survey(
+    nside: int,
+    wind_speed_maximum: float,
+    footprint: object,
+) -> list[basis_functions.BaseBasisFunction]:
+    """Get the basis functions for the blob survey.
+
+    Parameters
+    ----------
+    nside : `int`
+        The nside value for the healpix grid.
+    wind_speed_maximum : `float`
+        Maximum wind speed tolerated for the observations of the survey,
+        in m/s.
+    footprint: `object`
+        Footprint object to generate the blob.
+
+    Returns
+    -------
+    `list` of `basis_functions.BaseBasisFunction`
+    """
+
+    sun_alt_limit = -12.0
+
+    return [
+        basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
+        basis_functions.M5DiffBasisFunction(filtername="r", nside=nside),
+        basis_functions.FootprintBasisFunction(filtername="r", footprint=footprint),
+        basis_functions.MoonAvoidanceBasisFunction(nside=nside),
+        basis_functions.ZenithShadowMaskBasisFunction(
+            min_alt=26.0, max_alt=85.0, nside=nside
+        ),
+        basis_functions.AvoidDirectWind(
+            wind_speed_maximum=wind_speed_maximum, nside=nside
+        ),
+    ]
+
+
+def get_basis_functions_ddf_survey(
+    nside: int,
+    survey_name: str,
+    ra: float,
+    ha_limits: list[tuple[float, float]],
+    wind_speed_maximum: float,
+    gap_min: float,
+) -> list[basis_functions.BaseBasisFunction]:
+    """Get the basis functions for the DDF survey.
+
+    Parameters
+    ----------
+    nside : `int`
+        The nside value for the healpix grid.
+    survey_name : `str`
+        Name of survey.
+    ra : `float`
+        Right ascension of target field in degrees.
+    ha_limits : 'list` of `float`
+        A two-element list with the hour angle limits, in hours.
+    wind_speed_maximum : `float`
+        Maximum wind speed tolerated for the observations of the survey,
+        in m/s.
+    gap_min : `float`
+        Gap between subsequent observations, in minutes.
+
+    Returns
+    -------
+    `list` of `basis_functions.BaseBasisFunction`
+    """
+    sun_alt_limit = -12.0
+
+    return [
+        basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
+        basis_functions.HourAngleLimitBasisFunction(RA=ra, ha_limits=ha_limits),
+        basis_functions.ZenithShadowMaskBasisFunction(
+            min_alt=26.0, max_alt=85.0, nside=nside
+        ),
+        basis_functions.AvoidDirectWind(
+            wind_speed_maximum=wind_speed_maximum, nside=nside
+        ),
+        basis_functions.VisitGap(note=survey_name, gap_min=gap_min),
     ]

@@ -45,11 +45,21 @@ import typing
 import astropy.units as u
 import numpy as np
 from rubin_sim.scheduler.detailers import BaseDetailer
-from rubin_sim.scheduler.surveys import BaseSurvey, FieldSurvey
+from rubin_sim.scheduler.surveys import (
+    BaseSurvey,
+    BlobSurvey,
+    DeepDrillingSurvey,
+    FieldSurvey,
+)
 from rubin_sim.scheduler.utils import empty_observation
+from rubin_sim.utils import ddf_locations
 
 from ..target import Target
-from .basis_functions import get_basis_functions_star_tracker_survey
+from .basis_functions import (
+    get_basis_functions_blob_survey,
+    get_basis_functions_ddf_survey,
+    get_basis_functions_star_tracker_survey,
+)
 
 
 def generate_image_survey(
@@ -126,3 +136,96 @@ def generate_image_survey(
     image_survey.basis_weights *= target.reward_value
 
     return image_survey
+
+
+def generate_blob_survey(
+    nside: int,
+    wind_speed_maximum: float,
+    footprints: object,
+    filter_names: str,
+) -> BaseSurvey:
+    """Generate blob survey.
+
+    Parameters
+    ----------
+    nside : `int`
+        Healpix map resolution.
+    wind_speed_maximum : `float`
+        Wind speed limit, in m/s.
+    footprints : `object`
+        Footprint object to generate the blob.
+    filter_names : `list` of `str`
+        List of filters to add to the blob survey.
+
+    Returns
+    -------
+    blob_survey : `BlobSurvey`
+        Blob survey.
+    """
+
+    basis_functions = get_basis_functions_blob_survey(
+        nside=nside, wind_speed_maximum=wind_speed_maximum, footprint=footprints
+    )
+
+    basis_weights = np.ones(len(basis_functions))
+
+    blob_survey = BlobSurvey(
+        basis_functions, basis_weights, filtername1=filter_names, survey_note="blob"
+    )
+
+    return blob_survey
+
+
+def generate_ddf_survey(
+    nside: int,
+    wind_speed_maximum: float,
+    gap_min: float,
+) -> BaseSurvey:
+    """Generate DDF survey.
+
+    Parameters
+    ----------
+    nside : `int`
+        Healpix map resolution.
+    wind_speed_maximum : `float`
+        Wind speed limit, in m/s.
+    gap_min : `float`
+        Gap between subsequent observations, in minutes.
+
+    Returns
+    -------
+    ddf_survey : `DeepDrillingSurvey`
+        DDF survey as a DeepDrillingSurvey object.
+    """
+
+    locations = ddf_locations()
+
+    # ELAIS S1
+    survey_name = "DD:ELAISS1"
+    ra = locations["ELAISS1"][0]
+    dec = locations["ELAISS1"][1]
+    ha_limits = [(0.0, 4.5), (19.5, 24.0)]
+    basis_functions = get_basis_functions_ddf_survey(
+        nside=nside,
+        survey_name=survey_name,
+        ra=ra,
+        ha_limits=ha_limits,
+        wind_speed_maximum=wind_speed_maximum,
+        gap_min=gap_min,
+    )
+
+    ddf_survey = DeepDrillingSurvey(
+        basis_functions,
+        ra,
+        dec,
+        sequence="r",
+        nvis=[20],
+        exptime=30,
+        survey_name=survey_name,
+        nside=nside,
+        nexp=2,
+        detailers=None,
+        reward_value=100,
+    )
+
+    return ddf_survey

@@ -43,15 +43,22 @@
 __all__ = ["MakeScheduler"]
 
 import dataclasses
+import enum
 
 from astropy import units
 from astropy.coordinates import Angle
 from rubin_sim.scheduler.detailers import BaseDetailer
 from rubin_sim.scheduler.schedulers import CoreScheduler
 from rubin_sim.scheduler.surveys import BaseSurvey
+from rubin_sim.scheduler.utils import ConstantFootprint
 
 from .. import Target, Tiles, get_maintel_tiles
-from .surveys import generate_image_survey
+from .surveys import generate_blob_survey, generate_ddf_survey, generate_image_survey
+
+
+class SurveyType(enum.IntEnum):
+    Image = enum.auto()
+    SIT = enum.auto()
 
 
 class MakeScheduler:
@@ -64,6 +71,7 @@ class MakeScheduler:
         self,
         nside: int,
         wind_speed_maximum: float,
+        survey_type: SurveyType,
         image_tiles: list[Tiles],
         survey_detailers: list[BaseDetailer] | None = None,
     ) -> tuple[int, CoreScheduler]:
@@ -75,9 +83,12 @@ class MakeScheduler:
             Healpix map resolution.
         wind_speed_maximum : `int`
             Maximum wind speed (in m/s).
+        survey_type : `SurveyType`
+            Enumeration with the type of survey. This defines the surveys to be
+            added to the scheduler.
         image_tiles : `list`[`Tiles`]
             List of tiles.
-        survey_details : `list`[`BaseDetailer`], optional
+        survey_detailers : `list`[`BaseDetailer`], optional
             List of survey detailers (default=None).
 
         Returns
@@ -108,7 +119,29 @@ class MakeScheduler:
                     )
                 )
 
-        scheduler = CoreScheduler([image_survey], nside=nside)
+        # Blob surveys
+        footprints = ConstantFootprint(nside=nside, filters={"r": 0})
+
+        blob_survey = generate_blob_survey(
+            nside,
+            footprints=footprints,
+            wind_speed_maximum=wind_speed_maximum,
+            filter_names="r",
+        )
+
+        ddf_survey = generate_ddf_survey(
+            nside=nside,
+            wind_speed_maximum=wind_speed_maximum,
+            gap_min=60.0,
+        )
+
+        surveys = (
+            [[ddf_survey], [blob_survey]]
+            if survey_type == SurveyType.SIT
+            else [image_survey]
+        )
+
+        scheduler = CoreScheduler(surveys, nside=nside)
 
         return nside, scheduler
 
