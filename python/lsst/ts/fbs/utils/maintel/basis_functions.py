@@ -153,6 +153,8 @@ def get_basis_functions_blob_survey(
         basis_functions.AvoidDirectWind(
             wind_speed_maximum=wind_speed_maximum, nside=nside
         ),
+        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
+        basis_functions.VisitRepeatBasisFunction(nside=nside),
     ]
 
 

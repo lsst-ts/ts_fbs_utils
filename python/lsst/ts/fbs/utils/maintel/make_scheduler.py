@@ -50,10 +50,10 @@ from astropy.coordinates import Angle
 from rubin_sim.scheduler.detailers import BaseDetailer
 from rubin_sim.scheduler.schedulers import CoreScheduler
 from rubin_sim.scheduler.surveys import BaseSurvey
-from rubin_sim.scheduler.utils import ConstantFootprint
+from rubin_sim.scheduler.utils import Footprint
 
 from .. import Target, Tiles, get_maintel_tiles
-from .surveys import generate_blob_survey, generate_ddf_survey, generate_image_survey
+from .surveys import generate_blob_survey, generate_ddf_surveys, generate_image_survey
 
 
 class SurveyType(enum.IntEnum):
@@ -120,23 +120,33 @@ class MakeScheduler:
                 )
 
         # Blob surveys
-        footprints = ConstantFootprint(nside=nside, filters={"r": 0})
+        import healpy as hp
+        import numpy as np
+
+        blank_map = np.zeros(hp.nside2npix(nside))
+        simple_fp = {"r": blank_map + 1}
+
+        footprints = Footprint(60218.0, 3.27717639)
+        for filtername in simple_fp:
+            footprints.set_footprint(filtername, simple_fp[filtername])
 
         blob_survey = generate_blob_survey(
             nside,
             footprints=footprints,
             wind_speed_maximum=wind_speed_maximum,
             filter_names="r",
+            survey_name="SIT",
         )
 
-        ddf_survey = generate_ddf_survey(
+        ddf_surveys = generate_ddf_surveys(
             nside=nside,
             wind_speed_maximum=wind_speed_maximum,
             gap_min=60.0,
+            survey_base_name="SIT",
         )
 
         surveys = (
-            [[ddf_survey], [blob_survey]]
+            [ddf_surveys, [blob_survey]]
             if survey_type == SurveyType.SIT
             else [image_survey]
         )

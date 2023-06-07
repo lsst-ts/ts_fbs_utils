@@ -143,6 +143,7 @@ def generate_blob_survey(
     wind_speed_maximum: float,
     footprints: object,
     filter_names: str,
+    survey_name: str,
 ) -> BaseSurvey:
     """Generate blob survey.
 
@@ -156,6 +157,8 @@ def generate_blob_survey(
         Footprint object to generate the blob.
     filter_names : `list` of `str`
         List of filters to add to the blob survey.
+    survey_name : `str`
+        Name of survey.
 
     Returns
     -------
@@ -170,16 +173,21 @@ def generate_blob_survey(
     basis_weights = np.ones(len(basis_functions))
 
     blob_survey = BlobSurvey(
-        basis_functions, basis_weights, filtername1=filter_names, survey_note="blob"
+        basis_functions,
+        basis_weights,
+        filtername1=filter_names,
+        survey_name=survey_name,
+        survey_note=f"{survey_name}:Area",
     )
 
     return blob_survey
 
 
-def generate_ddf_survey(
+def generate_ddf_surveys(
     nside: int,
     wind_speed_maximum: float,
     gap_min: float,
+    survey_base_name: str,
 ) -> BaseSurvey:
     """Generate DDF survey.
 
@@ -191,6 +199,8 @@ def generate_ddf_survey(
         Wind speed limit, in m/s.
     gap_min : `float`
         Gap between subsequent observations, in minutes.
+    survey_base_name: `str`
+        Name of survey.
 
     Returns
     -------
@@ -201,31 +211,59 @@ def generate_ddf_survey(
     locations = ddf_locations()
 
     # ELAIS S1
-    survey_name = "DD:ELAISS1"
+    target_field = "DD_ELAISS1"
     ra = locations["ELAISS1"][0]
     dec = locations["ELAISS1"][1]
     ha_limits = [(0.0, 4.5), (19.5, 24.0)]
     basis_functions = get_basis_functions_ddf_survey(
         nside=nside,
-        survey_name=survey_name,
+        survey_name=f"{survey_base_name}:{target_field}",
         ra=ra,
         ha_limits=ha_limits,
         wind_speed_maximum=wind_speed_maximum,
         gap_min=gap_min,
     )
 
-    ddf_survey = DeepDrillingSurvey(
+    ddf_survey_1 = DeepDrillingSurvey(
         basis_functions,
         ra,
         dec,
         sequence="r",
         nvis=[20],
         exptime=30,
-        survey_name=survey_name,
+        survey_name=f"{survey_base_name}:{target_field}",
         nside=nside,
         nexp=2,
         detailers=None,
         reward_value=100,
     )
 
-    return ddf_survey
+    # Galactic Bulge
+    target_field = "DD_GALACTIC_CENTER"
+    ra = 270.33
+    dec = -27.5
+    ha_limits = [(0.0, 4.5), (19.5, 24.0)]
+    basis_functions = get_basis_functions_ddf_survey(
+        nside=nside,
+        survey_name=f"{survey_base_name}:{target_field}",
+        ra=ra,
+        ha_limits=ha_limits,
+        wind_speed_maximum=wind_speed_maximum,
+        gap_min=gap_min,
+    )
+
+    ddf_survey_2 = DeepDrillingSurvey(
+        basis_functions,
+        ra,
+        dec,
+        sequence="r",
+        nvis=[20],
+        exptime=30,
+        survey_name=f"{survey_base_name}:{target_field}",
+        nside=nside,
+        nexp=2,
+        detailers=None,
+        reward_value=100,
+    )
+
+    return [ddf_survey_1, ddf_survey_2]
