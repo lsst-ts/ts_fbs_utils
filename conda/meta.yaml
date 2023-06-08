@@ -32,14 +32,14 @@ requirements:
     - pip
     - setuptools_scm
     - setuptools
-    - rubin-sim {{ rubin_sim }}
+    - rubin-sim =1
   build:
     - python {{ python }}
     - numpy {{ numpy }}
     - setuptools
     - setuptools_scm
     - ts-conda-build
-    - rubin-sim {{ rubin_sim }}.*
+    - rubin-sim =1
   run:
     - python {{ python }}
     - {{ pin_compatible('rubin-sim') }}
