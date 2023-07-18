@@ -4,6 +4,12 @@
 Version History
 ===============
 
+v0.7.0
+------
+
+* Add method to configure maintel SIT survey using ``BlobSurvey`` and ``DeepDrillingSurvey``.
+* Remove ``conda/conda_build_config.yaml`` file. 
+
 v0.6.1
 ------
 
