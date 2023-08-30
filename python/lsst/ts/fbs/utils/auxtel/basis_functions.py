@@ -221,4 +221,5 @@ def get_basis_functions_spectroscopic_survey(
         basis_functions.AvoidDirectWind(
             wind_speed_maximum=wind_speed_maximum, nside=nside
         ),
+        basis_functions.AirmassDistBasisFunction(nside=nside),
     ]
