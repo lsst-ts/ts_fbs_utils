@@ -174,7 +174,7 @@ def generate_spectroscopic_survey(
     spectroscopic_survey : `BaseSurvey`
         Spectroscopic survey.
     """
-    basis_functions = get_basis_functions_spectroscopic_survey(
+    basis_weights, basis_functions = get_basis_functions_spectroscopic_survey(
         ra=target.ra.to(u.deg).value,
         nside=nside,
         note=target.target_name,
@@ -213,6 +213,7 @@ def generate_spectroscopic_survey(
         nside=nside,
         nexp=target.nexp,
         detailers=survey_detailers,
+        basis_weights=basis_weights,
     )
 
     spectroscopic_survey.basis_weights *= target.reward_value

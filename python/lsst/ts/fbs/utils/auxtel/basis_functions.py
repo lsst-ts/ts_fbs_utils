@@ -26,6 +26,7 @@ __all__ = [
 ]
 
 import typing
+import numpy as np
 
 from rubin_sim.scheduler import basis_functions
 
@@ -98,23 +99,8 @@ def get_basis_functions_image_survey(
         ),
         basis_functions.BalanceVisits(
             nobs_reference=nobs_reference, note_survey=note, note_interest=note_interest
-        ),
-        basis_functions.RewardNObsSequence(
-            n_obs_survey=nobs_survey,
-            note_survey=note,
-            nside=nside,
-        ),
+        )
     ]
-
-    if additional_notes is not None:
-        for additional_note, additional_nobs in additional_notes:
-            bfs.append(
-                basis_functions.RewardNObsSequence(
-                    n_obs_survey=additional_nobs,
-                    note_survey=additional_note,
-                    nside=nside,
-                ),
-            )
 
     return bfs
 
@@ -204,13 +190,10 @@ def get_basis_functions_spectroscopic_survey(
     """
     sun_alt_limit = -12.0
 
-    return [
+    basis_funcs = [
         basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
         basis_functions.HourAngleLimitBasisFunction(RA=ra, ha_limits=ha_limits),
-        basis_functions.M5DiffBasisFunction(nside=nside),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="g"),
         basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="i"),
         basis_functions.MoonAvoidanceBasisFunction(
             nside=nside, moon_distance=moon_distance
         ),
@@ -223,3 +206,16 @@ def get_basis_functions_spectroscopic_survey(
         ),
         basis_functions.AirmassDistBasisFunction(nside=nside),
     ]
+
+    basis_weights = np.array([
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.1,
+    ])
+
+    return basis_weights, basis_funcs
