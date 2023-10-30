@@ -211,7 +211,7 @@ class MakeScheduler:
         cwfs_survey: typing.List[BaseSurvey] = [
             generate_cwfs_survey(
                 nside=nside,
-                time_gap_min=120.0,
+                time_gap_min=240.0,
                 wind_speed_maximum=wind_speed_maximum,
             ),
         ]

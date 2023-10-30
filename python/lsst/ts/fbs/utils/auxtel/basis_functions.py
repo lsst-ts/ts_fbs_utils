@@ -192,8 +192,6 @@ def get_basis_functions_spectroscopic_survey(
 
     basis_funcs = [
         basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
-        basis_functions.HourAngleLimitBasisFunction(RA=ra, ha_limits=ha_limits),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
         basis_functions.MoonAvoidanceBasisFunction(
             nside=nside, moon_distance=moon_distance
         ),
@@ -201,9 +199,6 @@ def get_basis_functions_spectroscopic_survey(
             min_alt=26.0, max_alt=85.0, nside=nside
         ),
         basis_functions.VisitGap(note=note, gap_min=gap_min),
-        basis_functions.AvoidDirectWind(
-            wind_speed_maximum=wind_speed_maximum, nside=nside
-        ),
         basis_functions.AirmassDistBasisFunction(nside=nside),
     ]
 
@@ -213,9 +208,8 @@ def get_basis_functions_spectroscopic_survey(
         1.0,
         1.0,
         1.0,
-        1.0,
-        1.0,
-        0.1,
     ])
+
+    basis_weights = basis_weights/np.sum(basis_weights)
 
     return basis_weights, basis_funcs
