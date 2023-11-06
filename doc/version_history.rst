@@ -4,6 +4,13 @@
 Version History
 ===============
 
+v0.7.1
+------
+
+* In ``data/auxtel_tiles.txt``, add target regions for photo-calib survey.
+* Remove unused pytest options from ``pyproject.toml``.
+* Update github workflow to skip pre-commit install.
+
 v0.7.0
 ------
 
