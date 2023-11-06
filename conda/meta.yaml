@@ -15,7 +15,7 @@ build:
 test:
   requires:
     - ts-conda-build =0.3
-    - {{ pin_compatible('rubin-sim') }}
+    - {{ pin_compatible('rubin-sim',  min_pin='x.') }}
   source_files:
     - python
     - tests
@@ -42,4 +42,4 @@ requirements:
     - rubin-sim =1
   run:
     - python {{ python }}
-    - {{ pin_compatible('rubin-sim') }}
+    - {{ pin_compatible('rubin-sim', min_pin='x.') }}
