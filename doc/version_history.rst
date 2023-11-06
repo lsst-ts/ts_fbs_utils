@@ -4,6 +4,11 @@
 Version History
 ===============
 
+v0.7.2
+------
+
+* In ``conda/meta.yaml``, update rubin_sim min_pin build and test requirements.
+
 v0.7.1
 ------
 
