@@ -4,6 +4,11 @@
 Version History
 ===============
 
+v0.7.3
+------
+
+* In ``data/auxtel_tiles.txt``, fixup new target regions for photo-calib survey.
+
 v0.7.2
 ------
 
