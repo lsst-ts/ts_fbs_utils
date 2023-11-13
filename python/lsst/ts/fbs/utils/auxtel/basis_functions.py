@@ -26,8 +26,8 @@ __all__ = [
 ]
 
 import typing
-import numpy as np
 
+import numpy as np
 from rubin_sim.scheduler import basis_functions
 
 
@@ -99,7 +99,7 @@ def get_basis_functions_image_survey(
         ),
         basis_functions.BalanceVisits(
             nobs_reference=nobs_reference, note_survey=note, note_interest=note_interest
-        )
+        ),
     ]
 
     return bfs
@@ -196,19 +196,18 @@ def get_basis_functions_spectroscopic_survey(
             min_alt=26.0, max_alt=85.0, nside=nside
         ),
         basis_functions.ObservableTimeBasisFunction(nside=nside),
-        basis_functions.DeltaAirmassBasisFunction(
-            nside=nside,
-            note_survey=note
-        )
+        basis_functions.DeltaAirmassBasisFunction(nside=nside, note_survey=note),
     ]
 
-    basis_weights = np.array([
-        1.0,
-        1.0,
-        1.0,
-        0.1,
-    ])
+    basis_weights = np.array(
+        [
+            1.0,
+            1.0,
+            1.0,
+            0.1,
+        ]
+    )
 
-    basis_weights = basis_weights/np.sum(basis_weights)
+    basis_weights = basis_weights / np.sum(basis_weights)
 
     return basis_weights, basis_funcs
