@@ -204,7 +204,7 @@ def get_basis_functions_spectroscopic_survey(
             1.0,
             1.0,
             1.0,
-            0.1,
+            1.0,
         ]
     )
 
