@@ -4,6 +4,14 @@
 Version History
 ===============
 
+v0.7.4
+------
+
+* In ``auxtel/basis_functions.py``, add m5diff basis function to cwfs survey.
+* Add MaskAzimuthBasisFucntion to maintel blob and DD surveys.
+* Update maintel survey to use ``FieldSurvey`` class instead of ``DeepDrillingSurvey``.
+* Add an "anytime" survey to the maintel scheduler to allow using it anytime in the day.
+
 v0.7.3
 ------
 
