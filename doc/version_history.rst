@@ -4,6 +4,11 @@
 Version History
 ===============
 
+v0.7.4
+------
+
+* In ``auxtel/basis_functions.py``, add m5diff basis function to cwfs survey.
+
 v0.7.3
 ------
 
