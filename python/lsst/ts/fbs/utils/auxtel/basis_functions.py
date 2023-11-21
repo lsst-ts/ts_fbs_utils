@@ -197,10 +197,14 @@ def get_basis_functions_spectroscopic_survey(
         ),
         basis_functions.ObservableTimeBasisFunction(nside=nside),
         basis_functions.DeltaAirmassBasisFunction(nside=nside, note_survey=note),
+        basis_functions.BalanceTargetsOverWeek(
+            nside=nside, note_survey=note, max_reward=2
+        ),
     ]
 
     basis_weights = np.array(
         [
+            1.0,
             1.0,
             1.0,
             1.0,
