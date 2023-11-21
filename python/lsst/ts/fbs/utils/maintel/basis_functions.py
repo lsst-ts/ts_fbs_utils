@@ -155,6 +155,9 @@ def get_basis_functions_blob_survey(
         ),
         basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
         basis_functions.VisitRepeatBasisFunction(nside=nside),
+        basis_functions.MaskAzimuthBasisFunction(
+            nside=nside, az_min=160.0, az_max=200.0
+        ),
     ]
 
 
@@ -200,4 +203,7 @@ def get_basis_functions_ddf_survey(
             wind_speed_maximum=wind_speed_maximum, nside=nside
         ),
         basis_functions.VisitGap(note=survey_name, gap_min=gap_min),
+        basis_functions.MaskAzimuthBasisFunction(
+            nside=nside, az_min=160.0, az_max=200.0
+        ),
     ]

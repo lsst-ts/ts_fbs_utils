@@ -45,12 +45,7 @@ import typing
 import astropy.units as u
 import numpy as np
 from rubin_sim.scheduler.detailers import BaseDetailer
-from rubin_sim.scheduler.surveys import (
-    BaseSurvey,
-    BlobSurvey,
-    DeepDrillingSurvey,
-    FieldSurvey,
-)
+from rubin_sim.scheduler.surveys import BaseSurvey, BlobSurvey, FieldSurvey
 from rubin_sim.scheduler.utils import empty_observation
 from rubin_sim.utils import ddf_locations
 
@@ -224,7 +219,7 @@ def generate_ddf_surveys(
         gap_min=gap_min,
     )
 
-    ddf_survey_1 = DeepDrillingSurvey(
+    ddf_survey_1 = FieldSurvey(
         basis_functions,
         ra,
         dec,
@@ -252,7 +247,7 @@ def generate_ddf_surveys(
         gap_min=gap_min,
     )
 
-    ddf_survey_2 = DeepDrillingSurvey(
+    ddf_survey_2 = FieldSurvey(
         basis_functions,
         ra,
         dec,
