@@ -45,12 +45,18 @@ import typing
 import astropy.units as u
 import numpy as np
 from rubin_sim.scheduler.detailers import BaseDetailer
-from rubin_sim.scheduler.surveys import BaseSurvey, BlobSurvey, FieldSurvey
+from rubin_sim.scheduler.surveys import (
+    BaseSurvey,
+    BlobSurvey,
+    FieldSurvey,
+    GreedySurvey,
+)
 from rubin_sim.scheduler.utils import empty_observation
 from rubin_sim.utils import ddf_locations
 
 from ..target import Target
 from .basis_functions import (
+    get_basis_functions_anytime_survey,
     get_basis_functions_blob_survey,
     get_basis_functions_ddf_survey,
     get_basis_functions_star_tracker_survey,
@@ -262,3 +268,37 @@ def generate_ddf_surveys(
     )
 
     return [ddf_survey_1, ddf_survey_2]
+
+
+def generate_anytime_survey(
+    nside: int,
+    survey_name: str,
+) -> BaseSurvey:
+    """Generate a survey that will produce valid targets at anytime.
+
+    Parameters
+    ----------
+    nside : `int`
+        Healpix map resolution.
+    survey_name : `str`
+        Survey name.
+
+    Returns
+    -------
+    anytime_survey : `GreedySurvey`
+        Greedy survey configured to produce targets at any time.
+    """
+
+    bfs = get_basis_functions_anytime_survey(nside)
+
+    weights = np.ones(len(bfs))
+
+    anytime_survey = GreedySurvey(
+        basis_functions=bfs,
+        basis_weights=weights,
+        filtername="r",
+        nside=nside,
+        survey_name=survey_name,
+    )
+
+    return anytime_survey
