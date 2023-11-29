@@ -146,7 +146,7 @@ def get_basis_functions_cwfs_survey(
     -------
     `list` of `basis_functions.BaseBasisFunction`
     """
-    sun_alt_limit = -12.0
+    sun_alt_limit = -10.0
 
     return [
         basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
