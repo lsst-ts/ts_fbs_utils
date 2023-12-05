@@ -27,7 +27,7 @@ __all__ = [
 
 import typing
 
-from rubin_sim.scheduler import basis_functions
+from rubin_scheduler.scheduler import basis_functions
 
 
 def get_basis_functions_image_survey(

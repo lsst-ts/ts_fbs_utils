@@ -4,6 +4,11 @@
 Version History
 ===============
 
+v0.9.0
+------
+* Move imports from rubin_sim to rubin_scheduler where applicable.
+* Update and extend conda dependencies.
+
 v0.8.0
 ------
 

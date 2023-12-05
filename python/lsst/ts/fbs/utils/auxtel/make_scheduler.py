@@ -27,9 +27,9 @@ import typing
 
 from astropy import units
 from astropy.coordinates import Angle
-from rubin_sim.scheduler.detailers import BaseDetailer
-from rubin_sim.scheduler.schedulers import CoreScheduler
-from rubin_sim.scheduler.surveys import BaseSurvey
+from rubin_scheduler.scheduler.detailers import BaseDetailer
+from rubin_scheduler.scheduler.schedulers import CoreScheduler
+from rubin_scheduler.scheduler.surveys import BaseSurvey
 
 from .. import AssertSurvey, Target, Tiles, get_auxtel_tiles
 from .surveys import (

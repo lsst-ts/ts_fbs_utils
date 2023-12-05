@@ -47,8 +47,8 @@ __all__ = [
     "get_basis_functions_anytime_survey",
 ]
 
-from rubin_sim.scheduler import basis_functions
-from rubin_sim.scheduler.utils import standard_goals
+from rubin_scheduler.scheduler import basis_functions
+from rubin_scheduler.scheduler.utils import EuclidOverlapFootprint
 
 
 def get_basis_functions_star_tracker_survey(
@@ -226,7 +226,9 @@ def get_basis_functions_anytime_survey(
     `list`[ `basis_functions.BaseBasisFunction` ]
         List of basis functions.
     """
-    target_map = standard_goals()["r"]
+    sky = EuclidOverlapFootprint()
+    footprints, labels = sky.return_maps()
+    target_map = footprints["r"]
 
     bfs = [
         basis_functions.HaMaskBasisFunction(

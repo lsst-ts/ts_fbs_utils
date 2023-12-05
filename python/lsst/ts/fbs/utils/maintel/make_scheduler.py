@@ -47,10 +47,10 @@ import enum
 
 from astropy import units
 from astropy.coordinates import Angle
-from rubin_sim.scheduler.detailers import BaseDetailer
-from rubin_sim.scheduler.schedulers import CoreScheduler
-from rubin_sim.scheduler.surveys import BaseSurvey
-from rubin_sim.scheduler.utils import Footprint
+from rubin_scheduler.scheduler.detailers import BaseDetailer
+from rubin_scheduler.scheduler.schedulers import CoreScheduler
+from rubin_scheduler.scheduler.surveys import BaseSurvey
+from rubin_scheduler.scheduler.utils import Footprint
 
 from .. import Target, Tiles, get_maintel_tiles
 from .surveys import (
