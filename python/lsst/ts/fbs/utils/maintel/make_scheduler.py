@@ -119,9 +119,9 @@ class MakeScheduler:
                         target=target,
                         wind_speed_maximum=wind_speed_maximum,
                         nfields=len(image_targets),
-                        survey_detailers=survey_detailers
-                        if survey_detailers is not None
-                        else [],
+                        survey_detailers=(
+                            survey_detailers if survey_detailers is not None else []
+                        ),
                     )
                 )
 
