@@ -22,7 +22,7 @@ test:
     - setup.cfg
     - pyproject.toml
   commands:
-    - rs_download_data
+    - scheduler_download_data --update
     - pytest -vsx tests/
 
 requirements:
