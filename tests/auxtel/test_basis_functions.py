@@ -52,7 +52,7 @@ def test_get_basis_functions_cwfs_survey() -> None:
         wind_speed_maximum=7.0,
     )
 
-    assert len(basis_functions) == 8
+    assert len(basis_functions) == 9
 
 
 def test_get_basis_functions_spectroscopic_survey() -> None:

@@ -44,9 +44,11 @@ __all__ = [
     "get_basis_functions_star_tracker_survey",
     "get_basis_functions_blob_survey",
     "get_basis_functions_ddf_survey",
+    "get_basis_functions_anytime_survey",
 ]
 
-from rubin_sim.scheduler import basis_functions
+from rubin_scheduler.scheduler import basis_functions
+from rubin_scheduler.scheduler.utils import EuclidOverlapFootprint
 
 
 def get_basis_functions_star_tracker_survey(
@@ -155,6 +157,9 @@ def get_basis_functions_blob_survey(
         ),
         basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
         basis_functions.VisitRepeatBasisFunction(nside=nside),
+        basis_functions.MaskAzimuthBasisFunction(
+            nside=nside, az_min=160.0, az_max=200.0
+        ),
     ]
 
 
@@ -200,4 +205,47 @@ def get_basis_functions_ddf_survey(
             wind_speed_maximum=wind_speed_maximum, nside=nside
         ),
         basis_functions.VisitGap(note=survey_name, gap_min=gap_min),
+        basis_functions.MaskAzimuthBasisFunction(
+            nside=nside, az_min=160.0, az_max=200.0
+        ),
     ]
+
+
+def get_basis_functions_anytime_survey(
+    nside: int,
+) -> list[basis_functions.BaseBasisFunction]:
+    """Get basis functions for the anytime survey.
+
+    Parameters
+    ----------
+    nside : `int`
+        The healpix map resolution.
+
+    Returns
+    -------
+    `list`[ `basis_functions.BaseBasisFunction` ]
+        List of basis functions.
+    """
+    sky = EuclidOverlapFootprint()
+    footprints, labels = sky.return_maps()
+    target_map = footprints["r"]
+
+    bfs = [
+        basis_functions.HaMaskBasisFunction(
+            ha_min=-1.5,
+            ha_max=1.5,
+            nside=nside,
+        ),
+        basis_functions.ZenithShadowMaskBasisFunction(
+            min_alt=40.0,
+            max_alt=82.0,
+            nside=nside,
+        ),
+        basis_functions.SlewtimeBasisFunction(filtername="r", nside=nside),
+        basis_functions.TargetMapBasisFunction(target_map=target_map),
+        basis_functions.MaskAzimuthBasisFunction(
+            nside=nside, az_min=160.0, az_max=200.0
+        ),
+    ]
+
+    return bfs

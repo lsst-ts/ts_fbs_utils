@@ -27,7 +27,7 @@ __all__ = [
 
 import typing
 
-from rubin_sim.scheduler import basis_functions
+from rubin_scheduler.scheduler import basis_functions
 
 
 def get_basis_functions_image_survey(
@@ -150,6 +150,7 @@ def get_basis_functions_cwfs_survey(
 
     return [
         basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
+        basis_functions.M5DiffBasisFunction(nside=nside),
         basis_functions.SlewtimeBasisFunction(nside=nside, filtername="g"),
         basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
         basis_functions.SlewtimeBasisFunction(nside=nside, filtername="i"),

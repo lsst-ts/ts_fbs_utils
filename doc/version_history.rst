@@ -4,6 +4,19 @@
 Version History
 ===============
 
+v0.9.0
+------
+* Move imports from rubin_sim to rubin_scheduler where applicable.
+* Update and extend conda dependencies.
+
+v0.8.0
+------
+
+* In ``auxtel/basis_functions.py``, add m5diff basis function to cwfs survey.
+* Add MaskAzimuthBasisFucntion to maintel blob and DD surveys.
+* Update maintel survey to use ``FieldSurvey`` class instead of ``DeepDrillingSurvey``.
+* Add an "anytime" survey to the maintel scheduler to allow using it anytime in the day.
+
 v0.7.3
 ------
 

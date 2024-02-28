@@ -47,13 +47,18 @@ import enum
 
 from astropy import units
 from astropy.coordinates import Angle
-from rubin_sim.scheduler.detailers import BaseDetailer
-from rubin_sim.scheduler.schedulers import CoreScheduler
-from rubin_sim.scheduler.surveys import BaseSurvey
-from rubin_sim.scheduler.utils import Footprint
+from rubin_scheduler.scheduler.detailers import BaseDetailer
+from rubin_scheduler.scheduler.schedulers import CoreScheduler
+from rubin_scheduler.scheduler.surveys import BaseSurvey
+from rubin_scheduler.scheduler.utils import Footprint
 
 from .. import Target, Tiles, get_maintel_tiles
-from .surveys import generate_blob_survey, generate_ddf_surveys, generate_image_survey
+from .surveys import (
+    generate_anytime_survey,
+    generate_blob_survey,
+    generate_ddf_surveys,
+    generate_image_survey,
+)
 
 
 class SurveyType(enum.IntEnum):
@@ -73,6 +78,7 @@ class MakeScheduler:
         wind_speed_maximum: float,
         survey_type: SurveyType,
         image_tiles: list[Tiles],
+        survey_name: str = "SIT",
         survey_detailers: list[BaseDetailer] | None = None,
     ) -> tuple[int, CoreScheduler]:
         """Construct feature based scheduler.
@@ -113,9 +119,9 @@ class MakeScheduler:
                         target=target,
                         wind_speed_maximum=wind_speed_maximum,
                         nfields=len(image_targets),
-                        survey_detailers=survey_detailers
-                        if survey_detailers is not None
-                        else [],
+                        survey_detailers=(
+                            survey_detailers if survey_detailers is not None else []
+                        ),
                     )
                 )
 
@@ -135,18 +141,20 @@ class MakeScheduler:
             footprints=footprints,
             wind_speed_maximum=wind_speed_maximum,
             filter_names="r",
-            survey_name="SIT",
+            survey_name=survey_name,
         )
 
         ddf_surveys = generate_ddf_surveys(
             nside=nside,
             wind_speed_maximum=wind_speed_maximum,
             gap_min=60.0,
-            survey_base_name="SIT",
+            survey_base_name=survey_name,
         )
 
+        anytime_survey = generate_anytime_survey(nside=nside, survey_name=survey_name)
+
         surveys = (
-            [ddf_surveys, [blob_survey]]
+            [ddf_surveys, [blob_survey], [anytime_survey]]
             if survey_type == SurveyType.SIT
             else [image_survey]
         )

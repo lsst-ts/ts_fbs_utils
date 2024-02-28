@@ -15,14 +15,14 @@ build:
 test:
   requires:
     - ts-conda-build =0.3
-    - {{ pin_compatible('rubin-sim',  min_pin='x') }}
+    - {{ pin_compatible('rubin-scheduler',  min_pin='x') }}
   source_files:
     - python
     - tests
     - setup.cfg
     - pyproject.toml
   commands:
-    - rs_download_data
+    - scheduler_download_data --update
     - pytest -vsx tests/
 
 requirements:
@@ -32,14 +32,14 @@ requirements:
     - pip
     - setuptools_scm
     - setuptools
-    - rubin-sim =1
+    - rubin-scheduler
   build:
     - python {{ python }}
     - numpy {{ numpy }}
     - setuptools
     - setuptools_scm
     - ts-conda-build
-    - rubin-sim =1
+    - rubin-scheduler
   run:
     - python {{ python }}
-    - {{ pin_compatible('rubin-sim', min_pin='x') }}
+    - {{ pin_compatible('rubin-scheduler', min_pin='x') }}
