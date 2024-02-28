@@ -42,4 +42,4 @@ requirements:
     - rubin-scheduler
   run:
     - python {{ python }}
-    - {{ pin_compatible('rubin-sheduler', min_pin='x') }}
+    - {{ pin_compatible('rubin-scheduler', min_pin='x') }}
