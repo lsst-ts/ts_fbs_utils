@@ -44,15 +44,15 @@ import typing
 
 import astropy.units as u
 import numpy as np
-from rubin_sim.scheduler.detailers import BaseDetailer
-from rubin_sim.scheduler.surveys import (
+from rubin_scheduler.scheduler.detailers import BaseDetailer
+from rubin_scheduler.scheduler.surveys import (
     BaseSurvey,
     BlobSurvey,
     FieldSurvey,
     GreedySurvey,
 )
-from rubin_sim.scheduler.utils import empty_observation
-from rubin_sim.utils import ddf_locations
+from rubin_scheduler.scheduler.utils import empty_observation
+from rubin_scheduler.utils import ddf_locations
 
 from ..target import Target
 from .basis_functions import (
