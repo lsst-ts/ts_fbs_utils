@@ -4,6 +4,11 @@
 Version History
 ===============
 
+v0.9.1
+------
+* In ``data/auxtel_tiles.txt``, remove unused target regions.
+* Update git lint workflows to call tssw common workflow. 
+
 v0.9.0
 ------
 * Move imports from rubin_sim to rubin_scheduler where applicable.
