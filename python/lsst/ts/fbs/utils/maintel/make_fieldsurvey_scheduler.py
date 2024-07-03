@@ -25,24 +25,30 @@ import typing
 
 from rubin_scheduler.scheduler.schedulers import CoreScheduler
 from rubin_scheduler.scheduler.surveys import FieldSurvey
+from rubin_scheduler.scheduler.basis_functions import BaseBasisFunction
 
 from ..data import field_survey_centers
 
 
 class MakeFieldSurveyScheduler:
-    """Class to construct Feature Based Schedulers consisting of an ensemble of field surveys."""
+    """Construct Feature Based Scheduler configuration consisting of an 
+    ensemble of field surveys.
+    """
 
     def __init__(
         self, 
         nside: int = 32,
+        ntiers: int = 1,
     ) -> None:
         
         self.nside = 32
-        self.surveys = []
+        self.surveys = [
+            [] for _ in range(0, ntiers)
+        ]
 
 
     def _load_candidate_fields(self) -> typing.Dict:
-        """Docstring."""
+        """Load pointing center data for field surveys."""
         name_fields, ra_fields, dec_fields = zip(*field_survey_centers.fields)
         fields = {}
         for name, ra, dec in zip(name_fields, ra_fields, dec_fields):
@@ -52,14 +58,28 @@ class MakeFieldSurveyScheduler:
     
     def add_field_surveys(
         self,
+        tier: int,
+        program: str,
         field_names: typing.List[str],
+        basis_functions: typing.List[BaseBasisFunction] = [], 
         **kwargs,
     ) -> None:
-        """Add a set of field surveys to the scheduler configuration."""
-
-        # Assert that survey_name is not included among the kwargs
+        """Add a list of field surveys to the scheduler configuration.
         
-        basis_functions = []
+        Parameters
+        ----------
+        tier: `int`
+            Tier index used to control prioritization of surveys.
+        program_name: `str`
+            Program name of BLOCK to be executed.
+        field_names: `list` of `str`
+            List of names to specify the pointing center of each field survey.
+        basis_functions: `list` of `BaseBasisFunction`
+            Basis functions provided to each field survey.
+        """
+
+        if "survey_name" in kwargs:
+            raise ValueError("Use program_name rather than survey_name.")
 
         fields = self._load_candidate_fields()
         
@@ -70,12 +90,12 @@ class MakeFieldSurveyScheduler:
             # Consider adding flexibility to add a prefix or suffix
             survey_name = field_name
             
-            self.surveys.append(
+            self.surveys[tier].append(
                 FieldSurvey(
                     basis_functions,
                     RA,
                     dec,
-                    survey_name=survey_name,
+                    survey_name=program,
                     **kwargs,
                 )
             )
