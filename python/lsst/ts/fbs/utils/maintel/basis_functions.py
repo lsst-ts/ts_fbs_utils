@@ -44,6 +44,7 @@ __all__ = [
     "get_basis_functions_star_tracker_survey",
     "get_basis_functions_blob_survey",
     "get_basis_functions_ddf_survey",
+    "get_basis_functions_field_survey",
     "get_basis_functions_anytime_survey",
 ]
 
@@ -206,6 +207,40 @@ def get_basis_functions_ddf_survey(
         basis_functions.VisitGap(note=survey_name, gap_min=gap_min),
     ]
 
+
+def get_basis_functions_field_survey(
+    nside: int,
+    wind_speed_maximum: float,
+) -> list[basis_functions.BaseBasisFunction]:
+    """Get the basis functions for a field survey.
+
+    Parameters
+    ----------
+    nside : `int`
+        The nside value for the healpix grid.
+    wind_speed_maximum : `float`
+        Maximum wind speed tolerated for the observations of the survey,
+        in m/s.
+
+    Returns
+    -------
+    `list` of `basis_functions.BaseBasisFunction`
+    """
+    sun_alt_limit = -12.0
+
+    return [
+        basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
+        basis_functions.ZenithShadowMaskBasisFunction(
+            min_alt=26.0, max_alt=85.0, nside=nside
+        ),
+        basis_functions.AvoidDirectWind(
+            wind_speed_maximum=wind_speed_maximum, nside=nside
+        ),
+        basis_functions.MaskAzimuthBasisFunction(
+            nside=nside, az_min=160.0, az_max=200.0
+        ),
+    ]
+    
 
 def get_basis_functions_anytime_survey(
     nside: int,
