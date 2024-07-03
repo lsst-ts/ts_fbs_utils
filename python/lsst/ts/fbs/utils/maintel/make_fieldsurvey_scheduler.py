@@ -107,7 +107,15 @@ class MakeFieldSurveyScheduler:
 
     
     def get_scheduler(self) -> typing.Tuple[int, CoreScheduler]:
-        """Construct feature based scheduler for ensemble of field surveys."""
+        """Construct feature based scheduler for ensemble of field surveys.
+        
+        Returns
+        -------
+        nside : `int`
+            Healpix map resolution.
+        scheduler : `CoreScheduler`
+            Feature based scheduler.
+        """
 
         scheduler = CoreScheduler(self.surveys, nside=self.nside)
         
