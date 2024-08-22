@@ -210,7 +210,7 @@ def get_basis_functions_ddf_survey(
 
 def get_basis_functions_field_survey(
     nside: int,
-    wind_speed_maximum: float,
+    wind_speed_maximum: float = 10.,
 ) -> list[basis_functions.BaseBasisFunction]:
     """Get the basis functions for a field survey.
 
@@ -227,19 +227,38 @@ def get_basis_functions_field_survey(
     `list` of `basis_functions.BaseBasisFunction`
     """
     sun_alt_limit = -12.0
+    moon_distance = 30.
 
-    return [
+    bfs = [
         basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
-        basis_functions.ZenithShadowMaskBasisFunction(
-            min_alt=26.0, max_alt=85.0, nside=nside
+        basis_functions.MoonAvoidanceBasisFunction(
+            nside=nside, moon_distance=moon_distance
         ),
         basis_functions.AvoidDirectWind(
             wind_speed_maximum=wind_speed_maximum, nside=nside
         ),
-        basis_functions.MaskAzimuthBasisFunction(
-            nside=nside, az_min=160.0, az_max=200.0
+        # Mask parts of the sky in alt/az, including parts of the sky that will move into this area
+        # (replaces azimuth mask and zenith shadow mask, should also be able to replace airmass basis function)
+        basis_functions.AltAzShadowMaskBasisFunction(
+            nside=nside, min_alt=22, max_alt=83, min_az=0.0, max_az=360.0, shadow_minutes=30
         ),
+        # Avoid revisits within 30 minutes -- sequence is about 60 minutes long, don't repeat immediately
+        basis_functions.AvoidFastRevisitsBasisFunction(nside=nside, filtername=None, gap_min=30.0),
+        # reward fields which are rising, but don't mask out after zenith
+        basis_functions.RewardRisingBasisFunction(nside=nside, slope=0.1, penalty_val=0),
+        # Reward parts of the sky which are darker -- note that this is only for r band, so relying on
+        # skymap in r band .. if there isn't a strong reason to go with the darkest pointing,
+        # it might be reasonable to just drop this basis function
+        basis_functions.M5DiffBasisFunction(filtername='r', nside=nside),
+
+        #basis_functions.ZenithShadowMaskBasisFunction(
+        #    min_alt=26.0, max_alt=85.0, nside=nside
+        #),
+        #basis_functions.MaskAzimuthBasisFunction(
+        #    nside=nside, az_min=160.0, az_max=200.0
+        #),
     ]
+    return bfs
     
 
 def get_basis_functions_anytime_survey(
