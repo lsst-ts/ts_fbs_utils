@@ -21,3 +21,7 @@ fields = (
     ("EDFS_A", 58.9, -49.315), # EDFS_a
     ("EDFS_B", 63.6, -47.6), # EDFS_b
 )
+
+def get_sv_fields():
+    fields_dict = dict(zip([f[0] for f in fields], [{'RA': f[1], 'Dec': f[2]} for f in fields]))
+    return fields_dict

@@ -84,8 +84,8 @@ class MakeFieldSurveyScheduler:
         fields = self._load_candidate_fields()
         
         for field_name in field_names:
-            RA = fields[field_name]["RA"]
-            dec = fields[field_name]["dec"]
+            field_ra_deg = fields[field_name]["RA"]
+            field_dec_deg = fields[field_name]["dec"]
 
             # Consider adding flexibility to add a prefix or suffix
             survey_name = field_name
@@ -93,9 +93,13 @@ class MakeFieldSurveyScheduler:
             self.surveys[tier].append(
                 FieldSurvey(
                     basis_functions,
-                    RA,
-                    dec,
-                    survey_name=program,
+                    field_ra_deg,
+                    field_dec_deg,
+                    ignore_obs=None,
+                    accept_obs=[field_name],
+                    survey_name=field_name,
+                    scheduler_note=None,
+                    nside=self.nside,
                     **kwargs,
                 )
             )
