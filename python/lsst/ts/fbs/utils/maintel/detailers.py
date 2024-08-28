@@ -46,18 +46,19 @@ __all__ = [
 
 from rubin_scheduler.scheduler import detailers
 
+
 def get_detailers_field_survey() -> list[detailers.BaseDetailer]:
     """Get the detailers for a field survey.
 
     Parameters
     ----------
-    
+
 
     Returns
     -------
     `list` of `detailers.BaseDetailer`
     """
-    
+
     detailer_list = [
         detailers.CameraSmallRotPerObservationListDetailer(per_visit_rot=0.5),
         detailers.DitherDetailer(max_dither=0.2, per_night=False),

@@ -23,29 +23,28 @@ __all__ = ["MakeFieldSurveyScheduler"]
 
 import typing
 
-from rubin_scheduler.scheduler.schedulers import CoreScheduler
-from rubin_scheduler.scheduler.surveys import FieldSurvey
 from rubin_scheduler.scheduler.basis_functions import BaseBasisFunction
+from rubin_scheduler.scheduler.schedulers import CoreScheduler
+from rubin_scheduler.scheduler.surveys import BaseSurvey, FieldSurvey
 
 from ..data import field_survey_centers
 
 
 class MakeFieldSurveyScheduler:
-    """Construct Feature Based Scheduler configuration consisting of an 
-    ensemble of field surveys.
+    """Construct Feature Based Scheduler configuration consisting of an
+    ensemble of field surveys, and optionally, other types of surveys.
     """
 
     def __init__(
-        self, 
+        self,
         nside: int = 32,
         ntiers: int = 1,
     ) -> None:
-        
+
         self.nside = 32
-        self.surveys = [
+        self.surveys: typing.List[typing.List[BaseSurvey]] = [
             [] for _ in range(0, ntiers)
         ]
-
 
     def _load_candidate_fields(self) -> typing.Dict:
         """Load pointing center data for field surveys."""
@@ -55,17 +54,16 @@ class MakeFieldSurveyScheduler:
             fields[name] = {"RA": ra, "dec": dec}
         return fields
 
-    
     def add_field_surveys(
         self,
         tier: int,
         program: str,
         field_names: typing.List[str],
-        basis_functions: typing.List[BaseBasisFunction] = [], 
-        **kwargs,
+        basis_functions: typing.List[BaseBasisFunction] = [],
+        **kwargs: typing.Any,
     ) -> None:
         """Add a list of field surveys to the scheduler configuration.
-        
+
         Parameters
         ----------
         tier: `int`
@@ -82,14 +80,11 @@ class MakeFieldSurveyScheduler:
             raise ValueError("Use program_name rather than survey_name.")
 
         fields = self._load_candidate_fields()
-        
+
         for field_name in field_names:
             field_ra_deg = fields[field_name]["RA"]
             field_dec_deg = fields[field_name]["dec"]
 
-            # Consider adding flexibility to add a prefix or suffix
-            survey_name = field_name
-            
             self.surveys[tier].append(
                 FieldSurvey(
                     basis_functions,
@@ -104,15 +99,13 @@ class MakeFieldSurveyScheduler:
                 )
             )
 
-
     def add_cwfs_survey(self) -> None:
         """Add curvature wavefront sensing survey."""
         pass
 
-    
     def get_scheduler(self) -> typing.Tuple[int, CoreScheduler]:
         """Construct feature based scheduler for ensemble of field surveys.
-        
+
         Returns
         -------
         nside : `int`
@@ -122,5 +115,5 @@ class MakeFieldSurveyScheduler:
         """
 
         scheduler = CoreScheduler(self.surveys, nside=self.nside)
-        
+
         return self.nside, scheduler
