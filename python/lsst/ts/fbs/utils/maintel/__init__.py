@@ -20,6 +20,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from .basis_functions import *
-from .make_scheduler import *
 from .make_fieldsurvey_scheduler import *
+from .make_scheduler import *
 from .surveys import *
