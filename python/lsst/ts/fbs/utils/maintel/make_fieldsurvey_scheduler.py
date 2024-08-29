@@ -57,7 +57,9 @@ class MakeFieldSurveyScheduler:
     def add_field_surveys(
         self,
         tier: int,
-        program: str,
+        json_block: str,
+        observation_reason: str,
+        science_program: str,
         field_names: typing.List[str],
         basis_functions: typing.List[BaseBasisFunction] = [],
         **kwargs: typing.Any,
@@ -68,8 +70,12 @@ class MakeFieldSurveyScheduler:
         ----------
         tier: `int`
             Tier index used to control prioritization of surveys.
-        program_name: `str`
-            Program name of BLOCK to be executed.
+        json_block: `str`
+            JSON BLOCK used to perform the observations.
+        observation_reason: `str`
+            Purpose of the observation, e.g., "science"
+        science_program: `str`
+            Name of the science program.
         field_names: `list` of `str`
             List of names to specify the pointing center of each field survey.
         basis_functions: `list` of `BaseBasisFunction`
@@ -90,6 +96,9 @@ class MakeFieldSurveyScheduler:
                     basis_functions,
                     field_ra_deg,
                     field_dec_deg,
+                    json_block=json_block,
+                    observation_reason=observation_reason,
+                    science_program=science_program,
                     ignore_obs=None,
                     accept_obs=[field_name],
                     survey_name=field_name,
