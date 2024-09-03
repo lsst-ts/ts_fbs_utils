@@ -173,6 +173,7 @@ class MakeScheduler:
         spec_detailers: typing.List[BaseDetailer],
         image_detailers: typing.List[BaseDetailer],
         avoid_wind: bool = True,
+        cwfs_time_gap: float = 120.0,
     ) -> typing.Tuple[int, CoreScheduler]:
         """Construct feature based scheduler for spectroscopic survey with
         image survey in the background (with lower priority).
@@ -196,6 +197,11 @@ class MakeScheduler:
             List of Detailers used for spectroscopic survey.
         image_detailers : `list` of `BaseDetailer`
             List of Detailers used for image survey.
+        avoid_wind : `bool`
+            If True, include AvoidDirectWind basis function in spectroscopic
+            survey.
+        cwfs_time_gap : `int`
+            Time gap in minutes for cwfs survey.
 
         Returns
         -------
@@ -214,7 +220,7 @@ class MakeScheduler:
         cwfs_survey: typing.List[BaseSurvey] = [
             generate_cwfs_survey(
                 nside=nside,
-                time_gap_min=120.0,
+                time_gap_min=cwfs_time_gap,
                 wind_speed_maximum=wind_speed_maximum,
             ),
         ]
