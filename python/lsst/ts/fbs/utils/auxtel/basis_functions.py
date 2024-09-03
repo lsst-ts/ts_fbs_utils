@@ -170,6 +170,7 @@ def get_basis_functions_spectroscopic_survey(
     nside: int,
     note: str,
     ha_limits: typing.List[typing.Tuple[float, float]],
+    avoid_wind: bool,
     wind_speed_maximum: float,
     gap_min: float,
     moon_distance: float,
@@ -188,6 +189,8 @@ def get_basis_functions_spectroscopic_survey(
         Survey note.
     ha_limits : `list` of `tuple` of (`float`, `float`)
         Hour angle limits, in hours.
+    avoid_wind : `bool`
+        if True, include AvoidDirectWind basis function
     wind_speed_maximum : `float`
         Maximum wind speed, in m/s.
     gap_min : `float`
@@ -205,7 +208,7 @@ def get_basis_functions_spectroscopic_survey(
     """
     sun_alt_limit = -12.0
 
-    return [
+    bfs = [
         basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
         basis_functions.HourAngleLimitBasisFunction(RA=ra, ha_limits=ha_limits),
         basis_functions.M5DiffBasisFunction(nside=nside),
@@ -219,7 +222,12 @@ def get_basis_functions_spectroscopic_survey(
             min_alt=26.0, max_alt=85.0, nside=nside
         ),
         basis_functions.VisitGap(note=note, gap_min=gap_min),
-        basis_functions.AvoidDirectWind(
-            wind_speed_maximum=wind_speed_maximum, nside=nside
-        ),
     ]
+
+    if avoid_wind:
+        bfs.append(
+            basis_functions.AvoidDirectWind(
+                wind_speed_maximum=wind_speed_maximum, nside=nside
+            )
+        )
+    return bfs

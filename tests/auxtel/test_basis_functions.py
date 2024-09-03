@@ -62,6 +62,7 @@ def test_get_basis_functions_spectroscopic_survey() -> None:
         note="unit_test_321",
         ha_limits=(-6.0, 6.0),
         wind_speed_maximum=4.0,
+        avoid_wind=True,
         gap_min=3600.0,
         note_interest="spec",
         moon_distance=30.0,
@@ -69,3 +70,20 @@ def test_get_basis_functions_spectroscopic_survey() -> None:
     )
 
     assert len(basis_functions) == 10
+
+
+def test_get_basis_functions_spectroscopic_survey_no_wind() -> None:
+    basis_functions = get_basis_functions_spectroscopic_survey(
+        ra=0.0,
+        nside=32,
+        note="unit_test_321",
+        ha_limits=(-6.0, 6.0),
+        wind_speed_maximum=4.0,
+        avoid_wind=False,
+        gap_min=3600.0,
+        note_interest="spec",
+        moon_distance=30.0,
+        nobs_reference=3,
+    )
+
+    assert len(basis_functions) == 9
