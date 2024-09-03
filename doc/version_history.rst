@@ -4,6 +4,12 @@
 Version History
 ===============
 
+v0.9.2
+------
+* In ``data/auxtel_tiles.txt``, expand photo imaging survey.
+* Add bool option to toggle AvoidDirectWind basis function for AuxTel spectroscopic surveys.
+* Add option to configure cwfs time gap. 
+
 v0.9.1
 ------
 * In ``data/auxtel_tiles.txt``, remove unused target regions.
