@@ -152,6 +152,7 @@ def generate_cwfs_survey(
 def generate_spectroscopic_survey(
     nside: int,
     target: Target,
+    avoid_wind: bool,
     wind_speed_maximum: float,
     nfields: int,
     survey_detailers: typing.List[BaseDetailer],
@@ -164,7 +165,9 @@ def generate_spectroscopic_survey(
         Healpix map resolution.
     target : `Target`
         Target for the image survey.
-    wind_speed_maximu : `float`
+    avoid_wind : `bool`
+        Include AvoidDirectWind basis function.
+    wind_speed_maximum : `float`
         Maximum wind speed (in m/s).
     survey_detailers : `list` of `detailers.BaseDetailer`
         List of survey detailers.
@@ -180,6 +183,7 @@ def generate_spectroscopic_survey(
         note=target.target_name,
         note_interest="spec",
         ha_limits=target.hour_angle_limit,
+        avoid_wind=avoid_wind,
         wind_speed_maximum=wind_speed_maximum,
         gap_min=target.visit_gap,
         moon_distance=target.moon_distance,
