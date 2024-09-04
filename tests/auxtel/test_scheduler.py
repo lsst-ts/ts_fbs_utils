@@ -218,7 +218,7 @@ class TestMakeScheduler(unittest.TestCase):
     def get_image_tiles() -> typing.List[Tiles]:
         return [
             Tiles(
-                survey_name="LATISS_POLE",
+                survey_name="BLOCK-306",
                 hour_angle_limit=[(-6.0, 6.0)],
                 reward_value=0.5,
                 filters=["g", "r", "i"],

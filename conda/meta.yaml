@@ -14,7 +14,8 @@ build:
 
 test:
   requires:
-    - ts-conda-build =0.3
+    - ts-conda-build =0.4
+    - rubin-scheduler =1.1
     - {{ pin_compatible('rubin-scheduler',  min_pin='x') }}
   source_files:
     - python
@@ -32,14 +33,12 @@ requirements:
     - pip
     - setuptools_scm
     - setuptools
-    - rubin-scheduler
   build:
     - python {{ python }}
     - numpy {{ numpy }}
     - setuptools
     - setuptools_scm
     - ts-conda-build
-    - rubin-scheduler
   run:
     - python {{ python }}
-    - {{ pin_compatible('rubin-scheduler', min_pin='x') }}
+    - {{ pin_compatible('rubin-scheduler', min_pin='x.x') }}

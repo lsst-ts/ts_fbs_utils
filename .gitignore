@@ -13,6 +13,9 @@ config.log
 version.py
 bin/
 
+# pypi
+**egg-info*
+
 # Pytest
 tests/.tests
 pytest_session.txt

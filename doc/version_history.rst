@@ -4,6 +4,11 @@
 Version History
 ===============
 
+v0.9.3
+------
+
+* In ``data/auxtel_tiles.txt``, remove unused tiles and to rename AUXTEL_PHOTO_IMAGING survey to BLOCK-306.
+
 v0.9.2
 ------
 * In ``data/auxtel_tiles.txt``, expand photo imaging survey.
