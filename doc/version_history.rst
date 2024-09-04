@@ -4,6 +4,11 @@
 Version History
 ===============
 
+v0.10.0
+-------
+
+* Update ``auxtel/make_scheduler`` and ``auxtel/surveys`` to allow setting the cwfs survey name.
+
 v0.9.3
 ------
 
