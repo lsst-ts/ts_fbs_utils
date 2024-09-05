@@ -19,7 +19,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from .basis_functions import *
-from .make_fieldsurvey_scheduler import *
-from .make_scheduler import *
-from .surveys import *
+from lsst.ts.fbs.utils.maintel.detailers import get_detailers_field_survey
+
+
+def test_get_detailers_field_survey() -> None:
+    detailers = get_detailers_field_survey()
+
+    assert len(detailers) == 2
