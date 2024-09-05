@@ -35,6 +35,7 @@ class TestMakeScheduler(unittest.TestCase):
     image_tiles: typing.List[Tiles]
     spec_detailers: typing.List[BaseDetailer]
     image_detailers: typing.List[BaseDetailer]
+    cwfs_block_name: str
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -43,6 +44,7 @@ class TestMakeScheduler(unittest.TestCase):
         cls.image_tiles = cls.get_image_tiles()
         cls.spec_detailers = cls.get_spec_detailers()
         cls.image_detailers = cls.get_image_detailers()
+        cls.cwfs_block_name = "cwfs"
         return super().setUpClass()
 
     def test_get_scheduler_spec_image(
@@ -56,6 +58,7 @@ class TestMakeScheduler(unittest.TestCase):
             image_tiles=self.image_tiles,
             spec_detailers=self.spec_detailers,
             image_detailers=self.image_detailers,
+            cwfs_block_name=self.cwfs_block_name,
         )
 
         assert nside == 32
@@ -78,6 +81,7 @@ class TestMakeScheduler(unittest.TestCase):
                 image_tiles=self.image_tiles,
                 spec_detailers=self.spec_detailers,
                 image_detailers=self.image_detailers,
+                cwfs_block_name=self.cwfs_block_name,
             )
 
     def test_get_scheduler_spec_image_fail_no_image_tiles(self) -> None:
@@ -90,6 +94,7 @@ class TestMakeScheduler(unittest.TestCase):
                 image_tiles=[],
                 spec_detailers=self.spec_detailers,
                 image_detailers=self.image_detailers,
+                cwfs_block_name=self.cwfs_block_name,
             )
 
     def test_get_scheduler_image_spec(self) -> None:
@@ -101,6 +106,7 @@ class TestMakeScheduler(unittest.TestCase):
             image_tiles=self.image_tiles,
             spec_detailers=self.spec_detailers,
             image_detailers=self.image_detailers,
+            cwfs_block_name=self.cwfs_block_name,
         )
 
         assert nside == 32
@@ -123,6 +129,7 @@ class TestMakeScheduler(unittest.TestCase):
                 image_tiles=self.image_tiles,
                 spec_detailers=self.spec_detailers,
                 image_detailers=self.image_detailers,
+                cwfs_block_name=self.cwfs_block_name,
             )
 
     def test_get_scheduler_image_spec_fail_no_image_tiles(self) -> None:
@@ -135,6 +142,7 @@ class TestMakeScheduler(unittest.TestCase):
                 image_tiles=[],
                 spec_detailers=self.spec_detailers,
                 image_detailers=self.image_detailers,
+                cwfs_block_name=self.cwfs_block_name,
             )
 
     def test_get_scheduler_spec(self) -> None:
@@ -146,6 +154,7 @@ class TestMakeScheduler(unittest.TestCase):
             image_tiles=[],
             spec_detailers=self.spec_detailers,
             image_detailers=self.image_detailers,
+            cwfs_block_name=self.cwfs_block_name,
         )
 
         assert nside == 32
@@ -165,6 +174,7 @@ class TestMakeScheduler(unittest.TestCase):
                 image_tiles=self.image_tiles,
                 spec_detailers=self.spec_detailers,
                 image_detailers=self.image_detailers,
+                cwfs_block_name=self.cwfs_block_name,
             )
 
     def test_get_scheduler_image(self) -> None:
@@ -176,6 +186,7 @@ class TestMakeScheduler(unittest.TestCase):
             image_tiles=self.image_tiles,
             spec_detailers=self.spec_detailers,
             image_detailers=self.image_detailers,
+            cwfs_block_name=self.cwfs_block_name,
         )
 
         assert nside == 32
@@ -195,6 +206,7 @@ class TestMakeScheduler(unittest.TestCase):
                 image_tiles=self.image_tiles,
                 spec_detailers=self.spec_detailers,
                 image_detailers=self.image_detailers,
+                cwfs_block_name=self.cwfs_block_name,
             )
 
     @staticmethod

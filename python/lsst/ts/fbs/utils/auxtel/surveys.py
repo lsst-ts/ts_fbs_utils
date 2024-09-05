@@ -116,6 +116,7 @@ def generate_cwfs_survey(
     nside: int,
     time_gap_min: float,
     wind_speed_maximum: float,
+    cwfs_block_name: str,
 ) -> BaseSurvey:
     """Generate Curvature Wavefront Sensing Survey.
 
@@ -127,6 +128,8 @@ def generate_cwfs_survey(
         Minimum time between cwfs sequences (in minutes).
     wind_speed_maximum : `float`
         Maximum wind speed (in m/s).
+    cwfs_block_name : `str`
+        Name of the cwfs block survey.
 
     Returns
     -------
@@ -135,7 +138,7 @@ def generate_cwfs_survey(
     """
     basis_functions = get_basis_functions_cwfs_survey(
         nside=nside,
-        note="cwfs",
+        note=cwfs_block_name,
         time_gap_min=time_gap_min,
         wind_speed_maximum=wind_speed_maximum,
     )
@@ -144,7 +147,7 @@ def generate_cwfs_survey(
         basis_functions,
         np.ones_like(basis_functions) * 10000.0,
         nside=nside,
-        survey_name="cwfs",
+        survey_name=cwfs_block_name,
         nexp=4,
     )
 
