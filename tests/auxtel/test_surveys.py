@@ -54,6 +54,7 @@ def test_generate_cwfs_survey() -> None:
         nside=32,
         time_gap_min=120.0,
         wind_speed_maximum=8.0,
+        cwfs_block_name="cwfs",
     )
 
     assert survey.survey_name == "cwfs"
