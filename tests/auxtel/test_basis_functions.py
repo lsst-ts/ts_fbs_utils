@@ -18,6 +18,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+import typing
 import unittest
 
 from lsst.ts.fbs.utils.auxtel.basis_functions import (
@@ -25,17 +26,18 @@ from lsst.ts.fbs.utils.auxtel.basis_functions import (
     get_basis_functions_image_survey,
     get_basis_functions_spectroscopic_survey,
 )
+from rubin_scheduler.scheduler.basis_functions import BaseBasisFunction
 from rubin_scheduler.scheduler.model_observatory import ModelObservatory
 from rubin_scheduler.scheduler.utils import empty_observation
 
 
 class TestBasisFunctions(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.obs = empty_observation(1)
         mo = ModelObservatory()
         self.conditions = mo.return_conditions()
 
-    def check_bf_list(self, bf_list):
+    def check_bf_list(self, bf_list: typing.List[BaseBasisFunction]) -> None:
         """Check the basis functions in a list
         have working APIs
         """
