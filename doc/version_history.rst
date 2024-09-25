@@ -4,6 +4,11 @@
 Version History
 ===============
 
+v0.11.0
+-------
+
+* Replace deprecated ``ZenithShadowMaskBasisFunction`` with ``AltAzShadowMaskBasisFunction``.
+
 v0.10.0
 -------
 
