@@ -102,7 +102,7 @@ def get_basis_functions_star_tracker_survey(
         basis_functions.HourAngleLimitBasisFunction(RA=ra, ha_limits=ha_limits),
         basis_functions.SlewtimeBasisFunction(nside=nside, filtername="g"),
         basis_functions.MoonAvoidanceBasisFunction(nside=nside),
-        basis_functions.ZenithShadowMaskBasisFunction(
+        basis_functions.AltAzShadowMaskBasisFunction(
             min_alt=26.0, max_alt=85.0, nside=nside
         ),
         basis_functions.VisitGap(note=note, filter_names=filter_names, gap_min=gap_min),
@@ -149,7 +149,7 @@ def get_basis_functions_blob_survey(
         basis_functions.M5DiffBasisFunction(filtername="r", nside=nside),
         basis_functions.FootprintBasisFunction(filtername="r", footprint=footprint),
         basis_functions.MoonAvoidanceBasisFunction(nside=nside),
-        basis_functions.ZenithShadowMaskBasisFunction(
+        basis_functions.AltAzShadowMaskBasisFunction(
             min_alt=26.0, max_alt=85.0, nside=nside
         ),
         basis_functions.AvoidDirectWind(
@@ -198,7 +198,7 @@ def get_basis_functions_ddf_survey(
     return [
         basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
         basis_functions.HourAngleLimitBasisFunction(RA=ra, ha_limits=ha_limits),
-        basis_functions.ZenithShadowMaskBasisFunction(
+        basis_functions.AltAzShadowMaskBasisFunction(
             min_alt=26.0, max_alt=85.0, nside=nside
         ),
         basis_functions.AvoidDirectWind(
@@ -236,7 +236,7 @@ def get_basis_functions_anytime_survey(
             ha_max=1.5,
             nside=nside,
         ),
-        basis_functions.ZenithShadowMaskBasisFunction(
+        basis_functions.AltAzShadowMaskBasisFunction(
             min_alt=40.0,
             max_alt=82.0,
             nside=nside,
