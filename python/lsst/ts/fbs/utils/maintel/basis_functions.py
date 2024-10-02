@@ -147,7 +147,9 @@ def get_basis_functions_blob_survey(
     return [
         basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
         basis_functions.M5DiffBasisFunction(filtername="r", nside=nside),
-        basis_functions.FootprintBasisFunction(filtername="r", footprint=footprint),
+        basis_functions.FootprintBasisFunction(
+            filtername="r", footprint=footprint, nside=nside
+        ),
         basis_functions.MoonAvoidanceBasisFunction(nside=nside),
         basis_functions.AltAzShadowMaskBasisFunction(
             min_alt=26.0, max_alt=85.0, nside=nside
@@ -157,9 +159,6 @@ def get_basis_functions_blob_survey(
         ),
         basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
         basis_functions.VisitRepeatBasisFunction(nside=nside),
-        basis_functions.MaskAzimuthBasisFunction(
-            nside=nside, az_min=160.0, az_max=200.0
-        ),
     ]
 
 
@@ -205,9 +204,6 @@ def get_basis_functions_ddf_survey(
             wind_speed_maximum=wind_speed_maximum, nside=nside
         ),
         basis_functions.VisitGap(note=survey_name, gap_min=gap_min),
-        basis_functions.MaskAzimuthBasisFunction(
-            nside=nside, az_min=160.0, az_max=200.0
-        ),
     ]
 
 
@@ -243,9 +239,6 @@ def get_basis_functions_anytime_survey(
         ),
         basis_functions.SlewtimeBasisFunction(filtername="r", nside=nside),
         basis_functions.TargetMapBasisFunction(target_map=target_map),
-        basis_functions.MaskAzimuthBasisFunction(
-            nside=nside, az_min=160.0, az_max=200.0
-        ),
     ]
 
     return bfs
