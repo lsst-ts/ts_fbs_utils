@@ -4,6 +4,11 @@
 Version History
 ===============
 
+v0.12.0
+-------
+
+* General updates to support migration to rubin-scheduler >2.
+
 v0.11.0
 -------
 
