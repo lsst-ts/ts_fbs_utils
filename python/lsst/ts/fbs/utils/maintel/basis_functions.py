@@ -48,7 +48,7 @@ __all__ = [
 ]
 
 from rubin_scheduler.scheduler import basis_functions
-from rubin_scheduler.scheduler.utils import EuclidOverlapFootprint
+from rubin_scheduler.scheduler.utils import CurrentAreaMap, Footprint
 
 
 def get_basis_functions_star_tracker_survey(
@@ -102,7 +102,7 @@ def get_basis_functions_star_tracker_survey(
         basis_functions.HourAngleLimitBasisFunction(RA=ra, ha_limits=ha_limits),
         basis_functions.SlewtimeBasisFunction(nside=nside, filtername="g"),
         basis_functions.MoonAvoidanceBasisFunction(nside=nside),
-        basis_functions.ZenithShadowMaskBasisFunction(
+        basis_functions.AltAzShadowMaskBasisFunction(
             min_alt=26.0, max_alt=85.0, nside=nside
         ),
         basis_functions.VisitGap(note=note, filter_names=filter_names, gap_min=gap_min),
@@ -149,7 +149,7 @@ def get_basis_functions_blob_survey(
         basis_functions.M5DiffBasisFunction(filtername="r", nside=nside),
         basis_functions.FootprintBasisFunction(filtername="r", footprint=footprint),
         basis_functions.MoonAvoidanceBasisFunction(nside=nside),
-        basis_functions.ZenithShadowMaskBasisFunction(
+        basis_functions.AltAzShadowMaskBasisFunction(
             min_alt=26.0, max_alt=85.0, nside=nside
         ),
         basis_functions.AvoidDirectWind(
@@ -198,8 +198,8 @@ def get_basis_functions_ddf_survey(
     return [
         basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
         basis_functions.HourAngleLimitBasisFunction(RA=ra, ha_limits=ha_limits),
-        basis_functions.ZenithShadowMaskBasisFunction(
-            min_alt=26.0, max_alt=85.0, nside=nside
+        basis_functions.AltAzShadowMaskBasisFunction(
+            min_alt=26.0, max_alt=85.0, shadow_minutes=45, nside=nside
         ),
         basis_functions.AvoidDirectWind(
             wind_speed_maximum=wind_speed_maximum, nside=nside
@@ -226,9 +226,15 @@ def get_basis_functions_anytime_survey(
     `list`[ `basis_functions.BaseBasisFunction` ]
         List of basis functions.
     """
-    sky = EuclidOverlapFootprint()
-    footprints, labels = sky.return_maps()
-    target_map = footprints["r"]
+    sky = CurrentAreaMap(nside=nside)
+    fp_hp, labels = sky.return_maps()
+    # Just use these as placeholders
+    # The important thing is that they align
+    mjd_start = 60585.94546951167
+    sun_ra_start = 3.30000797
+    footprints = Footprint(nside=nside, mjd_start=mjd_start, sun_ra_start=sun_ra_start)
+    for f in fp_hp.dtype.names:
+        footprints.set_footprint(f, fp_hp[f])
 
     bfs = [
         basis_functions.HaMaskBasisFunction(
@@ -236,15 +242,10 @@ def get_basis_functions_anytime_survey(
             ha_max=1.5,
             nside=nside,
         ),
-        basis_functions.ZenithShadowMaskBasisFunction(
-            min_alt=40.0,
-            max_alt=82.0,
-            nside=nside,
-        ),
         basis_functions.SlewtimeBasisFunction(filtername="r", nside=nside),
-        basis_functions.TargetMapBasisFunction(target_map=target_map),
-        basis_functions.MaskAzimuthBasisFunction(
-            nside=nside, az_min=160.0, az_max=200.0
+        basis_functions.FootprintBasisFunction(filtername="r", nside=nside, footprint=footprints),
+        basis_functions.AltAzShadowMaskBasisFunction(
+            nside=nside, min_alt=40.0, max_alt=82.0, az_min=160.0, az_max=200.0
         ),
     ]
 

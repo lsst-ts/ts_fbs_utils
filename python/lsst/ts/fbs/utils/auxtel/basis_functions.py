@@ -53,6 +53,7 @@ def get_basis_functions_image_survey(
         The nside value for the healpix grid.
     note : `str`
         A identifier string to be attached to the survey observations.
+        This should be the same as the target_name.
     ha_limits : 'list` of `float`
         A two-element list with the hour angle limits, in hours.
     wind_speed_maximum : `float`
@@ -89,8 +90,8 @@ def get_basis_functions_image_survey(
         basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
         basis_functions.SlewtimeBasisFunction(nside=nside, filtername="i"),
         basis_functions.MoonAvoidanceBasisFunction(nside=nside),
-        basis_functions.ZenithShadowMaskBasisFunction(
-            min_alt=26.0, max_alt=85.0, nside=nside
+        basis_functions.AltAzShadowMaskBasisFunction(
+            min_alt=26.0, max_alt=85.0, shadow_minutes=40, nside=nside
         ),
         basis_functions.VisitGap(note=note, filter_names=filter_names, gap_min=gap_min),
         basis_functions.AvoidDirectWind(
@@ -155,8 +156,8 @@ def get_basis_functions_cwfs_survey(
         basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
         basis_functions.SlewtimeBasisFunction(nside=nside, filtername="i"),
         basis_functions.MoonAvoidanceBasisFunction(nside=nside),
-        basis_functions.ZenithShadowMaskBasisFunction(
-            min_alt=26.0, max_alt=85.0, nside=nside
+        basis_functions.AltAzShadowMaskBasisFunction(
+            min_alt=26.0, max_alt=85.0, shadow_minutes=30, nside=nside
         ),
         basis_functions.VisitGap(note=note, gap_min=time_gap_min),
         basis_functions.AvoidDirectWind(
@@ -218,8 +219,8 @@ def get_basis_functions_spectroscopic_survey(
         basis_functions.MoonAvoidanceBasisFunction(
             nside=nside, moon_distance=moon_distance
         ),
-        basis_functions.ZenithShadowMaskBasisFunction(
-            min_alt=26.0, max_alt=85.0, nside=nside
+        basis_functions.AltAzShadowMaskBasisFunction(
+            min_alt=26.0, max_alt=85.0, shadow_minutes=20, nside=nside
         ),
         basis_functions.VisitGap(note=note, gap_min=gap_min),
     ]

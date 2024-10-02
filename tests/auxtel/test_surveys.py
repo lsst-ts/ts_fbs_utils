@@ -46,7 +46,8 @@ def test_generate_image_survey() -> None:
         survey_detailers=[],
     )
 
-    assert survey.survey_name == target.survey_name
+    assert survey.science_program == target.survey_name
+    assert survey.target_name == target.target_name
 
 
 def test_generate_cwfs_survey() -> None:

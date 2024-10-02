@@ -19,13 +19,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import copy
 import typing
 
 import astropy.units as u
 import numpy as np
 from rubin_scheduler.scheduler.detailers import BaseDetailer
 from rubin_scheduler.scheduler.surveys import BaseSurvey, FieldSurvey, GreedySurvey
-from rubin_scheduler.scheduler.utils import empty_observation
 
 from ..target import Target
 from .basis_functions import (
@@ -67,7 +67,7 @@ def generate_image_survey(
         ra=target.ra.to(unit=u.deg).value,
         nside=nside,
         note=target.target_name,
-        note_interest=target.survey_name,
+        note_interest=target.target_name,
         ha_limits=target.hour_angle_limit,
         wind_speed_maximum=wind_speed_maximum,
         nobs_reference=nfields,
@@ -77,34 +77,23 @@ def generate_image_survey(
         additional_notes=[(target.target_name.split("_")[0], 32)],
     )
 
-    sequence = [empty_observation() for i in range(len(target.filters))]
-
-    for filter_obs, observation in zip(target.filters, sequence):
-        observation["RA"] = target.ra.to(u.rad).value
-        observation["dec"] = target.dec.to(u.rad).value
-        observation["filter"] = filter_obs
-        observation["exptime"] = target.exptime
-        observation["nexp"] = target.nexp
-        observation["note"] = f"{target.survey_name}:{target.target_name}"
+    sequence = target.filters
+    exptimes = dict((fname, target.exptime) for fname in sequence)
+    nexps = dict((fname, target.nexp) for fname in sequence)
+    nvisits = dict((fname, 1) for fname in sequence)
 
     image_survey = FieldSurvey(
-        basis_functions,
-        np.array(
-            [
-                target.ra.to(u.degree).value,
-            ]
-        ),
-        np.array(
-            [
-                target.dec.to(u.degree).value,
-            ]
-        ),
-        sequence=sequence,
-        survey_name=f"{target.survey_name}",
-        reward_value=target.reward_value,
-        nside=nside,
-        nexp=target.nexp,
-        detailers=survey_detailers,
+        basis_functions=basis_functions,
+        RA = target.ra.to(u.degree).value,
+        dec = target.dec.to(u.degree).value,
+        sequence = sequence,
+        nvisits = nvisits,
+        nexps = nexps,
+        exptimes = exptimes,
+        target_name = target.target_name,
+        science_program = target.survey_name,
+        nside = nside,
+        detailers = copy.deepcopy(survey_detailers),
     )
 
     image_survey.basis_weights *= target.reward_value
@@ -138,7 +127,7 @@ def generate_cwfs_survey(
     """
     basis_functions = get_basis_functions_cwfs_survey(
         nside=nside,
-        note=cwfs_block_name,
+        note="cwfs",
         time_gap_min=time_gap_min,
         wind_speed_maximum=wind_speed_maximum,
     )
@@ -147,7 +136,9 @@ def generate_cwfs_survey(
         basis_functions,
         np.ones_like(basis_functions) * 10000.0,
         nside=nside,
-        survey_name=cwfs_block_name,
+        survey_name="cwfs",
+        scheduler_note="cwfs",
+        science_program=cwfs_block_name,
         nexp=4,
     )
 
@@ -184,7 +175,7 @@ def generate_spectroscopic_survey(
         ra=target.ra.to(u.deg).value,
         nside=nside,
         note=target.target_name,
-        note_interest="spec",
+        note_interest=target.target_name,
         ha_limits=target.hour_angle_limit,
         avoid_wind=avoid_wind,
         wind_speed_maximum=wind_speed_maximum,
@@ -193,33 +184,23 @@ def generate_spectroscopic_survey(
         nobs_reference=nfields,
     )
 
-    observation = empty_observation()
-    observation["RA"] = target.ra.to(u.rad).value
-    observation["dec"] = target.dec.to(u.rad).value
-    observation["filter"] = "r"
-    observation["exptime"] = target.exptime
-    observation["nexp"] = target.nexp
-    observation["note"] = f"{target.survey_name}:{target.target_name}"
-    sequence = [observation]
+    sequence = "r"
+    exptimes = {"r": target.exptime}
+    nexps = {"r": target.nexp}
+    nvisits = {"r": 1}
 
     spectroscopic_survey = FieldSurvey(
-        basis_functions,
-        np.array(
-            [
-                target.ra.to(u.degree).value,
-            ]
-        ),
-        np.array(
-            [
-                target.dec.to(u.degree).value,
-            ]
-        ),
-        sequence=sequence,
-        survey_name=f"{target.target_name}",  # This is target name on purpose.
-        reward_value=target.reward_value,
-        nside=nside,
-        nexp=target.nexp,
-        detailers=survey_detailers,
+        basis_functions=basis_functions,
+        RA = target.ra.to(u.degree).value,
+        dec = target.dec.to(u.degree).value,
+        sequence = sequence,
+        nvisits = nvisits,
+        nexps = nexps,
+        exptimes = exptimes,
+        target_name = target.target_name,
+        science_program = target.survey_name,
+        nside = nside,
+        detailers = copy.deepcopy(survey_detailers),
     )
 
     spectroscopic_survey.basis_weights *= target.reward_value

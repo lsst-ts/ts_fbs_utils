@@ -36,7 +36,7 @@ class Target:
     target_name : `str`
         Name of the target.
     survey_name : `str`
-        Name of the survey.
+        Name of the survey. -- actually the science_program it looks like
     ra : `Angle`
         Right ascention of the target as an astropy angle. Units are inferred.
     dec : `Angle`

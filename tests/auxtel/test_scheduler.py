@@ -64,11 +64,15 @@ class TestMakeScheduler(unittest.TestCase):
         assert nside == 32
         assert scheduler.nside == nside
         assert len(scheduler.survey_lists) == 3
+        # Survey type was SpecImage, so should return spec survey then image
         assert (
-            scheduler.survey_lists[1][0].survey_name == self.spec_targets[0].target_name
+            scheduler.survey_lists[1][0].science_program == self.spec_targets[0].survey_name
         )
         assert (
-            scheduler.survey_lists[2][0].survey_name == self.image_tiles[0].survey_name
+            scheduler.survey_lists[1][0].target_name == self.spec_targets[0].target_name
+        )
+        assert (
+            scheduler.survey_lists[2][0].science_program == self.image_tiles[0].survey_name
         )
 
     def test_get_scheduler_spec_image_fail_no_spec_target(self) -> None:
@@ -112,11 +116,15 @@ class TestMakeScheduler(unittest.TestCase):
         assert nside == 32
         assert scheduler.nside == nside
         assert len(scheduler.survey_lists) == 3
+        # Now is ImageSpec survey, so order should be reversed
         assert (
-            scheduler.survey_lists[1][0].survey_name == self.image_tiles[0].survey_name
+            scheduler.survey_lists[2][0].science_program == self.spec_targets[0].survey_name
         )
         assert (
-            scheduler.survey_lists[2][0].survey_name == self.spec_targets[0].target_name
+            scheduler.survey_lists[2][0].target_name == self.spec_targets[0].target_name
+        )
+        assert (
+            scheduler.survey_lists[1][0].science_program == self.image_tiles[0].survey_name
         )
 
     def test_get_scheduler_image_spec_fail_no_spec_target(self) -> None:
@@ -161,7 +169,7 @@ class TestMakeScheduler(unittest.TestCase):
         assert scheduler.nside == nside
         assert len(scheduler.survey_lists) == 2
         assert (
-            scheduler.survey_lists[1][0].survey_name == self.spec_targets[0].target_name
+            scheduler.survey_lists[1][0].target_name == self.spec_targets[0].target_name
         )
 
     def test_get_scheduler_spec_fail_with_image_target(self) -> None:
@@ -193,7 +201,7 @@ class TestMakeScheduler(unittest.TestCase):
         assert scheduler.nside == nside
         assert len(scheduler.survey_lists) == 2
         assert (
-            scheduler.survey_lists[1][0].survey_name == self.image_tiles[0].survey_name
+            scheduler.survey_lists[1][0].science_program == self.image_tiles[0].survey_name
         )
 
     def test_get_scheduler_image_fail_with_spec_target(self) -> None:

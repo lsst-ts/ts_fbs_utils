@@ -51,7 +51,6 @@ from rubin_scheduler.scheduler.surveys import (
     FieldSurvey,
     GreedySurvey,
 )
-from rubin_scheduler.scheduler.utils import empty_observation
 from rubin_scheduler.utils import ddf_locations
 
 from ..target import Target
@@ -95,7 +94,7 @@ def generate_image_survey(
         ra=target.ra.to(unit=u.deg).value,
         nside=nside,
         note=target.target_name,
-        note_interest=target.survey_name,
+        note_interest=target.target_name,
         ha_limits=target.hour_angle_limit,
         wind_speed_maximum=wind_speed_maximum,
         nobs_reference=nfields,
@@ -104,34 +103,23 @@ def generate_image_survey(
         gap_min=target.visit_gap,
     )
 
-    sequence = [empty_observation() for i in range(len(target.filters))]
-
-    for filter_obs, observation in zip(target.filters, sequence):
-        observation["RA"] = target.ra.to(u.rad).value
-        observation["dec"] = target.dec.to(u.rad).value
-        observation["filter"] = filter_obs
-        observation["exptime"] = target.exptime
-        observation["nexp"] = target.nexp
-        observation["note"] = f"{target.survey_name}:{target.target_name}"
+    sequence = target.filters
+    exptimes = dict((fname, target.exptime) for fname in sequence)
+    nexps = dict((fname, target.nexp) for fname in sequence)
+    nvisits = dict((fname, 1) for fname in sequence)
 
     image_survey = FieldSurvey(
-        basis_functions,
-        np.array(
-            [
-                target.ra.to(u.degree).value,
-            ]
-        ),
-        np.array(
-            [
-                target.dec.to(u.degree).value,
-            ]
-        ),
-        sequence=sequence,
-        survey_name=f"{target.survey_name}",
-        reward_value=target.reward_value,
-        nside=nside,
-        nexp=target.nexp,
-        detailers=survey_detailers,
+        basis_functions=basis_functions,
+        RA = target.ra.to(u.degree).value,
+        dec = target.dec.to(u.degree).value,
+        sequence = sequence,
+        nvisits = nvisits,
+        nexps = nexps,
+        exptimes = exptimes,
+        target_name = target.target_name,
+        science_program = target.science_program,
+        nside = nside,
+        detailers = survey_detailers,
     )
 
     image_survey.basis_weights *= target.reward_value
@@ -178,7 +166,7 @@ def generate_blob_survey(
         basis_weights,
         filtername1=filter_names,
         survey_name=survey_name,
-        survey_note=f"{survey_name}:Area",
+        target_name=f"{survey_name}:Area",
     )
 
     return blob_survey
@@ -230,11 +218,13 @@ def generate_ddf_surveys(
         ra,
         dec,
         sequence="r",
-        nvis=[20],
-        exptime=30,
+        nvis={"r": 20},
+        exptime={"r": 30},
+        nexp={"r": 2},
         survey_name=f"{survey_base_name}:{target_field}",
+        target_name = target_field,
+        science_program = None, # YOUR JSON BLOCK
         nside=nside,
-        nexp=2,
         detailers=None,
         reward_value=100,
     )
@@ -258,13 +248,13 @@ def generate_ddf_surveys(
         ra,
         dec,
         sequence="r",
-        nvis=[20],
-        exptime=30,
+        nvis={"r": 20},
+        exptime={"r": 30},
+        nexp={"r": 2},
         survey_name=f"{survey_base_name}:{target_field}",
+        target_name = target_field,
         nside=nside,
-        nexp=2,
         detailers=None,
-        reward_value=100,
     )
 
     return [ddf_survey_1, ddf_survey_2]
