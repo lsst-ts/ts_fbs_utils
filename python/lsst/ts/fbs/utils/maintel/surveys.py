@@ -45,18 +45,12 @@ import typing
 import astropy.units as u
 import numpy as np
 from rubin_scheduler.scheduler.detailers import BaseDetailer
-from rubin_scheduler.scheduler.surveys import (
-    BaseSurvey,
-    BlobSurvey,
-    FieldSurvey,
-    GreedySurvey,
-)
-from rubin_scheduler.scheduler.utils import empty_observation
+from rubin_scheduler.scheduler.surveys import BaseSurvey, BlobSurvey, FieldSurvey
+from rubin_scheduler.scheduler.utils import ObservationArray
 from rubin_scheduler.utils import ddf_locations
 
 from ..target import Target
 from .basis_functions import (
-    get_basis_functions_anytime_survey,
     get_basis_functions_blob_survey,
     get_basis_functions_ddf_survey,
     get_basis_functions_star_tracker_survey,
@@ -104,7 +98,7 @@ def generate_image_survey(
         gap_min=target.visit_gap,
     )
 
-    sequence = [empty_observation() for i in range(len(target.filters))]
+    sequence = [ObservationArray(n=1) for i in range(len(target.filters))]
 
     for filter_obs, observation in zip(target.filters, sequence):
         observation["RA"] = target.ra.to(u.rad).value
@@ -112,7 +106,9 @@ def generate_image_survey(
         observation["filter"] = filter_obs
         observation["exptime"] = target.exptime
         observation["nexp"] = target.nexp
-        observation["note"] = f"{target.survey_name}:{target.target_name}"
+        observation["scheduler_note"] = f"{target.survey_name}:{target.target_name}"
+        observation["target_name"] = target.target_name
+        observation["science_program"] = target.survey_name
 
     image_survey = FieldSurvey(
         basis_functions,
@@ -127,7 +123,9 @@ def generate_image_survey(
             ]
         ),
         sequence=sequence,
-        survey_name=f"{target.survey_name}",
+        survey_name=target.survey_name,
+        target_name=target.target_name,
+        science_program=target.survey_name,
         reward_value=target.reward_value,
         nside=nside,
         nexp=target.nexp,
@@ -177,8 +175,8 @@ def generate_blob_survey(
         basis_functions,
         basis_weights,
         filtername1=filter_names,
-        survey_name=survey_name,
-        survey_note=f"{survey_name}:Area",
+        survey_name="Area",
+        science_program=survey_name,
     )
 
     return blob_survey
@@ -218,7 +216,7 @@ def generate_ddf_surveys(
     ha_limits = [(0.0, 4.5), (19.5, 24.0)]
     basis_functions = get_basis_functions_ddf_survey(
         nside=nside,
-        survey_name=f"{survey_base_name}:{target_field}",
+        survey_name="DD",
         ra=ra,
         ha_limits=ha_limits,
         wind_speed_maximum=wind_speed_maximum,
@@ -230,13 +228,14 @@ def generate_ddf_surveys(
         ra,
         dec,
         sequence="r",
-        nvis=[20],
-        exptime=30,
-        survey_name=f"{survey_base_name}:{target_field}",
+        nvisits=dict(r=20),
+        exptimes=dict(r=30),
+        survey_name="DD",
+        target_name=target_field,
+        science_program=survey_base_name,
         nside=nside,
-        nexp=2,
+        nexps=dict(r=2),
         detailers=None,
-        reward_value=100,
     )
 
     # Galactic Bulge
@@ -246,7 +245,7 @@ def generate_ddf_surveys(
     ha_limits = [(0.0, 4.5), (19.5, 24.0)]
     basis_functions = get_basis_functions_ddf_survey(
         nside=nside,
-        survey_name=f"{survey_base_name}:{target_field}",
+        survey_name="DD",
         ra=ra,
         ha_limits=ha_limits,
         wind_speed_maximum=wind_speed_maximum,
@@ -258,47 +257,14 @@ def generate_ddf_surveys(
         ra,
         dec,
         sequence="r",
-        nvis=[20],
-        exptime=30,
-        survey_name=f"{survey_base_name}:{target_field}",
+        nvisits=dict(r=20),
+        exptimes=dict(r=30),
+        survey_name="DD",
+        target_name=target_field,
+        science_program=survey_base_name,
         nside=nside,
-        nexp=2,
+        nexps=dict(r=2),
         detailers=None,
-        reward_value=100,
     )
 
     return [ddf_survey_1, ddf_survey_2]
-
-
-def generate_anytime_survey(
-    nside: int,
-    survey_name: str,
-) -> BaseSurvey:
-    """Generate a survey that will produce valid targets at anytime.
-
-    Parameters
-    ----------
-    nside : `int`
-        Healpix map resolution.
-    survey_name : `str`
-        Survey name.
-
-    Returns
-    -------
-    anytime_survey : `GreedySurvey`
-        Greedy survey configured to produce targets at any time.
-    """
-
-    bfs = get_basis_functions_anytime_survey(nside)
-
-    weights = np.ones(len(bfs))
-
-    anytime_survey = GreedySurvey(
-        basis_functions=bfs,
-        basis_weights=weights,
-        filtername="r",
-        nside=nside,
-        survey_name=survey_name,
-    )
-
-    return anytime_survey
