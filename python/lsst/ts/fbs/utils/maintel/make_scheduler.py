@@ -53,12 +53,7 @@ from rubin_scheduler.scheduler.surveys import BaseSurvey
 from rubin_scheduler.scheduler.utils import Footprint
 
 from .. import Target, Tiles, get_maintel_tiles
-from .surveys import (
-    generate_anytime_survey,
-    generate_blob_survey,
-    generate_ddf_surveys,
-    generate_image_survey,
-)
+from .surveys import generate_blob_survey, generate_ddf_surveys, generate_image_survey
 
 
 class SurveyType(enum.IntEnum):
@@ -151,10 +146,8 @@ class MakeScheduler:
             survey_base_name=survey_name,
         )
 
-        anytime_survey = generate_anytime_survey(nside=nside, survey_name=survey_name)
-
         surveys = (
-            [ddf_surveys, [blob_survey], [anytime_survey]]
+            [ddf_surveys, [blob_survey]]
             if survey_type == SurveyType.SIT
             else [image_survey]
         )
