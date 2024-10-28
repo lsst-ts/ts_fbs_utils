@@ -24,6 +24,7 @@ __all__ = ["MakeFieldSurveyScheduler"]
 import typing
 
 from rubin_scheduler.scheduler.basis_functions import BaseBasisFunction
+from rubin_scheduler.scheduler.detailers import BaseDetailer
 from rubin_scheduler.scheduler.schedulers import CoreScheduler
 from rubin_scheduler.scheduler.surveys import BaseSurvey, FieldSurvey
 
@@ -41,27 +42,32 @@ class MakeFieldSurveyScheduler:
         ntiers: int = 1,
     ) -> None:
 
-        self.nside = 32
+        self.nside = nside
         self.surveys: typing.List[typing.List[BaseSurvey]] = [
             [] for _ in range(0, ntiers)
         ]
 
-    def _load_candidate_fields(self) -> typing.Dict:
+    def _load_candidate_targets(self) -> typing.Dict:
         """Load pointing center data for field surveys."""
-        name_fields, ra_fields, dec_fields = zip(*field_survey_centers.fields)
-        fields = {}
-        for name, ra, dec in zip(name_fields, ra_fields, dec_fields):
-            fields[name] = {"RA": ra, "dec": dec}
-        return fields
+        name_targets, ra_targets, dec_targets = zip(*field_survey_centers.targets)
+        targets = {}
+        for name, ra, dec in zip(name_targets, ra_targets, dec_targets):
+            targets[name] = {"RA": ra, "dec": dec}
+        return targets
 
     def add_field_surveys(
         self,
         tier: int,
-        json_block: str,
         observation_reason: str,
         science_program: str,
-        field_names: typing.List[str],
+        target_names: typing.List[str],
+        survey_name: str | None = None,
         basis_functions: typing.List[BaseBasisFunction] = [],
+        sequence: str = "ugrizy",
+        nvisits: dict | None = None,
+        exptimes: dict | None = None,
+        nexps: dict | None = None,
+        detailers: typing.List[BaseDetailer] = [],
         **kwargs: typing.Any,
     ) -> None:
         """Add a list of field surveys to the scheduler configuration.
@@ -76,33 +82,30 @@ class MakeFieldSurveyScheduler:
             Purpose of the observation, e.g., "science"
         science_program: `str`
             Name of the science program.
-        field_names: `list` of `str`
+        target_names: `list` of `str`
             List of names to specify the pointing center of each field survey.
         basis_functions: `list` of `BaseBasisFunction`
             Basis functions provided to each field survey.
         """
 
-        if "survey_name" in kwargs:
-            raise ValueError("Use program_name rather than survey_name.")
+        targets = self._load_candidate_targets()
 
-        fields = self._load_candidate_fields()
-
-        for field_name in field_names:
-            field_ra_deg = fields[field_name]["RA"]
-            field_dec_deg = fields[field_name]["dec"]
+        for target_name in target_names:
+            RA = targets[target_name]["RA"]
+            dec = targets[target_name]["dec"]
 
             self.surveys[tier].append(
                 FieldSurvey(
                     basis_functions,
-                    field_ra_deg,
-                    field_dec_deg,
-                    # sequence=sequence,
-                    # nvisits=nvisits,
-                    # exptimes=exptimes,
-                    # nexps=nexps,
+                    RA,
+                    dec,
+                    sequence=sequence,
+                    nvisits=nvisits,
+                    exptimes=exptimes,
+                    nexps=nexps,
                     ignore_obs=None,
-                    survey_name=None,
-                    target_name=field_name,
+                    survey_name=survey_name,
+                    target_name=target_name,
                     science_program=science_program,
                     observation_reason=observation_reason,
                     scheduler_note=None,
@@ -110,20 +113,7 @@ class MakeFieldSurveyScheduler:
                     filter_change_time=120.0,
                     nside=self.nside,
                     flush_pad=30.0,
-                    # detailers=detailers,
-                    # Start old
-                    # basis_functions,
-                    # field_ra_deg,
-                    # field_dec_deg,
-                    # json_block=json_block,
-                    # observation_reason=observation_reason,
-                    # science_program=science_program,
-                    # ignore_obs=None,
-                    # accept_obs=[field_name],
-                    # survey_name=field_name,
-                    # scheduler_note=None,
-                    # nside=self.nside,
-                    # **kwargs,
+                    detailers=detailers,
                 )
             )
 

@@ -210,7 +210,9 @@ def get_basis_functions_ddf_survey(
 
 def get_basis_functions_field_survey(
     nside: int,
-    wind_speed_maximum: float = 10.0,
+    wind_speed_maximum: float = 20.0,
+    sun_alt_limit: float = -12.0,
+    moon_distance: float = 30.0,
 ) -> list[basis_functions.BaseBasisFunction]:
     """Get the basis functions for a field survey.
 
@@ -221,13 +223,15 @@ def get_basis_functions_field_survey(
     wind_speed_maximum : `float`
         Maximum wind speed tolerated for the observations of the survey,
         in m/s.
+    sun_alt_limit : `float`
+        Maximum sun elevation in degrees.
+    moon_distance : `float`
+        Minimum moon distance in degrees.
 
     Returns
     -------
     `list` of `basis_functions.BaseBasisFunction`
     """
-    sun_alt_limit = -12.0
-    moon_distance = 30.0
 
     bfs = [
         basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
@@ -243,32 +247,26 @@ def get_basis_functions_field_survey(
         # replace airmass basis function)
         basis_functions.AltAzShadowMaskBasisFunction(
             nside=nside,
-            min_alt=22,
-            max_alt=83,
+            min_alt=40.0,
+            max_alt=83.0,
             min_az=0.0,
             max_az=360.0,
-            shadow_minutes=30,
+            shadow_minutes=30.0,
         ),
         # Avoid revisits within 30 minutes -- sequence is about 60 minutes
         # long, don't repeat immediately
         basis_functions.AvoidFastRevisitsBasisFunction(
             nside=nside, filtername=None, gap_min=30.0
         ),
-        # reward fields which are rising, but don't mask out after zenith
+        # Reward fields that are rising, but don't mask out after zenith
         basis_functions.RewardRisingBasisFunction(
-            nside=nside, slope=0.1, penalty_val=0
+            nside=nside, slope=1.0, penalty_val=0
         ),
         # Reward parts of the sky which are darker -- note that this is only
         # for r band, so relying on skymap in r band .. if there isn't a stron
         # reason to go with the darkest pointing, it might be reasonable to
         # just drop this basis function
         basis_functions.M5DiffBasisFunction(filtername="r", nside=nside),
-        # basis_functions.ZenithShadowMaskBasisFunction(
-        #    min_alt=26.0, max_alt=85.0, nside=nside
-        # ),
-        # basis_functions.MaskAzimuthBasisFunction(
-        #    nside=nside, az_min=160.0, az_max=200.0
-        # ),
     ]
     return bfs
 
