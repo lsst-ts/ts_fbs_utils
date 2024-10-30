@@ -213,6 +213,8 @@ def get_basis_functions_field_survey(
     wind_speed_maximum: float = 20.0,
     sun_alt_limit: float = -12.0,
     moon_distance: float = 30.0,
+    min_alt: float = 22.0,
+    max_alt: float = 83.0,
 ) -> list[basis_functions.BaseBasisFunction]:
     """Get the basis functions for a field survey.
 
@@ -247,8 +249,8 @@ def get_basis_functions_field_survey(
         # replace airmass basis function)
         basis_functions.AltAzShadowMaskBasisFunction(
             nside=nside,
-            min_alt=40.0,
-            max_alt=83.0,
+            min_alt=min_alt,
+            max_alt=max_alt,
             min_az=0.0,
             max_az=360.0,
             shadow_minutes=30.0,
