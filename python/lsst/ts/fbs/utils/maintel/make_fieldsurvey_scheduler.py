@@ -49,11 +49,7 @@ class MakeFieldSurveyScheduler:
 
     def _load_candidate_targets(self) -> typing.Dict:
         """Load pointing center data for field surveys."""
-        name_targets, ra_targets, dec_targets = zip(*field_survey_centers.targets)
-        targets = {}
-        for name, ra, dec in zip(name_targets, ra_targets, dec_targets):
-            targets[name] = {"RA": ra, "dec": dec}
-        return targets
+        return field_survey_centers.get_comcam_sv_targets()
 
     def add_field_surveys(
         self,
@@ -91,7 +87,7 @@ class MakeFieldSurveyScheduler:
         targets = self._load_candidate_targets()
 
         for target_name in target_names:
-            RA = targets[target_name]["RA"]
+            RA = targets[target_name]["ra"]
             dec = targets[target_name]["dec"]
 
             self.surveys[tier].append(
