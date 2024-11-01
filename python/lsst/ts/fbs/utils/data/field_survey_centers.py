@@ -1,4 +1,4 @@
-# This file is part of ts_fbs_utils.
+# This file is part of ts_fbs_utils
 #
 # Developed for the Vera Rubin Observatory Telescope and Site System.
 # This product includes software developed by the LSST Project
@@ -19,7 +19,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from .basis_functions import *
-from .make_fieldsurvey_scheduler import *
-from .make_scheduler import *
-from .surveys import *
+
+import pathlib
+
+import yaml
+
+
+def get_data_dir() -> pathlib.Path:
+    """Return the data directory of this package."""
+    return pathlib.Path(__file__).resolve().parents[0]
+
+
+def get_comcam_sv_targets() -> dict:
+    infile = str(get_data_dir() / "field_survey_centers.yaml")
+    with open(infile) as stream:
+        try:
+            targets_dict = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+
+    return targets_dict["comcam_sv_targets"]
