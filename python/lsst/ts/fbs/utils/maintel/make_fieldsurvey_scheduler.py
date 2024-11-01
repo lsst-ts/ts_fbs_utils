@@ -133,23 +133,6 @@ class MakeFieldSurveyScheduler:
         return self.nside, scheduler
 
 
-def without_keys(d: dict, keys: typing.List[str]) -> dict:
-    """Return dictionary with keys removed.
-
-    Parameters
-    ----------
-    d : `dict`
-        Input dictionary
-    keys : `list[str]`
-        List of keys to be removed.
-
-    Returns
-    -------
-        dict
-    """
-    return {x: d[x] for x in d if x not in keys}
-
-
 def get_comcam_sv_targets(exclude: typing.List[str] = []) -> dict:
     """Load candidate targets for ComCam science observations.
 
@@ -163,11 +146,9 @@ def get_comcam_sv_targets(exclude: typing.List[str] = []) -> dict:
     target_dict : `dict`
         Dictionary of candidate target names and coordinates.
     """
-    infile = str(get_data_dir() / "field_survey_centers.yaml")
+    infile = get_data_dir() / "field_survey_centers.yaml"
     with open(infile) as stream:
-        try:
-            targets_dict = yaml.safe_load(stream)
-        except yaml.YAMLError as exc:
-            print(exc)
+        targets_dict = yaml.safe_load(stream)
 
-    return without_keys(targets_dict["comcam_sv_targets"], exclude)
+    targets_dict = targets_dict["comcam_sv_targets"]
+    return {_: targets_dict[_] for _ in targets_dict if _ not in exclude}
