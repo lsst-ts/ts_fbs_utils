@@ -19,16 +19,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-__all__ = ["MakeFieldSurveyScheduler"]
+__all__ = ["MakeFieldSurveyScheduler", "get_comcam_sv_targets"]
 
 import typing
 
+import yaml
+from lsst.ts.fbs.utils import get_data_dir
 from rubin_scheduler.scheduler.basis_functions import BaseBasisFunction
 from rubin_scheduler.scheduler.detailers import BaseDetailer
 from rubin_scheduler.scheduler.schedulers import CoreScheduler
 from rubin_scheduler.scheduler.surveys import BaseSurvey, FieldSurvey
-
-from ..data import field_survey_centers
 
 
 class MakeFieldSurveyScheduler:
@@ -49,7 +49,7 @@ class MakeFieldSurveyScheduler:
 
     def _load_candidate_targets(self) -> typing.Dict:
         """Load pointing center data for field surveys."""
-        return field_survey_centers.get_comcam_sv_targets()
+        return get_comcam_sv_targets()
 
     def add_field_surveys(
         self,
@@ -131,3 +131,43 @@ class MakeFieldSurveyScheduler:
         scheduler = CoreScheduler(self.surveys, nside=self.nside)
 
         return self.nside, scheduler
+
+
+def without_keys(d: dict, keys: typing.List[str]) -> dict:
+    """Return dictionary with keys removed.
+
+    Parameters
+    ----------
+    d : `dict`
+        Input dictionary
+    keys : `list[str]`
+        List of keys to be removed.
+
+    Returns
+    -------
+        dict
+    """
+    return {x: d[x] for x in d if x not in keys}
+
+
+def get_comcam_sv_targets(exclude: typing.List[str] = []) -> dict:
+    """Load candidate targets for ComCam science observations.
+
+    Parameters
+    ----------
+    exclude : `list[str]`
+        List of target names to exclude when loading.
+
+    Returns
+    -------
+    target_dict : `dict`
+        Dictionary of candidate target names and coordinates.
+    """
+    infile = str(get_data_dir() / "field_survey_centers.yaml")
+    with open(infile) as stream:
+        try:
+            targets_dict = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+
+    return without_keys(targets_dict["comcam_sv_targets"], exclude)

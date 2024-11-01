@@ -1,0 +1,89 @@
+comcam_sv_targets:
+  Rubin_SV_095_-25:
+    # High stellar densty, low extinction
+    ra: 95.0
+    dec: -25.0
+  Rubin_SV_125_-15:
+    # High stellar densty, low extinction
+    ra: 125.0
+    dec: -15.0 
+  DESI_SV3_R1:
+    # DESI, GAMA, HSC DR2, KiDS-N
+    ra: 179.60
+    dec: 0.000   
+  Rubin_SV_225_-40:
+    # High stellar densty, low extinction
+    ra: 225.0
+    dec: -40.0  
+  DEEP_A0:
+    # DEEP Solar Systen
+    ra: 216.0
+    dec: -12.5  
+  Rubin_SV_250_2:
+    # 2High stellar densty, low extinction
+    ra: 250.0
+    dec: 2.0  
+  Baades_Window:
+    # Baade's Window
+    ra: 270.891667
+    dec: -30.033889 
+  Rubin_SV_300_-41:
+    # High stellar densty, low extinction
+    ra: 300.0
+    dec: -41.0  
+  Rubin_SV_280_-48:
+    # High stellar densty, low extinction
+    ra: 280.0  
+    dec: -48.0
+  # DEEP_B1:
+  #   # DEEP Solar System, B1j
+  #   ra: 354.4
+  #   dec: -1.0
+  HSC-SSP_Deep2-3:
+    # HSC SSP Deep2-3
+    ra: 352.360542
+    dec: -0.844150
+  DEEP_B0:
+    # DEEP Solar System
+    ra: 310.0
+    dec: -19.0  
+  ELAIS_S1:
+    # ELAIS-S1 LSST DDF
+    ra: 9.45
+    dec: -44.0
+  XMM_LSS:
+     # XMM_LSS LSST DDF
+    ra: 35.708333
+    dec: -4.75 
+  ECDFS:
+    # ECDFS LSST DDF
+    ra: 53.125
+    dec: -28.1  
+  COSMOS:
+    # COSMOS LSST DDF
+    ra: 150.1
+    dec: 2.1819444444444445
+  # EDFS_A:
+  #   # EDFS_a LSST DDF
+  #   ra: 58.9
+  #   dec: -49.315  
+  # EDFS_B:
+  #   # EDFS_b LSST DDF
+  #   ra: 63.6 
+  #   dec: -47.6
+  EDFS_comcam:
+    # EDFS recommended pointing for ComCam
+    ra: 59.1004
+    dec: -48.73
+  Abell_2744:
+    # JWST 50 sq. arcminutes to 5-sigma depth of 29
+    ra: 3.58
+    dec: -30.58  
+  Abell_2764:
+    # Euclid ERO target
+    ra: 5.713
+    dec: -49.249  
+  NGC_6822:
+    # Euclid ERO target
+    ra: 296.236
+    dec: -14.788
