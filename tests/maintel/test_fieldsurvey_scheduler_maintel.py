@@ -51,7 +51,7 @@ class TestMakeFieldSurveyScheduler(unittest.TestCase):
 class TestGetComCamSVTargets(unittest.TestCase):
 
     def test_get_comcam_sv_targets(self) -> None:
-        assert len(get_comcam_sv_targets()) > 0
+        self.assertNotEqual(len(get_comcam_sv_targets()), 0)
 
         key = list(get_comcam_sv_targets().keys())[0]
-        assert key not in get_comcam_sv_targets(exclude=[key]).keys()
+        self.assertNotIn(key, get_comcam_sv_targets(exclude=[key]).keys())
