@@ -19,7 +19,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from .basis_functions import *
-from .make_fieldsurvey_scheduler import *
-from .make_scheduler import *
-from .surveys import *
+from lsst.ts.fbs.utils.maintel.basis_functions import get_basis_functions_field_survey
+
+
+def test_get_basis_functions_field_survey() -> None:
+    basis_functions = get_basis_functions_field_survey(
+        nside=32,
+        wind_speed_maximum=13.0,
+    )
+
+    assert len(basis_functions) == 7

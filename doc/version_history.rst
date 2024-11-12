@@ -4,6 +4,11 @@
 Version History
 ===============
 
+v0.13.0
+-------
+
+* Add utilities for generating ComCam science scheduler configurations.
+
 v0.12.0
 -------
 
