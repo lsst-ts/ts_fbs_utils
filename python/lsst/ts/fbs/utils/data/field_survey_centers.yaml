@@ -87,3 +87,27 @@ comcam_sv_targets:
     # Euclid ERO target
     ra: 296.236
     dec: -14.788
+  Rubin_SV_16_4:
+    # Ecliptic
+    ra: 16.0
+    dec: 4.0
+  Rubin_SV_30_10:
+    # Ecliptic
+    ra: 30.0
+    dec: 10.0
+  Rubin_SV_40_10:
+    # Ecliptic
+    ra: 40.0
+    dec: 10.0
+  Rubin_SV_75_8:
+    # Ecliptic
+    ra: 75.0
+    dec: 8.0
+  Rubin_SV_85_10:
+    # Ecliptic
+    ra: 85.0
+    dec: 10.0
+  Rubin_SV_105_20:
+    # Ecliptic
+    ra: 105.0
+    dec: 20.0
