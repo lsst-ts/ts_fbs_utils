@@ -19,7 +19,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-__all__ = ["get_data_dir", "get_auxtel_tiles", "get_maintel_tiles"]
+__all__ = [
+    "get_data_dir",
+    "get_auxtel_tiles",
+    "get_maintel_tiles",
+    "get_pointing_model_grid_data",
+]
 
 import pathlib
 
@@ -58,6 +63,27 @@ def get_maintel_tiles() -> Table:
     """
     return ascii.read(
         str(get_data_dir() / "maintel_tiles.txt"),
+        format="basic",
+        fast_reader=False,
+        guess=False,
+    )
+
+
+def get_pointing_model_grid_data(science_program: str) -> Table:
+    """Get pointing model tiles.
+
+    Parameters
+    ----------
+    science_program : `str`
+        Name of the science program.
+
+    Returns
+    -------
+    `Table`
+        Pointing tiles as astropy tables.
+    """
+    return ascii.read(
+        str(get_data_dir() / "pointing-tiles-{science_program.lower()}.txt"),
         format="basic",
         fast_reader=False,
         guess=False,
