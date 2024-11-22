@@ -4,6 +4,11 @@
 Version History
 ===============
 
+v0.14.0
+-------
+
+* Update ``MakeFieldSurveyScheduler`` with ``add_field_altaz_surveys`` method, that will add ``FieldAltAzSurvey`` to the list of surveys.
+
 v0.13.1
 -------
 
