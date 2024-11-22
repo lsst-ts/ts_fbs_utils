@@ -24,11 +24,11 @@ __all__ = ["MakeFieldSurveyScheduler", "get_comcam_sv_targets"]
 import typing
 
 import yaml
-from lsst.ts.fbs.utils import get_data_dir
-from rubin_scheduler.scheduler.basis_functions import BaseBasisFunction
+from lsst.ts.fbs.utils import get_data_dir, get_pointing_model_grid_data
+from rubin_scheduler.scheduler.basis_functions import BaseBasisFunction, VisitGap
 from rubin_scheduler.scheduler.detailers import BaseDetailer
 from rubin_scheduler.scheduler.schedulers import CoreScheduler
-from rubin_scheduler.scheduler.surveys import BaseSurvey, FieldSurvey
+from rubin_scheduler.scheduler.surveys import BaseSurvey, FieldAltAzSurvey, FieldSurvey
 
 
 class MakeFieldSurveyScheduler:
@@ -105,6 +105,64 @@ class MakeFieldSurveyScheduler:
                     science_program=science_program,
                     observation_reason=observation_reason,
                     scheduler_note=None,
+                    readtime=2.4,
+                    filter_change_time=120.0,
+                    nside=self.nside,
+                    flush_pad=30.0,
+                    detailers=detailers,
+                )
+            )
+
+    def add_field_altaz_surveys(
+        self,
+        tier: int,
+        observation_reason: str,
+        science_program: str,
+        survey_name: str | None = None,
+        basis_functions: typing.List[BaseBasisFunction] = [],
+        sequence: str = "ugrizy",
+        nvisits: dict | None = None,
+        exptimes: dict | None = None,
+        nexps: dict | None = None,
+        detailers: typing.List[BaseDetailer] = [],
+        **kwargs: typing.Any,
+    ) -> None:
+        """Add a list of field surveys to the scheduler configuration.
+
+        Parameters
+        ----------
+        tier: `int`
+            Tier index used to control prioritization of surveys.
+        json_block: `str`
+            JSON BLOCK used to perform the observations.
+        observation_reason: `str`
+            Purpose of the observation, e.g., "science"
+        science_program: `str`
+            Name of the science program.
+        basis_functions: `list` of `BaseBasisFunction`
+            Basis functions provided to each field survey.
+        """
+
+        targets = get_pointing_model_grid_data(science_program=science_program)
+
+        for target_name, alt, az in targets:
+
+            self.surveys[tier].append(
+                FieldAltAzSurvey(
+                    basis_functions=[VisitGap(note=target_name, gap_min=420)]
+                    + basis_functions,
+                    alt=alt,
+                    az=az,
+                    sequence=sequence,
+                    nvisits=nvisits,
+                    exptimes=exptimes,
+                    nexps=nexps,
+                    ignore_obs=None,
+                    survey_name=survey_name,
+                    target_name=target_name,
+                    science_program=science_program,
+                    observation_reason=observation_reason,
+                    scheduler_note=target_name,
                     readtime=2.4,
                     filter_change_time=120.0,
                     nside=self.nside,
