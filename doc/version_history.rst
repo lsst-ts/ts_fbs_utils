@@ -4,7 +4,7 @@
 Version History
 ===============
 
-v0.15.0
+v0.14.1
 -------
 
 * Add candidate targets for ComCam science scheduler configurations.
