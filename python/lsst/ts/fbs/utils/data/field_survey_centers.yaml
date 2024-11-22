@@ -111,3 +111,19 @@ comcam_sv_targets:
     # Ecliptic
     ra: 105.0
     dec: 20.0
+  Rubin_SV_38_7:
+    # Ecliptic
+    ra: 37.86
+    dec: 6.98
+  Fornax_dSph:
+    # Dwarf Spheroidal Galaxy
+    ra: 39.9971
+    dec: -34.4492
+  47_Tuc:
+    # Globular Cluster
+    ra: 6.022329
+    dec: -72.081444
+  Seagull:
+    # Nebulosity
+    ra: 106.23
+    dec: -10.51
