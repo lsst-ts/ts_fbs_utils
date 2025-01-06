@@ -4,6 +4,12 @@
 Version History
 ===============
 
+v0.14.2
+-------
+
+* Update AuxTel Tiles.
+* Update github workflows to pin identify v2.6+
+
 v0.14.1
 -------
 
