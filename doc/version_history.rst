@@ -4,6 +4,12 @@
 Version History
 ===============
 
+v0.14.3
+-------
+
+* In auxtel/basis_functions, override default values for shadow_minutes and pad in AltAzShadowMaskBasisFunction.
+* In auxtel/surveys, pass target name as scheduler_note to field survey.
+
 v0.14.2
 -------
 
