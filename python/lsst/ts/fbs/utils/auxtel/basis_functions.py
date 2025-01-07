@@ -90,7 +90,7 @@ def get_basis_functions_image_survey(
         basis_functions.SlewtimeBasisFunction(nside=nside, filtername="i"),
         basis_functions.MoonAvoidanceBasisFunction(nside=nside),
         basis_functions.AltAzShadowMaskBasisFunction(
-            min_alt=26.0, max_alt=85.0, nside=nside
+            min_alt=26.0, max_alt=85.0, nside=nside, shadow_minutes=0.0, pad=0.0
         ),
         basis_functions.VisitGap(note=note, filter_names=filter_names, gap_min=gap_min),
         basis_functions.AvoidDirectWind(
@@ -203,7 +203,7 @@ def get_basis_functions_spectroscopic_survey(
 
     Returns
     -------
-    list of basis_functions.BaseBasisFunction
+    list of basis_functions.BaseBasisFunctio
         List of basis functions.
     """
     sun_alt_limit = -12.0
@@ -219,7 +219,7 @@ def get_basis_functions_spectroscopic_survey(
             nside=nside, moon_distance=moon_distance
         ),
         basis_functions.AltAzShadowMaskBasisFunction(
-            min_alt=26.0, max_alt=85.0, nside=nside
+            min_alt=26.0, max_alt=85.0, shadow_minutes=0.0, pad=0.0, nside=nside
         ),
         basis_functions.VisitGap(note=note, gap_min=gap_min),
     ]

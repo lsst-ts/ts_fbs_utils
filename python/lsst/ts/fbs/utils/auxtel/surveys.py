@@ -105,6 +105,7 @@ def generate_image_survey(
         survey_name=f"{target.survey_name}",
         target_name=f"{target.target_name}",
         science_program=f"{target.survey_name}",
+        scheduler_note=f"{target.survey_name}:{target.target_name}",
         nside=nside,
         detailers=[
             TrackingInfoDetailer(
@@ -229,6 +230,7 @@ def generate_spectroscopic_survey(
         sequence=sequence,
         survey_name=f"{target.survey_name}",  # This is target name on purpose.
         target_name=f"{target.target_name}",
+        scheduler_note=f"{target.target_name}",
         science_program=f"{target.survey_name}",
         nside=nside,
         detailers=[
