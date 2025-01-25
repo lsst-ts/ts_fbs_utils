@@ -35,6 +35,9 @@ class AssertSurvey(typing.Protocol):
     """
 
     def __call__(
-        self, spec_targets: typing.List[Target], image_tiles: typing.List[Tiles]
+        self,
+        spec_targets: typing.List[Target],
+        image_tiles: typing.List[Tiles],
+        image_targest: typing.List[Target],
     ) -> None:
         pass
