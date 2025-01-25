@@ -25,10 +25,12 @@ import typing
 
 import yaml
 from lsst.ts.fbs.utils import get_data_dir, get_pointing_model_grid_data
-from rubin_scheduler.scheduler.basis_functions import BaseBasisFunction, VisitGap
+from rubin_scheduler.scheduler.basis_functions import (BaseBasisFunction,
+                                                       VisitGap)
 from rubin_scheduler.scheduler.detailers import BaseDetailer
 from rubin_scheduler.scheduler.schedulers import CoreScheduler
-from rubin_scheduler.scheduler.surveys import BaseSurvey, FieldAltAzSurvey, FieldSurvey
+from rubin_scheduler.scheduler.surveys import (BaseSurvey, FieldAltAzSurvey,
+                                               FieldSurvey)
 
 
 class MakeFieldSurveyScheduler:

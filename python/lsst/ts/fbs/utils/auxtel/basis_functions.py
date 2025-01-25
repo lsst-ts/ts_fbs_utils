@@ -34,11 +34,11 @@ def get_basis_functions_image_survey(
     ra: float,
     nside: int,
     note: str,
-    ha_limits: typing.List[typing.Tuple[float, float]],
+    ha_limits: typing.List[typing.Tuple[float, float]] | None,
     wind_speed_maximum: float,
     nobs_reference: int,
     nobs_survey: int,
-    note_interest: str,
+    note_interest: str | None,
     filter_names: list,
     gap_min: float,
     additional_notes: list[tuple[str, int]] | None = None,
@@ -84,27 +84,45 @@ def get_basis_functions_image_survey(
 
     bfs = [
         basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
-        basis_functions.HourAngleLimitBasisFunction(RA=ra, ha_limits=ha_limits),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="g"),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="i"),
         basis_functions.MoonAvoidanceBasisFunction(nside=nside),
         basis_functions.AltAzShadowMaskBasisFunction(
             min_alt=26.0, max_alt=85.0, nside=nside, shadow_minutes=0.0, pad=0.0
         ),
+        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="g"),
+        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
+        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="i"),
+        # Note that band_names should include ONLY the bands in use, as
+        # the VisitGap will not trigger until all bands are satisfied
         basis_functions.VisitGap(note=note, filter_names=filter_names, gap_min=gap_min),
         basis_functions.AvoidDirectWind(
             wind_speed_maximum=wind_speed_maximum, nside=nside
         ),
-        basis_functions.BalanceVisits(
-            nobs_reference=nobs_reference, note_survey=note, note_interest=note_interest
-        ),
-        basis_functions.RewardNObsSequence(
-            n_obs_survey=nobs_survey,
-            note_survey=note,
-            nside=nside,
-        ),
     ]
+
+    if ha_limits is not None:
+        bfs.append(
+            basis_functions.HourAngleLimitBasisFunction(RA=ra, ha_limits=ha_limits)
+        )
+
+    # The basis functions below are really only relevant for image
+    # surveys based on using Tiles for dithering.
+    if nobs_survey > 0:
+        bfs.append(
+            basis_functions.RewardNObsSequence(
+                n_obs_survey=nobs_survey,
+                note_survey=note,
+                nside=nside,
+            )
+        )
+
+    if note_interest is not None:
+        bfs.append(
+            basis_functions.BalanceVisits(
+                nobs_reference=nobs_reference,
+                note_survey=note,
+                note_interest=note_interest,
+            )
+        )
 
     if additional_notes is not None:
         for additional_note, additional_nobs in additional_notes:
@@ -210,7 +228,6 @@ def get_basis_functions_spectroscopic_survey(
 
     bfs = [
         basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
-        basis_functions.HourAngleLimitBasisFunction(RA=ra, ha_limits=ha_limits),
         basis_functions.M5DiffBasisFunction(nside=nside),
         basis_functions.SlewtimeBasisFunction(nside=nside, filtername="g"),
         basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
@@ -223,6 +240,11 @@ def get_basis_functions_spectroscopic_survey(
         ),
         basis_functions.VisitGap(note=note, gap_min=gap_min),
     ]
+
+    if ha_limits is not None:
+        bfs.append(
+            basis_functions.HourAngleLimitBasisFunction(RA=ra, ha_limits=ha_limits)
+        )
 
     if avoid_wind:
         bfs.append(
