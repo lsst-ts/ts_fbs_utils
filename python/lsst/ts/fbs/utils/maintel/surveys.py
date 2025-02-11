@@ -45,15 +45,16 @@ import typing
 import astropy.units as u
 import numpy as np
 from rubin_scheduler.scheduler.detailers import BaseDetailer
-from rubin_scheduler.scheduler.surveys import (BaseSurvey, BlobSurvey,
-                                               FieldSurvey)
+from rubin_scheduler.scheduler.surveys import BaseSurvey, BlobSurvey, FieldSurvey
 from rubin_scheduler.scheduler.utils import ObservationArray
 from rubin_scheduler.utils import ddf_locations
 
 from ..target import Target
-from .basis_functions import (get_basis_functions_blob_survey,
-                              get_basis_functions_ddf_survey,
-                              get_basis_functions_star_tracker_survey)
+from .basis_functions import (
+    get_basis_functions_blob_survey,
+    get_basis_functions_ddf_survey,
+    get_basis_functions_star_tracker_survey,
+)
 
 
 def generate_image_survey(

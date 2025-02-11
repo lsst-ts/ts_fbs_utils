@@ -42,6 +42,8 @@ def get_basis_functions_image_survey(
     filter_names: list,
     gap_min: float,
     additional_notes: list[tuple[str, int]] | None = None,
+    avoid_wind: bool = True,
+    include_slew: bool = True,
 ) -> typing.List[basis_functions.BaseBasisFunction]:
     """Get the basis functions for the image survey.
 
@@ -74,34 +76,47 @@ def get_basis_functions_image_survey(
         RewardNObsSequence basis function to reward completing a set of tiles.
         The first element should be the substring that defines the tile set,
         and the second should be the number of tiles.
-        ...
+    avoid_wind : `bool`, optional
+        If True, add the wind avoidance basis function.
+        If False, drop basis function entirely.
+        Makes use align with the spectroscopic survey.
+    include_slew : `bool`, optional
+        Include slewtime basis functions (or not).
+
     Returns
     -------
     `list` of `basis_functions.BaseBasisFunction`
     """
 
-    sun_alt_limit = -12.0
-
     bfs = [
-        basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
         basis_functions.MoonAvoidanceBasisFunction(nside=nside),
         basis_functions.AltAzShadowMaskBasisFunction(
             min_alt=26.0, max_alt=85.0, nside=nside, shadow_minutes=0.0, pad=0.0
         ),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="g"),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="i"),
         # Note that band_names should include ONLY the bands in use, as
         # the VisitGap will not trigger until all bands are satisfied
         basis_functions.VisitGap(note=note, filter_names=filter_names, gap_min=gap_min),
-        basis_functions.AvoidDirectWind(
-            wind_speed_maximum=wind_speed_maximum, nside=nside
-        ),
     ]
+
+    if avoid_wind:
+        bfs.append(
+            basis_functions.AvoidDirectWind(
+                wind_speed_maximum=wind_speed_maximum, nside=nside
+            )
+        )
 
     if ha_limits is not None:
         bfs.append(
             basis_functions.HourAngleLimitBasisFunction(RA=ra, ha_limits=ha_limits)
+        )
+
+    if include_slew:
+        bfs.extend(
+            [
+                basis_functions.SlewtimeBasisFunction(nside=nside, filtername="g"),
+                basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
+                basis_functions.SlewtimeBasisFunction(nside=nside, filtername="i"),
+            ]
         )
 
     # The basis functions below are really only relevant for image
@@ -164,11 +179,9 @@ def get_basis_functions_cwfs_survey(
     -------
     `list` of `basis_functions.BaseBasisFunction`
     """
-    sun_alt_limit = -12.0
 
     return [
-        basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
-        basis_functions.M5DiffBasisFunction(nside=nside),
+        # basis_functions.M5DiffBasisFunction(nside=nside),
         basis_functions.SlewtimeBasisFunction(nside=nside, filtername="g"),
         basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
         basis_functions.SlewtimeBasisFunction(nside=nside, filtername="i"),
@@ -194,6 +207,7 @@ def get_basis_functions_spectroscopic_survey(
     moon_distance: float,
     nobs_reference: int,
     note_interest: str,
+    include_slew: bool = True,
 ) -> typing.List[basis_functions.BaseBasisFunction]:
     """Get basis functions for spectroscopic survey.
 
@@ -208,7 +222,9 @@ def get_basis_functions_spectroscopic_survey(
     ha_limits : `list` of `tuple` of (`float`, `float`)
         Hour angle limits, in hours.
     avoid_wind : `bool`
-        if True, include AvoidDirectWind basis function
+        If True, include AvoidDirectWind basis function
+    include_slew: `bool`
+        If True, include slewtime basis functions
     wind_speed_maximum : `float`
         Maximum wind speed, in m/s.
     gap_min : `float`
@@ -218,20 +234,16 @@ def get_basis_functions_spectroscopic_survey(
     note_interest : `str`
         A substring that maps to surveys to be accounted for against the
         reference number of observations.
+    include_slew : `bool`, optional
+        Include slewtime basis functions (or not).
 
     Returns
     -------
     list of basis_functions.BaseBasisFunctio
         List of basis functions.
     """
-    sun_alt_limit = -12.0
 
     bfs = [
-        basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
-        basis_functions.M5DiffBasisFunction(nside=nside),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="g"),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="i"),
         basis_functions.MoonAvoidanceBasisFunction(
             nside=nside, moon_distance=moon_distance
         ),
@@ -251,5 +263,14 @@ def get_basis_functions_spectroscopic_survey(
             basis_functions.AvoidDirectWind(
                 wind_speed_maximum=wind_speed_maximum, nside=nside
             )
+        )
+
+    if include_slew:
+        bfs.extend(
+            [
+                basis_functions.SlewtimeBasisFunction(nside=nside, filtername="g"),
+                basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
+                basis_functions.SlewtimeBasisFunction(nside=nside, filtername="i"),
+            ]
         )
     return bfs
