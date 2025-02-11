@@ -32,9 +32,12 @@ from rubin_scheduler.scheduler.schedulers import CoreScheduler
 from rubin_scheduler.scheduler.surveys import BaseSurvey
 
 from .. import AssertSurvey, Target, Tiles, get_auxtel_tiles
-from .surveys import (generate_cwfs_survey, generate_image_survey_from_target,
-                      generate_image_survey_from_tiles,
-                      generate_spectroscopic_survey)
+from .surveys import (
+    generate_cwfs_survey,
+    generate_image_survey_from_target,
+    generate_image_survey_from_tiles,
+    generate_spectroscopic_survey,
+)
 
 
 class SurveyType(enum.IntEnum):
@@ -360,9 +363,16 @@ class MakeScheduler:
             [
                 Target(
                     target_name=target["Name"],
+                    survey_name=f"{target['Survey']}:{target['Name']}",
+                    science_program=tile.survey_name,
                     ra=Angle(target["RA"], unit=units.hourangle),
                     dec=Angle(target["Dec"], unit=units.degree),
-                    **dataclasses.asdict(tile),
+                    hour_angle_limit=tile.hour_angle_limit,
+                    reward_value=tile.reward_value,
+                    filters=tile.filters,
+                    visit_gap=tile.visit_gap,
+                    exptime=tile.exptime,
+                    nexp=tile.nexp,
                 )
                 for target in self.tiles
                 if tile.survey_name == target["Survey"]

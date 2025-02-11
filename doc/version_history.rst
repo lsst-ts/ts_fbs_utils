@@ -4,6 +4,17 @@
 Version History
 ===============
 
+v0.15.0
+-------
+
+* In auxtel/surveys, add an imaging survey based on a single target, with a single (larger dither) detailer.
+* In auxtel/make_scheduler and utils.py - adds a type of imaging survey based on target, in addition to an imaging survey based on tiles (image_target, in addition to image_tiles). 
+* In auxtel/basis_functions, remove M5Diff basis functions from imaging and spectroscopy surveys, in order to choose targets based on time when desired rather than when the best m5 is achieved.
+* Adds data/auxtel_targets.yaml, to provide a list of targets for auxtel with easy configuration for individual targets.
+* In auxtel/surveys, adds a function to read the auxtel_targets.yaml file.
+* Extends the target.py data class to include `science_program` (aka json block) explicitly, separate from `survey_name`.
+
+
 v0.14.3
 -------
 
