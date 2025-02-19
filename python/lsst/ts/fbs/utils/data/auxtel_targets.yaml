@@ -5,18 +5,18 @@ auxtel_wd_targets:
     dec: "-37:41:28.0"
     block: "BLOCK-T359_WD_0621-376"
     exptime: 420
-    nexp: 4
-    visit_gap: 16
-    priority: 2
+    nexp: 1
+    visit_gap: 10
+    priority: 1.2
   WD_0859-039:
     # type DA2.1, G=13.2
     ra: "09:02:17.3"
     dec: "-04:06:55.5"
     block: "BLOCK-T359_WD_0859-039"
     exptime: 420
-    nexp: 1
-    visit_gap: 15
-    priority: 1
+    nexp: 4
+    visit_gap: 16
+    priority: 2
 auxtel_calspec_targets:
   HD38666:
     # type O9.5V, V=5.2
