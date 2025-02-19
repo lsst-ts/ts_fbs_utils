@@ -39,20 +39,20 @@ from .basis_functions import (
 def get_auxtel_targets(infile: str | None = None) -> dict:
     """Load potential targets for auxtel observations.
 
-    Targets are split into different categories - imaging, WD, calspec.
-    The idea behind these splits is that different categories of targets
-    may have different survey configurations.
+    Targets can be split into different categories for convenience.
+    The targets in a particular category should be destined for the same
+    'kind' of survey (imaging survey or spectroscopy survey), so that they
+    can be configured similarly.
 
-    After target_dict is returned, remove or include desired targets
-    and add reward_value, exposure time, filter, etc. as needed.
+    After target_dict is returned, remove or include desired targets.
 
     Returns
     -------
     target_pointings : `dict`
-        Dictionary of candidate target names, ra, dec coordinates and BLOCK.
+        Dictionary of candidate target information.
+        The minimum necessary is ra, dec, and block.
+        Additional options include exptime, nexp, visit_gap, and priority.
     """
-    # Read yaml file with basic target pointing and BLOCK info
-    # (this yaml file should probably be expanded in the future)
     if infile is None:
         infile = get_data_dir() / "auxtel_targets.yaml"
     with open(infile) as stream:
@@ -104,21 +104,6 @@ def generate_image_survey_from_tiles(
     )
 
     # Set up a sequence of nexp exposures per filter
-    # sequence_len = target.nexp * len(target.filters)
-    # sequence = ObservationArray(n=sequence_len)
-    # sequence["RA"] = target.ra.to(u.rad).value
-    # sequence["dec"] = target.dec.to(u.rad).value
-    # sequence["exptime"] = target.exptime
-    # sequence["nexp"] = 1
-    # sequence["scheduler_note"] = f"{target.survey_name}"
-    # sequence["target_name"] = f"{target.target_name}"
-    # sequence["science_program"] = f"{target.science_program}"
-    # i = 0
-    # for filter_obs in target.filters:
-    #     sequence["filter"][i : i + target.nexp] = filter_obs
-    #     i += target.nexp
-
-    # Use this method, until there is an update of rubin_scheduler at summit
     sequence = [ObservationArray(n=1) for i in range(len(target.filters))]
     for filter_obs, observation in zip(target.filters, sequence):
         observation["RA"] = target.ra.to(u.rad).value
@@ -203,21 +188,6 @@ def generate_image_survey_from_target(
     )
 
     # Set up a sequence of nexp exposures per filter
-    # sequence_len = target.nexp * len(target.filters)
-    # sequence = ObservationArray(n=sequence_len)
-    # sequence["RA"] = target.ra.to(u.rad).value
-    # sequence["dec"] = target.dec.to(u.rad).value
-    # sequence["exptime"] = target.exptime
-    # sequence["nexp"] = 1
-    # sequence["scheduler_note"] = f"{target.survey_name}"
-    # sequence["target_name"] = f"{target.target_name}"
-    # sequence["science_program"] = f"{target.science_program}"
-    # i = 0
-    # for filter_obs in target.filters:
-    #     sequence["filter"][i : i + target.nexp] = filter_obs
-    #     i += target.nexp
-
-    # Use this method, until there is an update of rubin_scheduler at summit
     sequence = [ObservationArray(n=target.nexp) for i in range(len(target.filters))]
     for filter_obs, observation in zip(target.filters, sequence):
         observation["RA"] = target.ra.to(u.rad).value
@@ -286,9 +256,6 @@ def generate_cwfs_survey(
 
     return GreedySurvey(
         basis_functions,
-        # Boosting the reward very high is good if this is competing
-        # with other surveys in a tier, but otherwise it just blows up
-        # plots of reward value over time
         np.ones_like(basis_functions) * 1.0,
         nside=nside,
         survey_name="cwfs",
@@ -342,17 +309,13 @@ def generate_spectroscopic_survey(
         include_slew=include_slew,
     )
 
-    # Use this method, until there is an update of rubin_scheduler at summit
     observation = ObservationArray(n=target.nexp)
     observation["RA"] = target.ra.to(u.rad).value
     observation["dec"] = target.dec.to(u.rad).value
-    # This can change to band once FBS updated to 3.5+
     observation["filter"] = "r"
     observation["exptime"] = target.exptime
     observation["nexp"] = 1
     observation["scheduler_note"] = target.survey_name
-
-    # Remove when rubin_scheduler updated
     observation = [observation]
 
     spectroscopic_survey = FieldSurvey(
@@ -368,7 +331,7 @@ def generate_spectroscopic_survey(
             ]
         ),
         sequence=observation,
-        survey_name=f"{target.survey_name}",  # This is target name on purpose.
+        survey_name=f"{target.survey_name}",
         target_name=f"{target.target_name}",
         scheduler_note=f"{target.survey_name}",
         science_program=f"{target.science_program}",
