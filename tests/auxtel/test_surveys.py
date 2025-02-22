@@ -22,13 +22,18 @@
 from astropy import units
 from astropy.coordinates import Angle
 from lsst.ts.fbs.utils import Target
-from lsst.ts.fbs.utils.auxtel.surveys import generate_cwfs_survey, generate_image_survey
+from lsst.ts.fbs.utils.auxtel.surveys import (
+    generate_cwfs_survey,
+    generate_image_survey_from_target,
+    generate_image_survey_from_tiles,
+)
 
 
 def test_generate_image_survey() -> None:
     target = Target(
         target_name="unit_test_target",
         survey_name="unit_test_survey",
+        science_program="BLOCK-TEST",
         ra=Angle("00:00:00", unit=units.hourangle),
         dec=Angle("-30:00:00", unit=units.degree),
         hour_angle_limit=[(-6.0, 6.0)],
@@ -38,7 +43,7 @@ def test_generate_image_survey() -> None:
         exptime=30.0,
         nexp=2,
     )
-    survey = generate_image_survey(
+    survey = generate_image_survey_from_tiles(
         nside=32,
         target=target,
         nfields=64,
@@ -46,6 +51,27 @@ def test_generate_image_survey() -> None:
         survey_detailers=[],
     )
 
+    assert survey.survey_name == target.survey_name
+
+    target = Target(
+        target_name="unit_test_target",
+        survey_name="unit_test_survey",
+        science_program="BLOCK-TEST",
+        ra=Angle("00:00:00", unit=units.hourangle),
+        dec=Angle("-30:00:00", unit=units.degree),
+        hour_angle_limit=[(-6.0, 6.0)],
+        reward_value=1.0,
+        filters=["r"],
+        visit_gap=144.0,
+        exptime=30.0,
+        nexp=2,
+    )
+    survey = generate_image_survey_from_target(
+        nside=32,
+        target=target,
+        wind_speed_maximum=5.0,
+        survey_detailers=[],
+    )
     assert survey.survey_name == target.survey_name
 
 

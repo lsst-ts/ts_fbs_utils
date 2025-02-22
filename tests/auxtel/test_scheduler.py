@@ -34,7 +34,7 @@ class TestMakeScheduler(unittest.TestCase):
     spec_targets: typing.List[Target]
     image_tiles: typing.List[Tiles]
     spec_detailers: typing.List[BaseDetailer]
-    image_detailers: typing.List[BaseDetailer]
+    image_detailers_tiles: typing.List[BaseDetailer]
     cwfs_block_name: str
 
     @classmethod
@@ -42,8 +42,10 @@ class TestMakeScheduler(unittest.TestCase):
         cls.make_scheduler = MakeScheduler()
         cls.spec_targets = cls.get_spec_targets()
         cls.image_tiles = cls.get_image_tiles()
+        cls.image_targets = []
         cls.spec_detailers = cls.get_spec_detailers()
-        cls.image_detailers = cls.get_image_detailers()
+        cls.image_detailers_tiles = cls.get_image_detailers()
+        cls.image_detailers_targets = []
         cls.cwfs_block_name = "cwfs"
         return super().setUpClass()
 
@@ -57,7 +59,9 @@ class TestMakeScheduler(unittest.TestCase):
             spec_targets=self.spec_targets,
             image_tiles=self.image_tiles,
             spec_detailers=self.spec_detailers,
-            image_detailers=self.image_detailers,
+            image_detailers_tiles=self.image_detailers_tiles,
+            image_targets=self.image_targets,
+            image_detailers_targets=self.image_detailers_targets,
             cwfs_block_name=self.cwfs_block_name,
         )
 
@@ -68,7 +72,7 @@ class TestMakeScheduler(unittest.TestCase):
             scheduler.survey_lists[1][0].survey_name == self.spec_targets[0].survey_name
         )
         assert (
-            scheduler.survey_lists[2][0].survey_name == self.image_tiles[0].survey_name
+            self.image_tiles[0].survey_name in scheduler.survey_lists[2][0].survey_name
         )
 
     def test_get_scheduler_spec_image_fail_no_spec_target(self) -> None:
@@ -80,7 +84,9 @@ class TestMakeScheduler(unittest.TestCase):
                 spec_targets=[],
                 image_tiles=self.image_tiles,
                 spec_detailers=self.spec_detailers,
-                image_detailers=self.image_detailers,
+                image_detailers_tiles=self.image_detailers_tiles,
+                image_targets=self.image_targets,
+                image_detailers_targets=self.image_detailers_targets,
                 cwfs_block_name=self.cwfs_block_name,
             )
 
@@ -93,7 +99,9 @@ class TestMakeScheduler(unittest.TestCase):
                 spec_targets=self.spec_targets,
                 image_tiles=[],
                 spec_detailers=self.spec_detailers,
-                image_detailers=self.image_detailers,
+                image_detailers_tiles=self.image_detailers_tiles,
+                image_targets=self.image_targets,
+                image_detailers_targets=self.image_detailers_targets,
                 cwfs_block_name=self.cwfs_block_name,
             )
 
@@ -105,7 +113,9 @@ class TestMakeScheduler(unittest.TestCase):
             spec_targets=self.spec_targets,
             image_tiles=self.image_tiles,
             spec_detailers=self.spec_detailers,
-            image_detailers=self.image_detailers,
+            image_detailers_tiles=self.image_detailers_tiles,
+            image_targets=self.image_targets,
+            image_detailers_targets=self.image_detailers_targets,
             cwfs_block_name=self.cwfs_block_name,
         )
 
@@ -113,7 +123,7 @@ class TestMakeScheduler(unittest.TestCase):
         assert scheduler.nside == nside
         assert len(scheduler.survey_lists) == 3
         assert (
-            scheduler.survey_lists[1][0].survey_name == self.image_tiles[0].survey_name
+            self.image_tiles[0].survey_name in scheduler.survey_lists[1][0].survey_name
         )
         assert (
             scheduler.survey_lists[2][0].survey_name == self.spec_targets[0].survey_name
@@ -128,7 +138,9 @@ class TestMakeScheduler(unittest.TestCase):
                 spec_targets=[],
                 image_tiles=self.image_tiles,
                 spec_detailers=self.spec_detailers,
-                image_detailers=self.image_detailers,
+                image_detailers_tiles=self.image_detailers_tiles,
+                image_targets=self.image_targets,
+                image_detailers_targets=self.image_detailers_targets,
                 cwfs_block_name=self.cwfs_block_name,
             )
 
@@ -141,7 +153,9 @@ class TestMakeScheduler(unittest.TestCase):
                 spec_targets=self.spec_targets,
                 image_tiles=[],
                 spec_detailers=self.spec_detailers,
-                image_detailers=self.image_detailers,
+                image_detailers_tiles=self.image_detailers_tiles,
+                image_targets=self.image_targets,
+                image_detailers_targets=self.image_detailers_targets,
                 cwfs_block_name=self.cwfs_block_name,
             )
 
@@ -153,7 +167,9 @@ class TestMakeScheduler(unittest.TestCase):
             spec_targets=self.spec_targets,
             image_tiles=[],
             spec_detailers=self.spec_detailers,
-            image_detailers=self.image_detailers,
+            image_detailers_tiles=self.image_detailers_tiles,
+            image_targets=self.image_targets,
+            image_detailers_targets=self.image_detailers_targets,
             cwfs_block_name=self.cwfs_block_name,
         )
 
@@ -173,7 +189,9 @@ class TestMakeScheduler(unittest.TestCase):
                 spec_targets=self.spec_targets,
                 image_tiles=self.image_tiles,
                 spec_detailers=self.spec_detailers,
-                image_detailers=self.image_detailers,
+                image_detailers_tiles=self.image_detailers_tiles,
+                image_targets=self.image_targets,
+                image_detailers_targets=self.image_detailers_targets,
                 cwfs_block_name=self.cwfs_block_name,
             )
 
@@ -185,7 +203,9 @@ class TestMakeScheduler(unittest.TestCase):
             spec_targets=[],
             image_tiles=self.image_tiles,
             spec_detailers=self.spec_detailers,
-            image_detailers=self.image_detailers,
+            image_detailers_tiles=self.image_detailers_tiles,
+            image_targets=self.image_targets,
+            image_detailers_targets=self.image_detailers_targets,
             cwfs_block_name=self.cwfs_block_name,
         )
 
@@ -193,7 +213,7 @@ class TestMakeScheduler(unittest.TestCase):
         assert scheduler.nside == nside
         assert len(scheduler.survey_lists) == 2
         assert (
-            scheduler.survey_lists[1][0].survey_name == self.image_tiles[0].survey_name
+            self.image_tiles[0].survey_name in scheduler.survey_lists[1][0].survey_name
         )
 
     def test_get_scheduler_image_fail_with_spec_target(self) -> None:
@@ -205,7 +225,9 @@ class TestMakeScheduler(unittest.TestCase):
                 spec_targets=self.spec_targets,
                 image_tiles=self.image_tiles,
                 spec_detailers=self.spec_detailers,
-                image_detailers=self.image_detailers,
+                image_detailers_tiles=self.image_detailers_tiles,
+                image_targets=self.image_targets,
+                image_detailers_targets=self.image_detailers_targets,
                 cwfs_block_name=self.cwfs_block_name,
             )
 
@@ -215,6 +237,7 @@ class TestMakeScheduler(unittest.TestCase):
             Target(
                 target_name="TestTarget",
                 survey_name="UnitTest",
+                science_program="TEST_BLOCK",
                 ra=Angle("00:00:00.0", unit=units.hourangle),
                 dec=Angle("-30:00:00", unit=units.deg),
                 hour_angle_limit=[(-6.0, 6.0)],
