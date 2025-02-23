@@ -34,7 +34,8 @@ from rubin_scheduler.scheduler.surveys import BaseSurvey
 from .. import AssertSurvey, Target, Tiles, get_auxtel_tiles
 from .surveys import (
     generate_cwfs_survey,
-    generate_image_survey,
+    generate_image_survey_from_target,
+    generate_image_survey_from_tiles,
     generate_spectroscopic_survey,
 )
 
@@ -60,7 +61,10 @@ class MakeScheduler:
         self.tiles = get_auxtel_tiles()
 
     def assert_spec_survey(
-        self, spec_targets: typing.List[Target], image_tiles: typing.List[Tiles]
+        self,
+        spec_targets: typing.List[Target],
+        image_tiles: typing.List[Tiles],
+        image_targets: typing.List[Target],
     ) -> None:
         """Assert spectroscopic survey.
 
@@ -68,18 +72,25 @@ class MakeScheduler:
         ----------
         spec_targets : `list` of `Target`
             List of targets for spectroscopic survey.
+        image_tiles : `list` of `Tile`
+            List of Tiles for image survey.
         image_targets : `list` of `Target`
-            List of targets for background image survey.
+            List of targets for image survey.
 
         Raises
         ------
         AssertionError:
             If inputs are invalid.
         """
-        assert len(spec_targets) > 0 and len(image_tiles) == 0
+        assert (
+            len(spec_targets) > 0 and len(image_tiles) == 0 and len(image_targets) == 0
+        )
 
     def assert_image_survey(
-        self, spec_targets: typing.List[Target], image_tiles: typing.List[Tiles]
+        self,
+        spec_targets: typing.List[Target],
+        image_tiles: typing.List[Tiles],
+        image_targets: typing.List[Target],
     ) -> None:
         """Assert image survey.
 
@@ -87,18 +98,25 @@ class MakeScheduler:
         ----------
         spec_targets : `list` of `Target`
             List of targets for spectroscopic survey.
+        image_tiles : `list` of `Tile`
+            List of Tiles for image survey.
         image_targets : `list` of `Target`
-            List of targets for background image survey.
+            List of targets for image survey.
 
         Raises
         ------
         AssertionError:
             If inputs are invalid.
         """
-        assert len(spec_targets) == 0 and len(image_tiles) > 0
+        assert len(spec_targets) == 0 and (
+            len(image_tiles) > 0 or len(image_targets) > 0
+        )
 
     def assert_spec_image(
-        self, spec_targets: typing.List[Target], image_tiles: typing.List[Tiles]
+        self,
+        spec_targets: typing.List[Target],
+        image_tiles: typing.List[Tiles],
+        image_targets: typing.List[Target],
     ) -> None:
         """Assert spectroscopic and image survey (spectroscopic with higher
         priority).
@@ -107,18 +125,25 @@ class MakeScheduler:
         ----------
         spec_targets : `list` of `Target`
             List of targets for spectroscopic survey.
+        image_tiles : `list` of `Tile`
+            List of Tiles for image survey.
         image_targets : `list` of `Target`
-            List of targets for background image survey.
+            List of targets for image survey.
 
         Raises
         ------
         AssertionError:
             If inputs are invalid.
         """
-        assert len(spec_targets) > 0 and len(image_tiles) > 0
+        assert len(spec_targets) > 0 and (
+            len(image_tiles) > 0 or len(image_targets) > 0
+        )
 
     def assert_image_spec(
-        self, spec_targets: typing.List[Target], image_tiles: typing.List[Tiles]
+        self,
+        spec_targets: typing.List[Target],
+        image_tiles: typing.List[Tiles],
+        image_targets: typing.List[Target],
     ) -> None:
         """Assert image and spectroscopic survey (image with higher priority).
 
@@ -126,21 +151,26 @@ class MakeScheduler:
         ----------
         spec_targets : `list` of `Target`
             List of targets for spectroscopic survey.
+        image_tiles : `list` of `Tile`
+            List of Tiles for image survey.
         image_targets : `list` of `Target`
-            List of targets for background image survey.
+            List of targets for image survey.
 
         Raises
         ------
         AssertionError:
             If inputs are invalid.
         """
-        assert len(spec_targets) > 0 and len(image_tiles) > 0
+        assert len(spec_targets) > 0 and (
+            len(image_tiles) > 0 or len(image_targets) > 0
+        )
 
     def assert_scheduler_inputs(
         self,
         survey_type: SurveyType,
         spec_targets: typing.List[Target],
         image_tiles: typing.List[Tiles],
+        image_targets: typing.List[Target],
     ) -> None:
         """Assert that the scheduler inputs are correct.
 
@@ -151,8 +181,11 @@ class MakeScheduler:
             surveys in the scheduler.
         spec_targets : `list` of `Target`
             List of targets for spectroscopic survey.
+        image_tiles : `list` of `Tile`
+            List of Tiles for image survey.
         image_targets : `list` of `Target`
-            List of targets for background image survey.
+            List of targets for image survey.
+
 
         Raises
         ------
@@ -160,7 +193,9 @@ class MakeScheduler:
             If inputs are invalid.
         """
         self.survey_type_assertions[survey_type](
-            spec_targets=spec_targets, image_tiles=image_tiles
+            spec_targets=spec_targets,
+            image_tiles=image_tiles,
+            image_targets=image_targets,
         )
 
     def get_scheduler(
@@ -170,11 +205,14 @@ class MakeScheduler:
         survey_type: SurveyType,
         spec_targets: typing.List[Target],
         image_tiles: typing.List[Tiles],
+        image_targets: typing.List[Target],
         spec_detailers: typing.List[BaseDetailer],
-        image_detailers: typing.List[BaseDetailer],
+        image_detailers_tiles: typing.List[BaseDetailer],
+        image_detailers_targets: typing.List[BaseDetailer],
         cwfs_block_name: str,
         avoid_wind: bool = True,
         cwfs_time_gap: float = 120.0,
+        equal_spec_image: bool = False,
     ) -> typing.Tuple[int, CoreScheduler]:
         """Construct feature based scheduler for spectroscopic survey with
         image survey in the background (with lower priority).
@@ -190,14 +228,16 @@ class MakeScheduler:
             surveys in the scheduler.
         spec_targets : `list` of `Target`
             List of targets for spectroscopic survey.
-        avoid_wind : `bool`
-            Include AvoidDirectWind basis function for spectroscopic survey.
-        tiles : `list` of `Tiles`
-            List of targets for background image survey.
+        image_tiles : `list` of `Tile`
+            List of Tiles for image survey.
+        image_targets : `list` of `Target`
+            List of targets for image survey.
         spec_detailers : `list` of `BaseDetailer`
             List of Detailers used for spectroscopic survey.
-        image_detailers : `list` of `BaseDetailer`
-            List of Detailers used for image survey.
+        image_detailers_tiles : `list` of `BaseDetailer`
+            List of Detailers used for image survey based on tiles.
+        image_detailers_tiles : `list` of `BaseDetailer`
+            List of Detailers used for image survey based on targets.
         cwfs_block_name : `str`
             Name of the cwfs block survey.
         avoid_wind : `bool`
@@ -205,6 +245,9 @@ class MakeScheduler:
             survey.
         cwfs_time_gap : `int`
             Time gap in minutes for cwfs survey.
+        equal_spec_image : `bool`
+            If True, spectroscopic and image surveys are placed
+            in the same tier and compete. [[cwfs], [image, spec]]
 
         Returns
         -------
@@ -218,8 +261,10 @@ class MakeScheduler:
             survey_type=survey_type,
             spec_targets=spec_targets,
             image_tiles=image_tiles,
+            image_targets=image_targets,
         )
 
+        # Generate CWFS survey (top tier, runs at cwfs time gap)
         cwfs_survey: typing.List[BaseSurvey] = [
             generate_cwfs_survey(
                 nside=nside,
@@ -229,6 +274,7 @@ class MakeScheduler:
             ),
         ]
 
+        # Generate spectroscopy survey from Targets.
         spectroscopic_survey: typing.List[BaseSurvey] = []
 
         for target in spec_targets:
@@ -243,39 +289,56 @@ class MakeScheduler:
                 )
             )
 
-        # Background imaging survey
-        image_target_surveys = self.generate_targets_from_tiles(image_tiles)
+        # Generate image survey. Could be from tiles and/or targets.
+        image_survey_tiles: typing.List[BaseSurvey] = []
+        if len(image_tiles) > 0:
+            # Image surveys generated from tiles
+            image_target_surveys = self.generate_targets_from_tiles(image_tiles)
+            for image_targets in image_target_surveys:
+                for target in image_targets:
+                    image_survey_tiles.append(
+                        generate_image_survey_from_tiles(
+                            nside=nside,
+                            target=target,
+                            wind_speed_maximum=wind_speed_maximum,
+                            nfields=len(image_targets),
+                            survey_detailers=image_detailers_tiles,
+                        )
+                    )
 
-        image_survey: typing.List[BaseSurvey] = []
-
-        # Image surveys
-        for image_targets in image_target_surveys:
+        image_survey_targets: typing.List[BaseSurvey] = []
+        if len(image_targets) > 0:
+            # Image surveys generated from Targets (probably with dithers)
             for target in image_targets:
-                image_survey.append(
-                    generate_image_survey(
+                image_survey_targets.append(
+                    generate_image_survey_from_target(
                         nside=nside,
                         target=target,
                         wind_speed_maximum=wind_speed_maximum,
-                        nfields=len(image_targets),
-                        survey_detailers=image_detailers,
+                        survey_detailers=image_detailers_targets,
                     )
                 )
 
-        first_survey, second_survey = (
-            (spectroscopic_survey, image_survey)
-            if survey_type in {SurveyType.SpecImage, SurveyType.Spec}
-            else (image_survey, spectroscopic_survey)
-        )
+        image_survey = image_survey_tiles + image_survey_targets
 
-        surveys = [
-            survey
-            for survey in [
-                cwfs_survey,
-                first_survey,
-                second_survey,
+        if equal_spec_image:
+            surveys = [cwfs_survey, spectroscopic_survey + image_survey]
+        else:
+            first_survey, second_survey = (
+                (spectroscopic_survey, image_survey)
+                if survey_type in {SurveyType.SpecImage, SurveyType.Spec}
+                else (image_survey, spectroscopic_survey)
+            )
+
+            surveys = [
+                survey
+                for survey in [
+                    cwfs_survey,
+                    first_survey,
+                    second_survey,
+                ]
+                if len(survey) > 0
             ]
-            if len(survey) > 0
-        ]
 
         scheduler = CoreScheduler(surveys, nside=nside)
 
@@ -300,9 +363,16 @@ class MakeScheduler:
             [
                 Target(
                     target_name=target["Name"],
+                    survey_name=f"{target['Survey']}:{target['Name']}",
+                    science_program=tile.survey_name,
                     ra=Angle(target["RA"], unit=units.hourangle),
                     dec=Angle(target["Dec"], unit=units.degree),
-                    **dataclasses.asdict(tile),
+                    hour_angle_limit=tile.hour_angle_limit,
+                    reward_value=tile.reward_value,
+                    filters=tile.filters,
+                    visit_gap=tile.visit_gap,
+                    exptime=tile.exptime,
+                    nexp=tile.nexp,
                 )
                 for target in self.tiles
                 if tile.survey_name == target["Survey"]

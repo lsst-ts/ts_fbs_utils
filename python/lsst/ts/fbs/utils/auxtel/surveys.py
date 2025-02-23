@@ -20,9 +20,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import typing
-
+from ..utils import get_data_dir
 import astropy.units as u
 import numpy as np
+import yaml
 from rubin_scheduler.scheduler.detailers import BaseDetailer, TrackingInfoDetailer
 from rubin_scheduler.scheduler.surveys import BaseSurvey, FieldSurvey, GreedySurvey
 from rubin_scheduler.scheduler.utils import ObservationArray
@@ -35,14 +36,38 @@ from .basis_functions import (
 )
 
 
-def generate_image_survey(
+def get_auxtel_targets(infile: str | None = None) -> dict:
+    """Load potential targets for auxtel observations.
+
+    Targets can be split into different categories for convenience.
+    The targets in a particular category should be destined for the same
+    'kind' of survey (imaging survey or spectroscopy survey), so that they
+    can be configured similarly.
+
+    After target_dict is returned, remove or include desired targets.
+
+    Returns
+    -------
+    target_pointings : `dict`
+        Dictionary of candidate target information.
+        The minimum necessary is ra, dec, and block.
+        Additional options include exptime, nexp, visit_gap, and priority.
+    """
+    if infile is None:
+        infile = get_data_dir() / "auxtel_targets.yaml"
+    with open(infile) as stream:
+        target_pointings = yaml.safe_load(stream)
+    return target_pointings
+
+
+def generate_image_survey_from_tiles(
     nside: int,
     target: Target,
     wind_speed_maximum: float,
     nfields: int,
     survey_detailers: typing.List[BaseDetailer],
 ) -> BaseSurvey:
-    """Generate image survey.
+    """Generate image survey, where original Targets coming from tiles
 
     Parameters
     ----------
@@ -62,12 +87,13 @@ def generate_image_survey(
     image_survey : `FieldSurvey`
         Image survey.
     """
-
+    # One difference in a series of image surveys using tiles
+    # vs a single image survey using dithering is in the basis functions
     basis_functions = get_basis_functions_image_survey(
         ra=target.ra.to(unit=u.deg).value,
         nside=nside,
-        note=target.target_name,
-        note_interest=target.survey_name,
+        note=target.survey_name,
+        note_interest=target.science_program,
         ha_limits=target.hour_angle_limit,
         wind_speed_maximum=wind_speed_maximum,
         nobs_reference=nfields,
@@ -77,17 +103,15 @@ def generate_image_survey(
         additional_notes=[(target.target_name.split("_")[0], 32)],
     )
 
+    # Set up a sequence of nexp exposures per filter
     sequence = [ObservationArray(n=1) for i in range(len(target.filters))]
-
     for filter_obs, observation in zip(target.filters, sequence):
         observation["RA"] = target.ra.to(u.rad).value
         observation["dec"] = target.dec.to(u.rad).value
         observation["filter"] = filter_obs
         observation["exptime"] = target.exptime
         observation["nexp"] = target.nexp
-        observation["scheduler_note"] = f"{target.survey_name}:{target.target_name}"
-        observation["target_name"] = f"{target.target_name}"
-        observation["science_program"] = f"{target.survey_name}"
+        observation["scheduler_note"] = target.survey_name
 
     image_survey = FieldSurvey(
         basis_functions,
@@ -104,18 +128,96 @@ def generate_image_survey(
         sequence=sequence,
         survey_name=f"{target.survey_name}",
         target_name=f"{target.target_name}",
-        science_program=f"{target.survey_name}",
-        scheduler_note=f"{target.survey_name}:{target.target_name}",
+        science_program=f"{target.science_program}",
+        scheduler_note=f"{target.survey_name}",
         nside=nside,
-        detailers=[
-            TrackingInfoDetailer(
-                target_name=f"{target.target_name}",
-                science_program=f"{target.survey_name}",
-            )
-        ]
-        + survey_detailers,
+        detailers=survey_detailers,
+    )
+    # Weight all of the basis functions up or down to weight overall survey
+    image_survey.basis_weights *= target.reward_value
+
+    return image_survey
+
+
+def generate_image_survey_from_target(
+    nside: int,
+    target: Target,
+    wind_speed_maximum: float,
+    survey_detailers: typing.List[BaseDetailer],
+    avoid_wind: bool = True,
+    include_slew: bool = True,
+) -> BaseSurvey:
+    """Generate image survey, for single Target with dithers
+
+    Parameters
+    ----------
+    nside : `int`
+        Healpix map resolution.
+    target : `Target`
+        Target for the image survey.
+    wind_speed_maximum : `float`
+        Wind speed limit, in m/s.
+    survey_detailers : `list` of `detailers.BaseDetailer`
+        List of survey detailers.
+    avoid_wind : `bool`, optional
+        If True, add the wind avoidance basis function.
+        If False, drop basis function entirely.
+        Makes use align with the spectroscopic survey.
+    include_slew : `bool`, optional
+        If True, include slewtime basis functions.
+
+    Returns
+    -------
+    image_survey : `FieldSurvey`
+        Image survey.
+    """
+
+    basis_functions = get_basis_functions_image_survey(
+        ra=target.ra.to(unit=u.deg).value,
+        nside=nside,
+        note=target.target_name,
+        note_interest=None,
+        ha_limits=target.hour_angle_limit,
+        wind_speed_maximum=wind_speed_maximum,
+        nobs_reference=0,
+        nobs_survey=0,
+        filter_names=target.filters,
+        gap_min=target.visit_gap,
+        additional_notes=None,
+        include_slew=include_slew,
     )
 
+    # Set up a sequence of nexp exposures per filter
+    sequence = [ObservationArray(n=target.nexp) for i in range(len(target.filters))]
+    for filter_obs, observation in zip(target.filters, sequence):
+        observation["RA"] = target.ra.to(u.rad).value
+        observation["dec"] = target.dec.to(u.rad).value
+        observation["filter"] = filter_obs
+        observation["exptime"] = target.exptime
+        observation["nexp"] = 1
+        observation["scheduler_note"] = target.survey_name
+
+    image_survey = FieldSurvey(
+        basis_functions=basis_functions,
+        RA=np.array(
+            [
+                target.ra.to(u.degree).value,
+            ]
+        ),
+        dec=np.array(
+            [
+                target.dec.to(u.degree).value,
+            ]
+        ),
+        sequence=sequence,
+        survey_name=f"{target.survey_name}",
+        target_name=f"{target.target_name}",
+        science_program=f"{target.science_program}",
+        scheduler_note=f"{target.survey_name}",
+        nside=nside,
+        detailers=survey_detailers,
+    )
+    # Weight all of the basis functions up or down to weight overall survey
     image_survey.basis_weights *= target.reward_value
 
     return image_survey
@@ -154,7 +256,7 @@ def generate_cwfs_survey(
 
     return GreedySurvey(
         basis_functions,
-        np.ones_like(basis_functions) * 10000.0,
+        np.ones_like(basis_functions) * 1.0,
         nside=nside,
         survey_name="cwfs",
         science_program=cwfs_block_name,
@@ -169,6 +271,7 @@ def generate_spectroscopic_survey(
     wind_speed_maximum: float,
     nfields: int,
     survey_detailers: typing.List[BaseDetailer],
+    include_slew: bool = True,
 ) -> BaseSurvey:
     """Generate Spectroscopic Survey.
 
@@ -184,6 +287,8 @@ def generate_spectroscopic_survey(
         Maximum wind speed (in m/s).
     survey_detailers : `list` of `detailers.BaseDetailer`
         List of survey detailers.
+    include_slew : `bool`, optional
+        If True, include slewtime basis functions.
 
     Returns
     -------
@@ -201,19 +306,17 @@ def generate_spectroscopic_survey(
         gap_min=target.visit_gap,
         moon_distance=target.moon_distance,
         nobs_reference=nfields,
+        include_slew=include_slew,
     )
 
-    observation = ObservationArray(n=1)
+    observation = ObservationArray(n=target.nexp)
     observation["RA"] = target.ra.to(u.rad).value
     observation["dec"] = target.dec.to(u.rad).value
     observation["filter"] = "r"
     observation["exptime"] = target.exptime
-    observation["nexp"] = target.nexp
-    observation["scheduler_note"] = f"{target.survey_name}:{target.target_name}"
-    observation["target_name"] = f"{target.target_name}"
-    observation["science_program"] = f"{target.survey_name}"
-
-    sequence = [observation]
+    observation["nexp"] = 1
+    observation["scheduler_note"] = target.survey_name
+    observation = [observation]
 
     spectroscopic_survey = FieldSurvey(
         basis_functions,
@@ -227,21 +330,15 @@ def generate_spectroscopic_survey(
                 target.dec.to(u.degree).value,
             ]
         ),
-        sequence=sequence,
-        survey_name=f"{target.survey_name}",  # This is target name on purpose.
+        sequence=observation,
+        survey_name=f"{target.survey_name}",
         target_name=f"{target.target_name}",
-        scheduler_note=f"{target.target_name}",
-        science_program=f"{target.survey_name}",
+        scheduler_note=f"{target.survey_name}",
+        science_program=f"{target.science_program}",
         nside=nside,
-        detailers=[
-            TrackingInfoDetailer(
-                target_name=f"{target.target_name}",
-                science_program=f"{target.survey_name}",
-            )
-        ]
-        + survey_detailers,
+        detailers=survey_detailers,
     )
-
+    # Weight all of the basis functions up or down to weight overall survey
     spectroscopic_survey.basis_weights *= target.reward_value
 
     return spectroscopic_survey
