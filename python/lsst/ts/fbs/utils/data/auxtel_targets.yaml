@@ -1,4 +1,13 @@
 auxtel_candidate_catalog_targets:
+  HD36780:
+    # type K4III C, V=5.9
+    ra: "05:34:04.0"
+    dec: "-01:28:12.9"
+    block: "BLOCK-312"
+    exptime: 300
+    nexp: 2
+    visit_gap: 8
+    priority: 1
   HD42525:
     # type A0V, V=5.7
     ra: "06:06:09"
@@ -18,11 +27,20 @@ auxtel_candidate_catalog_targets:
     visit_gap: 15
     priority: 1
   HD73495:
-    #type A0V, V=5.7
+    # type A0V, V=5.7
     ra: "08:37:52"
     dec: "-26:15:18.0"
     block: "BLOCK-312"
     exptime: 300
+    nexp: 2
+    visit_gap: 8
+    priority: 1
+  HD99685:
+    # type A0IV, V=7.8
+    ra: "09:56:37.5"
+    dec: "-89:46:56.7"
+    block: "BLOCK-307"
+    exptime: 420
     nexp: 2
     visit_gap: 8
     priority: 1
