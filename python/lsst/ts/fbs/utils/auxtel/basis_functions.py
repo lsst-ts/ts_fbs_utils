@@ -44,6 +44,7 @@ def get_basis_functions_image_survey(
     additional_notes: list[tuple[str, int]] | None = None,
     avoid_wind: bool = True,
     include_slew: bool = True,
+    sun_alt_limit: float = -12,
 ) -> typing.List[basis_functions.BaseBasisFunction]:
     """Get the basis functions for the image survey.
 
@@ -82,6 +83,9 @@ def get_basis_functions_image_survey(
         Makes use align with the spectroscopic survey.
     include_slew : `bool`, optional
         Include slewtime basis functions (or not).
+    sun_alt_limit : `float`, optional
+        Sun altitude limit for the survey (degrees).
+        Sun must be below this limit for survey to be feasible.
 
     Returns
     -------
@@ -89,6 +93,7 @@ def get_basis_functions_image_survey(
     """
 
     bfs = [
+        basis_functions.SunAltLimitBasisFunction(alt_limit=sun_alt_limit),
         basis_functions.MoonAvoidanceBasisFunction(nside=nside),
         basis_functions.AltAzShadowMaskBasisFunction(
             min_alt=26.0, max_alt=85.0, nside=nside, shadow_minutes=0.0, pad=0.0
@@ -157,6 +162,7 @@ def get_basis_functions_cwfs_survey(
     note: str,
     time_gap_min: float,
     wind_speed_maximum: float,
+    sun_alt_limit: float = -10,
 ) -> typing.List[basis_functions.BaseBasisFunction]:
     """Get the basis functions for the CWFS survey.
 
@@ -174,6 +180,9 @@ def get_basis_functions_cwfs_survey(
     wind_speed_maximum : `float`
         Maximum wind speed tolerated for the observations of the survey,
         in m/s.
+    sun_alt_limit : `float`, optional
+        Sun altitude limit for the survey (degrees).
+        Sun must be below this limit for survey to be feasible.
 
     Returns
     -------
@@ -193,6 +202,7 @@ def get_basis_functions_cwfs_survey(
         basis_functions.AvoidDirectWind(
             wind_speed_maximum=wind_speed_maximum, nside=nside
         ),
+        basis_functions.SunAltLimitBasisFunction(alt_limit=sun_alt_limit),
     ]
 
 
@@ -208,6 +218,7 @@ def get_basis_functions_spectroscopic_survey(
     nobs_reference: int,
     note_interest: str,
     include_slew: bool = True,
+    sun_alt_limit: float = -10,
 ) -> typing.List[basis_functions.BaseBasisFunction]:
     """Get basis functions for spectroscopic survey.
 
@@ -236,6 +247,9 @@ def get_basis_functions_spectroscopic_survey(
         reference number of observations.
     include_slew : `bool`, optional
         Include slewtime basis functions (or not).
+    sun_alt_limit : `float`, optional
+        Sun altitude limit for the survey (degrees).
+        Sun must be below this limit for survey to be feasible.
 
     Returns
     -------
@@ -244,6 +258,7 @@ def get_basis_functions_spectroscopic_survey(
     """
 
     bfs = [
+        basis_functions.SunAltLimitBasisFunction(alt_limit=sun_alt_limit),
         basis_functions.MoonAvoidanceBasisFunction(
             nside=nside, moon_distance=moon_distance
         ),

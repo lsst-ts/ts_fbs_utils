@@ -42,7 +42,7 @@ def test_get_basis_functions_image_survey() -> None:
         include_slew=True,
     )
 
-    assert len(basis_functions) == 11
+    assert len(basis_functions) == 12
 
 
 def test_get_basis_functions_cwfs_survey() -> None:
@@ -53,7 +53,7 @@ def test_get_basis_functions_cwfs_survey() -> None:
         wind_speed_maximum=7.0,
     )
 
-    assert len(basis_functions) == 8
+    assert len(basis_functions) == 9
 
 
 def test_get_basis_functions_spectroscopic_survey() -> None:
@@ -70,7 +70,7 @@ def test_get_basis_functions_spectroscopic_survey() -> None:
         nobs_reference=3,
     )
 
-    assert len(basis_functions) == 8
+    assert len(basis_functions) == 9
 
 
 def test_get_basis_functions_spectroscopic_survey_no_wind() -> None:
@@ -87,4 +87,4 @@ def test_get_basis_functions_spectroscopic_survey_no_wind() -> None:
         nobs_reference=3,
     )
 
-    assert len(basis_functions) == 7
+    assert len(basis_functions) == 8

@@ -4,6 +4,11 @@
 Version History
 ===============
 
+v0.15.1
+-------
+* Added SunAltLimitBasisFunctions to cwfs, imaging and spectroscopic surveys, to ensure that the FBS stops requesting targets beyond twilight time. The default values are -10 deg, -12 deg, and -10 deg respectively. Placing these limits lightens the load on the OSs around enabling and disabling the Scheduler near twilight.
+
+
 v0.15.0
 -------
 
