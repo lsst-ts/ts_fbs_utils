@@ -146,6 +146,7 @@ def generate_image_survey_from_target(
     survey_detailers: typing.List[BaseDetailer],
     avoid_wind: bool = True,
     include_slew: bool = True,
+    sun_alt_limit: float = -12,
 ) -> BaseSurvey:
     """Generate image survey, for single Target with dithers
 
@@ -165,6 +166,9 @@ def generate_image_survey_from_target(
         Makes use align with the spectroscopic survey.
     include_slew : `bool`, optional
         If True, include slewtime basis functions.
+    sun_alt_limit : `float`, optional
+        Sun altitude limit for the survey (degrees).
+        Sun must be below this limit for survey to be feasible.
 
     Returns
     -------
@@ -185,6 +189,7 @@ def generate_image_survey_from_target(
         gap_min=target.visit_gap,
         additional_notes=None,
         include_slew=include_slew,
+        sun_alt_limit=sun_alt_limit,
     )
 
     # Set up a sequence of nexp exposures per filter
@@ -242,6 +247,7 @@ def generate_cwfs_survey(
     cwfs_block_name : `str`
         Name of the cwfs block survey.
 
+
     Returns
     -------
     `GreedySurvey`
@@ -272,6 +278,7 @@ def generate_spectroscopic_survey(
     nfields: int,
     survey_detailers: typing.List[BaseDetailer],
     include_slew: bool = True,
+    sun_alt_limit: float = -10,
 ) -> BaseSurvey:
     """Generate Spectroscopic Survey.
 
@@ -289,6 +296,9 @@ def generate_spectroscopic_survey(
         List of survey detailers.
     include_slew : `bool`, optional
         If True, include slewtime basis functions.
+    sun_alt_limit : `float`, optional
+        Sun altitude limit for the survey (degrees).
+        Sun must be below this limit for survey to be feasible.
 
     Returns
     -------
@@ -307,6 +317,7 @@ def generate_spectroscopic_survey(
         moon_distance=target.moon_distance,
         nobs_reference=nfields,
         include_slew=include_slew,
+        sun_alt_limit=sun_alt_limit,
     )
 
     observation = ObservationArray(n=target.nexp)
