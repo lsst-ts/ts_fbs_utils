@@ -40,12 +40,14 @@ class MakeFieldSurveyScheduler:
         self,
         nside: int = 32,
         ntiers: int = 1,
+        band_to_filter: dict | None = None,
     ) -> None:
 
         self.nside = nside
         self.surveys: typing.List[typing.List[BaseSurvey]] = [
             [] for _ in range(0, ntiers)
         ]
+        self.band_to_filter = band_to_filter
 
     def _load_candidate_targets(self) -> typing.Dict:
         """Load pointing center data for field surveys."""
@@ -106,7 +108,7 @@ class MakeFieldSurveyScheduler:
                     observation_reason=observation_reason,
                     scheduler_note=None,
                     readtime=2.4,
-                    filter_change_time=120.0,
+                    band_change_time=120.0,
                     nside=self.nside,
                     flush_pad=30.0,
                     detailers=detailers,
@@ -164,7 +166,7 @@ class MakeFieldSurveyScheduler:
                     observation_reason=observation_reason,
                     scheduler_note=target_name,
                     readtime=2.4,
-                    filter_change_time=120.0,
+                    band_change_time=120.0,
                     nside=self.nside,
                     flush_pad=30.0,
                     detailers=detailers,
@@ -186,7 +188,9 @@ class MakeFieldSurveyScheduler:
             Feature based scheduler.
         """
 
-        scheduler = CoreScheduler(self.surveys, nside=self.nside)
+        scheduler = CoreScheduler(
+            self.surveys, nside=self.nside, band_to_filter=self.band_to_filter
+        )
 
         return self.nside, scheduler
 
