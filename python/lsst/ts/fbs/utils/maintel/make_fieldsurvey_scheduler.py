@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-__all__ = ["MakeFieldSurveyScheduler", "get_comcam_sv_targets"]
+__all__ = ["MakeFieldSurveyScheduler", "get_sv_targets"]
 
 import typing
 
@@ -51,7 +51,7 @@ class MakeFieldSurveyScheduler:
 
     def _load_candidate_targets(self) -> typing.Dict:
         """Load pointing center data for field surveys."""
-        return get_comcam_sv_targets()
+        return get_sv_targets()
 
     def add_field_surveys(
         self,
@@ -195,8 +195,8 @@ class MakeFieldSurveyScheduler:
         return self.nside, scheduler
 
 
-def get_comcam_sv_targets(exclude: typing.List[str] = []) -> dict:
-    """Load candidate targets for ComCam science observations.
+def get_sv_targets(exclude: typing.List[str] = []) -> dict:
+    """Load candidate targets for science observations.
 
     Parameters
     ----------
@@ -212,5 +212,5 @@ def get_comcam_sv_targets(exclude: typing.List[str] = []) -> dict:
     with open(infile) as stream:
         targets_dict = yaml.safe_load(stream)
 
-    targets_dict = targets_dict["comcam_sv_targets"]
+    targets_dict = targets_dict["sv_targets"]
     return {_: targets_dict[_] for _ in targets_dict if _ not in exclude}

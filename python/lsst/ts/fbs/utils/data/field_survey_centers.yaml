@@ -1,4 +1,12 @@
-comcam_sv_targets:
+sv_targets:
+  Rubin_SV_216_-17:
+    # Low ecliptic latitude, opposition April
+    ra: 216.1
+    dec: -16.7
+  Rubin_SV_225_-19:
+    # Low ecliptic latitude, opposition May
+    ra: 224.7
+    dec: -19.3
   Rubin_SV_095_-25:
     # High stellar densty, low extinction
     ra: 95.0
