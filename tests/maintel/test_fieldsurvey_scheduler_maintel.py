@@ -23,7 +23,7 @@ import unittest
 
 from lsst.ts.fbs.utils.maintel.make_fieldsurvey_scheduler import (
     MakeFieldSurveyScheduler,
-    get_comcam_sv_targets,
+    get_sv_targets,
 )
 
 
@@ -39,8 +39,8 @@ class TestMakeFieldSurveyScheduler(unittest.TestCase):
     def test_get_scheduler(self) -> None:
         tier = 0
         observation_reason = "science"
-        science_program = "BLOCK-320"
-        target_names = get_comcam_sv_targets().keys()
+        science_program = "BLOCK-365"
+        target_names = get_sv_targets().keys()
         self.make_scheduler.add_field_surveys(
             tier, observation_reason, science_program, target_names
         )
@@ -51,7 +51,7 @@ class TestMakeFieldSurveyScheduler(unittest.TestCase):
 class TestGetComCamSVTargets(unittest.TestCase):
 
     def test_get_comcam_sv_targets(self) -> None:
-        self.assertNotEqual(len(get_comcam_sv_targets()), 0)
+        self.assertNotEqual(len(get_sv_targets()), 0)
 
-        key = list(get_comcam_sv_targets().keys())[0]
-        self.assertNotIn(key, get_comcam_sv_targets(exclude=[key]).keys())
+        key = list(get_sv_targets().keys())[0]
+        self.assertNotIn(key, get_sv_targets(exclude=[key]).keys())
