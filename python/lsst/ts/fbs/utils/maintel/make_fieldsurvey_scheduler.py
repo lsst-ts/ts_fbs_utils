@@ -24,8 +24,6 @@ __all__ = ["MakeFieldSurveyScheduler", "get_sv_targets"]
 import typing
 
 import yaml
-
-# from lsst.ts.fbs.utils import get_data_dir, get_pointing_model_grid_data
 from lsst.ts.fbs.utils import get_pointing_model_grid_data
 from rubin_scheduler.scheduler.basis_functions import BaseBasisFunction, VisitGap
 from rubin_scheduler.scheduler.detailers import BaseDetailer
@@ -52,10 +50,6 @@ class MakeFieldSurveyScheduler:
             [] for _ in range(0, ntiers)
         ]
         self.band_to_filter = band_to_filter
-
-    # def _load_candidate_targets(self) -> typing.Dict:
-    #     """Load pointing center data for field surveys."""
-    #     return get_sv_targets()
 
     def add_field_surveys(
         self,
@@ -89,8 +83,6 @@ class MakeFieldSurveyScheduler:
         basis_functions: `list` of `BaseBasisFunction`
             Basis functions provided to each field survey.
         """
-
-        # targets = self._load_candidate_targets()
 
         for target_name in target_names:
             RA = self.targets[target_name]["ra"]
@@ -197,27 +189,6 @@ class MakeFieldSurveyScheduler:
         )
 
         return self.nside, scheduler
-
-
-# def get_sv_targets(exclude: typing.List[str] = []) -> dict:
-#     """Load candidate targets for science observations.
-#
-#     Parameters
-#     ----------
-#     exclude : `list[str]`
-#         List of target names to exclude when loading.
-#
-#     Returns
-#     -------
-#     target_dict : `dict`
-#         Dictionary of candidate target names and coordinates.
-#     """
-#     infile = get_data_dir() / "field_survey_centers.yaml"
-#     with open(infile) as stream:
-#         targets_dict = yaml.safe_load(stream)
-#
-#     targets_dict = targets_dict["sv_targets"]
-#     return {_: targets_dict[_] for _ in targets_dict if _ not in exclude}
 
 
 def get_sv_targets(target_file: str, exclude: typing.List[str] = []) -> dict:
