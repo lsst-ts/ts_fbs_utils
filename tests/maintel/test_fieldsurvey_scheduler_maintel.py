@@ -21,6 +21,7 @@
 
 import unittest
 
+from lsst.ts.fbs.utils import get_data_dir
 from lsst.ts.fbs.utils.maintel.make_fieldsurvey_scheduler import (
     MakeFieldSurveyScheduler,
     get_sv_targets,
@@ -32,15 +33,18 @@ class TestMakeFieldSurveyScheduler(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
+        target_file = get_data_dir() / "test_fieldsurvey_centers.yaml"
+        targets = get_sv_targets(target_file)
         nside = 32
         ntiers = 1
-        cls.make_scheduler = MakeFieldSurveyScheduler(nside, ntiers)
+        cls.make_scheduler = MakeFieldSurveyScheduler(targets, nside, ntiers)
 
     def test_get_scheduler(self) -> None:
         tier = 0
         observation_reason = "science"
         science_program = "BLOCK-365"
-        target_names = get_sv_targets().keys()
+        target_file = get_data_dir() / "test_fieldsurvey_centers.yaml"
+        target_names = get_sv_targets(target_file).keys()
         self.make_scheduler.add_field_surveys(
             tier, observation_reason, science_program, target_names
         )
@@ -48,10 +52,12 @@ class TestMakeFieldSurveyScheduler(unittest.TestCase):
         nside, scheduler = self.make_scheduler.get_scheduler()
 
 
-class TestGetComCamSVTargets(unittest.TestCase):
+class TestGetSVTargets(unittest.TestCase):
 
-    def test_get_comcam_sv_targets(self) -> None:
-        self.assertNotEqual(len(get_sv_targets()), 0)
+    def test_get_sv_targets(self) -> None:
+        target_file = get_data_dir() / "test_fieldsurvey_centers.yaml"
 
-        key = list(get_sv_targets().keys())[0]
-        self.assertNotIn(key, get_sv_targets(exclude=[key]).keys())
+        self.assertNotEqual(len(get_sv_targets(target_file)), 0)
+
+        key = list(get_sv_targets(target_file).keys())[0]
+        self.assertNotIn(key, get_sv_targets(target_file, exclude=[key]).keys())
