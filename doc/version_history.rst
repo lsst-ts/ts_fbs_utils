@@ -4,10 +4,15 @@
 Version History
 ===============
 
+v0.16.0
+-------
+
+* Update tools for building fieldsurvey scheduler configurations for LSSTCam
+* Move the definition of fieldsurvey pointing centers to ts_config_ocs for more rapid deployment of updates
+
 v0.15.1
 -------
 * Added SunAltLimitBasisFunctions to cwfs, imaging and spectroscopic surveys, to ensure that the FBS stops requesting targets beyond twilight time. The default values are -10 deg, -12 deg, and -10 deg respectively. Placing these limits lightens the load on the OSs around enabling and disabling the Scheduler near twilight.
-
 
 v0.15.0
 -------
@@ -18,7 +23,6 @@ v0.15.0
 * Adds data/auxtel_targets.yaml, to provide a list of targets for auxtel with easy configuration for individual targets.
 * In auxtel/surveys, adds a function to read the auxtel_targets.yaml file.
 * Extends the target.py data class to include `science_program` (aka json block) explicitly, separate from `survey_name`.
-
 
 v0.14.3
 -------
