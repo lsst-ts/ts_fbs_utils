@@ -4,6 +4,11 @@
 Version History
 ===============
 
+v0.16.1
+-------
+
+* Fix bug in MakeFieldSurveyScheduler to make targets optional.
+
 v0.16.0
 -------
 
