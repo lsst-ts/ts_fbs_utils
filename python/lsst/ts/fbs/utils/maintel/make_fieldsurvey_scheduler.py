@@ -19,12 +19,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-__all__ = ["MakeFieldSurveyScheduler", "get_comcam_sv_targets"]
+__all__ = ["MakeFieldSurveyScheduler", "get_sv_targets"]
 
 import typing
 
 import yaml
-from lsst.ts.fbs.utils import get_data_dir, get_pointing_model_grid_data
+from lsst.ts.fbs.utils import get_pointing_model_grid_data
 from rubin_scheduler.scheduler.basis_functions import BaseBasisFunction, VisitGap
 from rubin_scheduler.scheduler.detailers import BaseDetailer
 from rubin_scheduler.scheduler.schedulers import CoreScheduler
@@ -38,18 +38,18 @@ class MakeFieldSurveyScheduler:
 
     def __init__(
         self,
+        targets: dict,
         nside: int = 32,
         ntiers: int = 1,
+        band_to_filter: dict | None = None,
     ) -> None:
 
+        self.targets = targets
         self.nside = nside
         self.surveys: typing.List[typing.List[BaseSurvey]] = [
             [] for _ in range(0, ntiers)
         ]
-
-    def _load_candidate_targets(self) -> typing.Dict:
-        """Load pointing center data for field surveys."""
-        return get_comcam_sv_targets()
+        self.band_to_filter = band_to_filter
 
     def add_field_surveys(
         self,
@@ -84,11 +84,9 @@ class MakeFieldSurveyScheduler:
             Basis functions provided to each field survey.
         """
 
-        targets = self._load_candidate_targets()
-
         for target_name in target_names:
-            RA = targets[target_name]["ra"]
-            dec = targets[target_name]["dec"]
+            RA = self.targets[target_name]["ra"]
+            dec = self.targets[target_name]["dec"]
 
             self.surveys[tier].append(
                 FieldSurvey(
@@ -105,8 +103,6 @@ class MakeFieldSurveyScheduler:
                     science_program=science_program,
                     observation_reason=observation_reason,
                     scheduler_note=None,
-                    readtime=2.4,
-                    filter_change_time=120.0,
                     nside=self.nside,
                     flush_pad=30.0,
                     detailers=detailers,
@@ -163,8 +159,6 @@ class MakeFieldSurveyScheduler:
                     science_program=science_program,
                     observation_reason=observation_reason,
                     scheduler_note=target_name,
-                    readtime=2.4,
-                    filter_change_time=120.0,
                     nside=self.nside,
                     flush_pad=30.0,
                     detailers=detailers,
@@ -186,16 +180,20 @@ class MakeFieldSurveyScheduler:
             Feature based scheduler.
         """
 
-        scheduler = CoreScheduler(self.surveys, nside=self.nside)
+        scheduler = CoreScheduler(
+            self.surveys, nside=self.nside, band_to_filter=self.band_to_filter
+        )
 
         return self.nside, scheduler
 
 
-def get_comcam_sv_targets(exclude: typing.List[str] = []) -> dict:
-    """Load candidate targets for ComCam science observations.
+def get_sv_targets(target_file: str, exclude: typing.List[str] = []) -> dict:
+    """Load candidate target coordinates for field survey science observations.
 
     Parameters
     ----------
+    target_file: `str`
+        Filename for YAML file with target names and coordinates.
     exclude : `list[str]`
         List of target names to exclude when loading.
 
@@ -204,9 +202,8 @@ def get_comcam_sv_targets(exclude: typing.List[str] = []) -> dict:
     target_dict : `dict`
         Dictionary of candidate target names and coordinates.
     """
-    infile = get_data_dir() / "field_survey_centers.yaml"
-    with open(infile) as stream:
+    with open(target_file) as stream:
         targets_dict = yaml.safe_load(stream)
 
-    targets_dict = targets_dict["comcam_sv_targets"]
+    targets_dict = targets_dict
     return {_: targets_dict[_] for _ in targets_dict if _ not in exclude}
