@@ -1,9 +1,8 @@
-sv_targets:
-  test_target_1:
-    # Test Target 1
-    ra: 10.1
-    dec: -10.1
-  test_target_2:
-    # Test Target 2
-    ra: 20.1
-    dec: -20.2
+test_target_1:
+  # Test Target 1
+  ra: 10.1
+  dec: -10.1
+test_target_2:
+  # Test Target 2
+  ra: 20.1
+  dec: -20.2

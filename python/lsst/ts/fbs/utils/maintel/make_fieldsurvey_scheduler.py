@@ -205,5 +205,5 @@ def get_sv_targets(target_file: str, exclude: typing.List[str] = []) -> dict:
     with open(target_file) as stream:
         targets_dict = yaml.safe_load(stream)
 
-    targets_dict = targets_dict["sv_targets"]
+    targets_dict = targets_dict
     return {_: targets_dict[_] for _ in targets_dict if _ not in exclude}
