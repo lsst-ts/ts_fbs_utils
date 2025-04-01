@@ -188,7 +188,7 @@ class MakeFieldSurveyScheduler:
 
 
 def get_sv_targets(target_file: str, exclude: typing.List[str] = []) -> dict:
-    """Load candidate target coordinates for science observations.
+    """Load candidate target coordinates for field survey science observations.
 
     Parameters
     ----------
