@@ -8,6 +8,8 @@ v0.16.1
 -------
 
 * Fix bug in MakeFieldSurveyScheduler to make targets optional.
+* Update get_data_dir to allow users setting a altenative data path from an environment variable.
+* Added pointing tiles for block 387.
 
 v0.16.0
 -------
