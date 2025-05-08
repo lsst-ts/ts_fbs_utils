@@ -38,12 +38,11 @@ class MakeFieldSurveyScheduler:
 
     def __init__(
         self,
-        targets: dict,
+        targets: dict | None = None,
         nside: int = 32,
         ntiers: int = 1,
         band_to_filter: dict | None = None,
     ) -> None:
-
         self.targets = targets
         self.nside = nside
         self.surveys: typing.List[typing.List[BaseSurvey]] = [
@@ -85,8 +84,11 @@ class MakeFieldSurveyScheduler:
         """
 
         for target_name in target_names:
-            RA = self.targets[target_name]["ra"]
-            dec = self.targets[target_name]["dec"]
+            if self.targets is not None:
+                RA = self.targets[target_name]["ra"]
+                dec = self.targets[target_name]["dec"]
+            else:
+                raise ValueError("No list of targets passed.")
 
             self.surveys[tier].append(
                 FieldSurvey(
@@ -142,7 +144,6 @@ class MakeFieldSurveyScheduler:
         targets = get_pointing_model_grid_data(science_program=science_program)
 
         for target_name, alt, az in targets:
-
             self.surveys[tier].append(
                 FieldAltAzSurvey(
                     basis_functions=[VisitGap(note=target_name, gap_min=420)]
