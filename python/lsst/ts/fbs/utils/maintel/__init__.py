@@ -23,3 +23,7 @@ from .basis_functions import *
 from .make_fieldsurvey_scheduler import *
 from .make_scheduler import *
 from .surveys import *
+from .sv_config import *
+from .sv_surveys import *
+from .ddf_presched import *
+
