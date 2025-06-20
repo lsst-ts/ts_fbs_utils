@@ -20,7 +20,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import typing
-from ..utils import get_data_dir
+
 import astropy.units as u
 import numpy as np
 import yaml
@@ -29,6 +29,7 @@ from rubin_scheduler.scheduler.surveys import BaseSurvey, FieldSurvey, GreedySur
 from rubin_scheduler.scheduler.utils import ObservationArray
 
 from ..target import Target
+from ..utils import get_data_dir
 from .basis_functions import (
     get_basis_functions_cwfs_survey,
     get_basis_functions_image_survey,
