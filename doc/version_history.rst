@@ -4,6 +4,14 @@
 Version History
 ===============
 
+v0.17.1
+-------
+* Fix some issues with the SV configuration: observation_reason needs underscores and no spaces, and n_obs template should not be 0 for surveys that use rubin_scheduler <= 3.10.0 if they also use the NObsPerYear basis function.
+
+v0.17.0
+-------
+* Add SV survey configuration support - generation of the footprint, as well as the various tiers of surveys (DDF, long-gaps (triplets), template gathering, standard pairs, twilight pairs, greedy (single) visits, and a final layer of early template gathering). This includes a DDF prescheduling generation file that more likely will long-term live in rubin_scheduler but is currently divergent from the version we have there (on purpose, to suppose "ocean" ddfs).
+
 v0.16.1
 -------
 
