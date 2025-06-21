@@ -423,9 +423,19 @@ def gen_lvk_templates(
             exptime=exptime,
             nexp=nexp,
             science_program=science_program,
-            observation_reason=f"template area singles {band}",
+            observation_reason=f"template_area_singles_{band}",
         )
         lvk_templates.append(s)
+
+    # Remove detailer (drop this when updated at rubin_scheduler)
+    bad_detailer = detailers.Rottep2RotspDesiredDetailer
+    for survey in lvk_templates:
+        good_dets = []
+        for det in survey.detailers:
+            if not isinstance(det, bad_detailer):
+                good_dets.append(det)
+        survey.detailers = good_dets
+
     return lvk_templates
 
 
@@ -570,8 +580,9 @@ def gen_template_surveys(
         if bandname in dark_only:
             bfs.append((bf.MoonAltLimitBasisFunction(alt_limit=-5), 0.0))
 
-        # limit to first year
-        bfs.append((bf.OnlyBeforeNightBasisFunction(night_max=366), 0.0))
+        # limit to first year -
+        # BUT for SV surveys we know < 1 year, plus "night" is wrong
+        # bfs.append((bf.OnlyBeforeNightBasisFunction(night_max=366), 0.0))
 
         # Mask anything observed n_obs_template times
         bfs.append(
@@ -604,7 +615,7 @@ def gen_template_surveys(
                 ideal_pair_time=pair_time,
                 survey_name=survey_name,
                 science_program=science_program,
-                observation_reason=f"template blob {bandname} {pair_time :.1f}",
+                observation_reason=f"template_blob_{bandname}_{pair_time :.1f}",
                 ignore_obs=ignore_obs,
                 nexp=nexp,
                 detailers=detailer_list,
@@ -647,6 +658,7 @@ def blob_for_long(
     blob_names: list[str] = [],
     scheduled_respect: float = 30.0,
     science_program: str = SCIENCE_PROGRAM,
+    observation_reason: str | None = None,
     blob_survey_params: dict | None = None,
 ) -> list[BlobSurvey]:
     """
@@ -729,6 +741,8 @@ def blob_for_long(
         observations (from a ScriptedSurvey).
     science_program : `str`
         The science_program to use for visits from these surveys.
+    observation_reason : `str` or None
+        The value to use for the observation_reason.
     blob_survey_params : `dict` or None
         A dictionary of additional kwargs to pass to the BlobSurvey.
         In particular, the times for typical slews, readtime, etc. are
@@ -833,6 +847,9 @@ def blob_for_long(
         if bandname2 is not None:
             detailer_list.append(detailers.TakeAsPairsDetailer(bandname=bandname2))
 
+        if observation_reason is None:
+            observation_reason = f"triplet_pairs_{bandname}{bandname2}_{pair_time :.1f}"
+
         surveys.append(
             BlobSurvey(
                 basis_functions,
@@ -846,7 +863,7 @@ def blob_for_long(
                 nexp=nexp,
                 detailers=detailer_list,
                 science_program=science_program,
-                observation_reason=f"triplet pairs {bandname}{bandname2} {pair_time :.1f}",
+                observation_reason=observation_reason,
                 **blob_survey_params,
             )
         )
@@ -1104,7 +1121,7 @@ def gen_greedy_surveys(
                 detailers=detailer_list,
                 survey_name=f"greedy {bandname}",
                 science_program=science_program,
-                observation_reason=f"singles {bandname}",
+                observation_reason=f"singles_{bandname}",
                 **greed_survey_params,
             )
         )
@@ -1371,6 +1388,11 @@ def generate_blobs(
         if bandname2 is not None:
             detailer_list.append(detailers.TakeAsPairsDetailer(bandname=bandname2))
 
+        observation_reason = f"pairs_{bandname}"
+        if bandname2 is not None:
+            observation_reason += f"{bandname2}"
+        observation_reason = +f"_{pair_time :.1f}"
+
         surveys.append(
             BlobSurvey(
                 basis_functions,
@@ -1381,6 +1403,7 @@ def generate_blobs(
                 ideal_pair_time=pair_time,
                 survey_name=survey_name,
                 science_program=science_program,
+                observation_reason=observation_reason,
                 ignore_obs=ignore_obs,
                 nexp=nexp,
                 detailers=detailer_list,
@@ -1502,7 +1525,7 @@ def generate_twi_blobs(
     surveys = []
 
     if n_obs_template is None:
-        n_obs_template = {"u": 0, "g": 3, "r": 3, "i": 3, "z": 3, "y": 0}
+        n_obs_template = {"u": 3, "g": 3, "r": 3, "i": 3, "z": 3, "y": 3}
 
     times_needed = [pair_time, pair_time * 2]
     for bandname, bandname2 in zip(band1s, band2s):
@@ -1591,6 +1614,11 @@ def generate_twi_blobs(
         if bandname2 is not None:
             detailer_list.append(detailers.TakeAsPairsDetailer(bandname=bandname2))
 
+        observation_reason = f"pairs_{bandname}"
+        if bandname2 is not None:
+            observation_reason += f"{bandname2}"
+        observation_reason = +f"_{pair_time :.1f}"
+
         surveys.append(
             BlobSurvey(
                 basis_functions,
@@ -1601,6 +1629,7 @@ def generate_twi_blobs(
                 ideal_pair_time=pair_time,
                 survey_name=survey_name,
                 science_program=science_program,
+                observation_reason=observation_reason,
                 ignore_obs=ignore_obs,
                 nexp=nexp,
                 detailers=detailer_list,
