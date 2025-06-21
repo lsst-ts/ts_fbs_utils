@@ -1617,7 +1617,7 @@ def generate_twi_blobs(
         observation_reason = f"pairs_{bandname}"
         if bandname2 is not None:
             observation_reason += f"{bandname2}"
-        observation_reason = +f"_{pair_time :.1f}"
+        observation_reason += f"_{pair_time :.1f}"
 
         surveys.append(
             BlobSurvey(
