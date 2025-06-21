@@ -4,6 +4,10 @@
 Version History
 ===============
 
+v0.17.2
+-------
+* Add a larger fiducial_FWHMEff for the M5DiffBasisFunctions. This makes it easier for SV surveys to take bluer-band visits instead of waiting for better seeing.
+
 v0.17.1
 -------
 * Fix some issues with the SV configuration: observation_reason needs underscores and no spaces, and n_obs template should not be 0 for surveys that use rubin_scheduler <= 3.10.0 if they also use the NObsPerYear basis function.
