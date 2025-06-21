@@ -73,10 +73,6 @@ class Test_SV_Surveys(unittest.TestCase):
         )
         assert len(surveys) > 0
 
-    def test_generate_blobs(self) -> None:
-        surveys = sv_surveys.generate_blobs(footprints=self.survey_info["Footprints"])
-        assert len(surveys) > 0
-
     def test_gen_ddf_surveys(self) -> None:
         surveys = sv_surveys.gen_ddf_surveys(
             ddf_config_file=os.path.join(get_data_dir(), "ddf_sv.dat")

@@ -607,7 +607,7 @@ def generate_ddf_scheduled_obs(
                     obs["scheduler_note"] = "DD:%s" % ddf_name
                     obs["target_name"] = "DDF %s" % ddf_name
                     obs["science_program"] = science_program
-                    obs["observation_reason"] = "DDF %s" % ddf_name
+                    obs["observation_reason"] = "DDF_%s" % ddf_name
                     obs["mjd_tol"] = mjd_tol
                     obs["dist_tol"] = dist_tol
                     # Need to set something for HA limits
@@ -631,7 +631,7 @@ def generate_ddf_scheduled_obs(
                     obs["scheduler_note"] = "DD:%s" % ddf_name.replace("_a", "_b")
                     obs["target_name"] = "DDF %s" % ddf_name.replace("_a", "_b")
                     obs["science_program"] = science_program
-                    obs["observation_reason"] = "DDF %s" % ddf_name.replace("_a", "_b")
+                    obs["observation_reason"] = "DDF_%s" % ddf_name.replace("_a", "_b")
 
                     obs["mjd_tol"] = mjd_tol
                     obs["dist_tol"] = dist_tol
@@ -656,7 +656,7 @@ def generate_ddf_scheduled_obs(
                     obs["scheduler_note"] = "DD:%s" % ddf_name
                     obs["target_name"] = "DDF %s" % ddf_name
                     obs["science_program"] = science_program
-                    obs["observation_reason"] = "DDF %s" % ddf_name
+                    obs["observation_reason"] = "DDF_%s" % ddf_name
 
                     obs["mjd_tol"] = mjd_tol
                     obs["dist_tol"] = dist_tol
