@@ -23,7 +23,6 @@ import numpy as np
 import numpy.typing as npt
 import rubin_scheduler.scheduler.basis_functions as bf
 import rubin_scheduler.scheduler.detailers as detailers
-from .ddf_presched import generate_ddf_scheduled_obs
 from rubin_scheduler.scheduler.example import simple_greedy_survey
 from rubin_scheduler.scheduler.surveys import (
     BlobSurvey,
@@ -33,6 +32,8 @@ from rubin_scheduler.scheduler.surveys import (
 )
 from rubin_scheduler.scheduler.utils import Footprints
 from rubin_scheduler.utils import DEFAULT_NSIDE, SURVEY_START_MJD
+
+from .ddf_presched import generate_ddf_scheduled_obs
 
 __all__ = [
     "safety_masks",
@@ -186,6 +187,7 @@ def standard_bf(
     u_template_weight: float = 50.0,
     g_template_weight: float = 50.0,
     footprints: Footprints | None = None,
+    fiducial_fwhm: float = 1.3,
     n_obs_template: dict | None = None,
     season: float = 365.25,
     season_start_hour: float = -4.0,
@@ -224,6 +226,8 @@ def standard_bf(
     footprints : `rubin_scheduler.scheduler.utils.Footprints` object
         The desired footprints object. Default of None will work, but is likely
         not desirable.
+    fiducial_fwhm : `float`
+        The fiducial FWHM for the M5Diff Basis function.
     n_obs_template : `dict`
         The number of observations to take every season in each band.
     season : `float`
@@ -264,19 +268,23 @@ def standard_bf(
     if bandname2 is not None:
         bfs.append(
             (
-                bf.M5DiffBasisFunction(bandname=bandname, nside=nside),
+                bf.M5DiffBasisFunction(
+                    bandname=bandname, nside=nside, fiducial_FWHMEff=fiducial_fwhm
+                ),
                 m5_weight / 2.0,
             )
         )
         bfs.append(
             (
-                bf.M5DiffBasisFunction(bandname=bandname2, nside=nside),
+                bf.M5DiffBasisFunction(
+                    bandname=bandname2, nside=nside, fiducial_FWHMEff=fiducial_fwhm
+                ),
                 m5_weight / 2.0,
             )
         )
 
     else:
-        bfs.append((bf.M5DiffBasisFunction(bandname=bandname, nside=nside), m5_weight))
+        bfs.append((bf.M5DiffBasisFunction(bandname=bandname, nside=nside, fiducial_FWHMEff=fiducial_fwhm), m5_weight))
 
     if bandname2 is not None:
         bfs.append(
