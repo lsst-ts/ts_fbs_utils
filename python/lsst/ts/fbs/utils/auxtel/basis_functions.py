@@ -162,7 +162,7 @@ def get_basis_functions_cwfs_survey(
     note: str,
     time_gap_min: float,
     wind_speed_maximum: float,
-    sun_alt_limit: float = -10,
+    sun_alt_limit: float = -7,
 ) -> typing.List[basis_functions.BaseBasisFunction]:
     """Get the basis functions for the CWFS survey.
 
