@@ -4,6 +4,11 @@
 Version History
 ===============
 
+v0.17.3
+-------
+* Modify the default sun_alt_limit for spectroscopic and cwfs surveys to be -7 degrees.
+* Add configuration option for sun_alt_limit for cwfs survey (generate_cwfs_survey). 
+
 v0.17.2
 -------
 * Add a larger fiducial_FWHMEff for the M5DiffBasisFunctions. This makes it easier for SV surveys to take bluer-band visits instead of waiting for better seeing.
