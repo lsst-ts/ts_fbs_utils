@@ -234,6 +234,7 @@ def generate_cwfs_survey(
     time_gap_min: float,
     wind_speed_maximum: float,
     cwfs_block_name: str,
+    sun_alt_limit: float = -7,
 ) -> BaseSurvey:
     """Generate Curvature Wavefront Sensing Survey.
 
@@ -247,6 +248,8 @@ def generate_cwfs_survey(
         Maximum wind speed (in m/s).
     cwfs_block_name : `str`
         Name of the cwfs block survey.
+    sun_alt_limit : `float`
+        Maximum sun altitude before scheduling cwfs survey.
 
 
     Returns
@@ -259,6 +262,7 @@ def generate_cwfs_survey(
         note="cwfs",
         time_gap_min=time_gap_min,
         wind_speed_maximum=wind_speed_maximum,
+        sun_alt_limit=sun_alt_limit,
     )
 
     return GreedySurvey(
@@ -279,7 +283,7 @@ def generate_spectroscopic_survey(
     nfields: int,
     survey_detailers: typing.List[BaseDetailer],
     include_slew: bool = True,
-    sun_alt_limit: float = -10,
+    sun_alt_limit: float = -7,
 ) -> BaseSurvey:
     """Generate Spectroscopic Survey.
 
