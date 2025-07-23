@@ -284,7 +284,14 @@ def standard_bf(
         )
 
     else:
-        bfs.append((bf.M5DiffBasisFunction(bandname=bandname, nside=nside, fiducial_FWHMEff=fiducial_fwhm), m5_weight))
+        bfs.append(
+            (
+                bf.M5DiffBasisFunction(
+                    bandname=bandname, nside=nside, fiducial_FWHMEff=fiducial_fwhm
+                ),
+                m5_weight,
+            )
+        )
 
     if bandname2 is not None:
         bfs.append(
@@ -1694,13 +1701,15 @@ def gen_ddf_surveys(
         nexp = {"u": U_NEXP, "g": NEXP, "r": NEXP, "i": NEXP, "z": NEXP, "y": NEXP}
 
     if detailer_list is None:
-        dither_detailer = detailers.DitherDetailer(per_night=True, max_dither=0.2)
+        dither_detailer = detailers.DitherDetailer(per_night=False, max_dither=0.2)
 
         dither_detailer = detailers.SplitDetailer(
-            dither_detailer, detailers.EuclidDitherDetailer()
+            dither_detailer, detailers.EuclidDitherDetailer(per_night=False)
         )
         detailer_list = [
-            detailers.CameraRotDetailer(min_rot=-75, max_rot=75),
+            detailers.CameraSmallRotPerObservationListDetailer(
+                min_rot=-75, max_rot=75, per_visit_rot=1.0
+            ),
             dither_detailer,
             detailers.BandSortDetailer(),
         ]
@@ -1723,6 +1732,7 @@ def gen_ddf_surveys(
         nside=nside,
         detailers=detailer_list,
         survey_name="deep drilling",
+        return_n_limit=250,
     )
     survey1.set_script(obs_array)
 

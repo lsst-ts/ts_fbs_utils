@@ -4,6 +4,11 @@
 Version History
 ===============
 
+v0.17.4
+-------
+* Add a large `return_n_limit` value for the DDFs, which should prevent target shuffling which resulted in more filter changes.
+* Add per-visit dither detailers (translational and rotational) for DDFs.
+
 v0.17.3
 -------
 * Modify the default sun_alt_limit for spectroscopic and cwfs surveys to be -7 degrees.
