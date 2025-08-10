@@ -4,6 +4,10 @@
 Version History
 ===============
 
+v0.17.5
+-------
+* Reduce primary SV survey area from approximately 3000 sq degrees to about 750, in response to concerns about remaining time available during commissioning and current image quality, plus ability to make and use templates.
+
 v0.17.4
 -------
 * Add a large `return_n_limit` value for the DDFs, which should prevent target shuffling which resulted in more filter changes.
