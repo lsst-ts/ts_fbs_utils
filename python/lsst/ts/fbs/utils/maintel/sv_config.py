@@ -71,10 +71,14 @@ def survey_footprint(
 
     # Define survey footprint areas
     allsky = generate_all_sky(nside=nside)
+    # SV survey started out with abs(eclip_lat) < 10
+    # and eclip_lon > 240 & < 40.
+    # Reduced to the following on 2025-08-10 following bad weather
+    # and a redirection of time towards image quality improvements.
     wide_area = np.where(
         (
-            (np.abs(allsky["eclip_lat"]) < 10)
-            & ((allsky["eclip_lon"] > 240) | (allsky["eclip_lon"] < 40))
+            (np.abs(allsky["eclip_lat"]) < 5)
+            & ((allsky["eclip_lon"] > 285) | (allsky["eclip_lon"] < -5))
         ),
         True,
         False,
