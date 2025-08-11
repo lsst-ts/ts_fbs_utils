@@ -4,6 +4,10 @@
 Version History
 ===============
 
+v0.17.6
+-------
+* Add minimum viable area for all kinds of pairs surveys, to avoid triggering these when there is not enough area to get a useful pairs (useful in terms of a minimum time separation, but also to avoid many filter changes).
+
 v0.17.5
 -------
 * Reduce primary SV survey area from approximately 3000 sq degrees to about 750, in response to concerns about remaining time available during commissioning and current image quality, plus ability to make and use templates.
