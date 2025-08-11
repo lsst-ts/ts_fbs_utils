@@ -628,13 +628,13 @@ def gen_template_surveys(
                 bandname2=None,
                 exptime=exptime,
                 ideal_pair_time=pair_time,
+                area_required=area_required,
                 survey_name=survey_name,
                 science_program=science_program,
                 observation_reason=f"template_blob_{bandname}_{pair_time :.1f}",
                 ignore_obs=ignore_obs,
                 nexp=nexp,
                 detailers=detailer_list,
-                area_required=area_required,
                 **blob_survey_params,
             )
         )
@@ -655,6 +655,7 @@ def blob_for_long(
     u_nexp: int = U_NEXP,
     n_obs_template: dict = None,
     pair_time: float = 33.0,
+    area_required: float = 150.0,
     season: float = 365.25,
     season_start_hour: float = -4.0,
     season_end_hour: float = 2.0,
@@ -710,6 +711,8 @@ def blob_for_long(
         If None, sets to 3 each. Default None.
     pair_time : `float`
         The ideal time between pairs (minutes). Default 33.
+    area_required : `float`
+        The minimum required current available area for the survey, sq deg.
     season : float
         The length of season (i.e., how long before templates expire) (days)
     season_start_hour : `float`
@@ -873,6 +876,7 @@ def blob_for_long(
                 bandname2=bandname2,
                 exptime=exptime,
                 ideal_pair_time=pair_time,
+                area_required=area_required,
                 survey_name=survey_name,
                 ignore_obs=ignore_obs,
                 nexp=nexp,
@@ -895,6 +899,7 @@ def gen_long_gaps_survey(
     u_exptime: float = U_EXPTIME,
     u_nexp: int = U_NEXP,
     pair_time: float = 33.0,
+    area_required: float = 150.0,
     night_pattern: list[bool] = [True, True],
     gap_range: list[float] = [2, 7],
     HA_min: float = 12,
@@ -927,6 +932,8 @@ def gen_long_gaps_survey(
         The number of exposures per visit for u band visits.
     pair_time : `float`
         The ideal time between pairs (minutes). Default 33.
+    area_required : `float`
+        The minimum required current available area for the survey, sq deg.
     night_pattern : `list` [ `bool` ]
         Which nights to let the survey execute.
         Default of [True, True] executes every night.
@@ -976,6 +983,7 @@ def gen_long_gaps_survey(
             u_exptime=u_exptime,
             u_nexp=u_nexp,
             pair_time=pair_time,
+            area_required=area_required,
             nside=nside,
             band1s=[bandname1],
             band2s=[bandname2],
@@ -1157,6 +1165,7 @@ def generate_blobs(
     u_nexp: int = U_NEXP,
     n_obs_template: dict = None,
     pair_time: float = 33.0,
+    area_required: float = 150.0,
     season: float = 365.25,
     season_start_hour: float = -4.0,
     season_end_hour: float = 2.0,
@@ -1206,6 +1215,8 @@ def generate_blobs(
         If None, sets to 3 each. Default None.
     pair_time : `float`
         The ideal time between pairs (minutes). Default 33.
+    area_required : `float`
+        The minimum required current available area for the survey, sq deg.
     season : float
         The length of season (i.e., how long before templates expire) (days)
     season_start_hour : `float`
@@ -1416,6 +1427,7 @@ def generate_blobs(
                 bandname2=bandname2,
                 exptime=exptime,
                 ideal_pair_time=pair_time,
+                area_required=area_required,
                 survey_name=survey_name,
                 science_program=science_program,
                 observation_reason=observation_reason,
@@ -1440,6 +1452,7 @@ def generate_twi_blobs(
     nexp: int = NEXP,
     n_obs_template: dict = None,
     pair_time: float = 15.0,
+    area_required: float = 50.0,
     season: float = 365.25,
     season_start_hour: float = -4.0,
     season_end_hour: float = 2.0,
@@ -1482,6 +1495,8 @@ def generate_twi_blobs(
         If None, sets to 3 each. Default None.
     pair_time : `float`
         The ideal time between pairs (minutes). Default 33.
+    area_required : `float`
+        The minimum required current available area for the survey, sq deg.
     season : float
         The length of season (i.e., how long before templates expire) (days)
     season_start_hour : `float`
@@ -1642,6 +1657,7 @@ def generate_twi_blobs(
                 bandname2=bandname2,
                 exptime=exptime,
                 ideal_pair_time=pair_time,
+                area_required=area_required,
                 survey_name=survey_name,
                 science_program=science_program,
                 observation_reason=observation_reason,
