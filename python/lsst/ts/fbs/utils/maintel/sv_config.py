@@ -26,6 +26,7 @@ from rubin_scheduler.scheduler.utils import (
     CurrentAreaMap,
     generate_all_sky,
     make_rolling_footprints,
+    ConstantFootprint,
 )
 from rubin_scheduler.site_models import Almanac
 from rubin_scheduler.utils import DEFAULT_NSIDE
@@ -76,10 +77,7 @@ def survey_footprint(
     # Reduced to the following on 2025-08-10 following bad weather
     # and a redirection of time towards image quality improvements.
     wide_area = np.where(
-        (
-            (np.abs(allsky["eclip_lat"]) < 5)
-            & ((allsky["eclip_lon"] > 285) | (allsky["eclip_lon"] < -5))
-        ),
+        ((np.abs(allsky["eclip_lat"]) < 5) & (allsky["eclip_lon"] > 285)),
         True,
         False,
     )
@@ -105,8 +103,10 @@ def survey_footprint(
     # Set up wide area using standard filter balance and labels
     sky = CurrentAreaMap(nside=nside)
     # Slightly boost NES visits in g band to help ensure templates
+    # NES no longer in reduced SV area, but still need to boost g in WFD
     footprints_hp_array, labels = sky.return_maps(
-        nes_ratios={"g": 0.35, "r": 0.4, "i": 0.4, "z": 0.28}
+        nes_ratios={"g": 0.35, "r": 0.4, "i": 0.4, "z": 0.28},
+        low_dust_ratios={"u": 0.7, "g": 1.0, "r": 0.9, "i": 0.9, "z": 1.0, "y": 0.9},
     )
     # Keep footprint inside wide_area along ecliptic
     for b in "ugrizy":
@@ -127,18 +127,12 @@ def survey_footprint(
     sun_moon_info = almanac.get_sun_moon_positions(survey_start_mjd)
     sun_ra_start = sun_moon_info["sun_RA"].copy()
 
-    footprints = make_rolling_footprints(
-        fp_hp=footprints_hp,
-        mjd_start=survey_start_mjd,
-        sun_ra_start=sun_ra_start,
-        nslice=2,
-        scale=0.9,
+    # Set up primary area footprint
+    footprints = ConstantFootprint(
         nside=nside,
-        wfd_indx=rolling_idx,
-        order_roll=1,
-        n_cycles=3,
-        uniform=True,
     )
+    for f in footprints_hp_array.dtype.names:
+        footprints.set_footprint(f, footprints_hp_array[f])
     survey_info["Footprints"] = footprints
 
     # Set up lvk_area footprint
