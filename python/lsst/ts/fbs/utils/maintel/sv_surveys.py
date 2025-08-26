@@ -471,6 +471,10 @@ def gen_template_surveys(
     HA_min: float = 2.5,
     HA_max: float = 24 - 2.5,
     max_alt: float = 76.0,
+    m5_weight: float = 6.0,
+    footprint_weight: float = 1.5,
+    slewtime_weight: float = 3.0,
+    stayband_weight: float = 3.0,
     science_program: str = SCIENCE_PROGRAM,
     blob_survey_params: dict | None = None,
 ) -> list[BlobSurvey]:
@@ -519,6 +523,14 @@ def gen_template_surveys(
         Typically for BlobSurveys this is set lower than the max available,
         to about 76 degrees, to avoid long dome slews near azimuth.
         This is masked separately from the `safety_masks`.
+    m5_weight : `float`
+        The weight for the 5-sigma depth difference basis function.
+    footprint_weight : `float`
+        The weight on the survey footprint basis function.
+    slewtime_weight : `float`
+        The weight on the slewtime basis function.
+    stayband_weight : `float`
+        The weight on basis function that tries to stay avoid band changes.
     science_program : `str`
         The science_program to use for visits from these surveys.
     blob_survey_params : `dict` or None
@@ -567,6 +579,10 @@ def gen_template_surveys(
                 nside,
                 bandname=bandname,
                 bandname2=None,
+                m5_weight=m5_weight,
+                footprint_weight=footprint_weight,
+                slewtime_weight=slewtime_weight,
+                stayband_weight=stayband_weight,
                 footprints=footprints,
                 n_obs_template=n_obs_template,
             )
@@ -905,6 +921,11 @@ def gen_long_gaps_survey(
     HA_min: float = 12,
     HA_max: float = 24 - 3.5,
     time_after_twi: float = 120,
+    m5_weight: float = 6.0,
+    footprint_weight: float = 1.5,
+    slewtime_weight: float = 3.0,
+    stayband_weight: float = 3.0,
+    template_weight: float = 12.0,
     u_template_weight: float = 50.0,
     g_template_weight: float = 50.0,
     science_program: str = SCIENCE_PROGRAM,
@@ -949,6 +970,16 @@ def gen_long_gaps_survey(
     time_after_twi : `float`
         The time after evening twilight to attempt long gaps (minutes).
         Default 120.
+    m5_weight : `float`
+        The weight for the 5-sigma depth difference basis function.
+    footprint_weight : `float`
+        The weight on the survey footprint basis function.
+    slewtime_weight : `float`
+        The weight on the slewtime basis function.
+    stayband_weight : `float`
+        The weight on basis function that tries to stay avoid band changes.
+    template_weight : `float`
+        The weight to place on getting image templates every season.
     u_template_weight : `float`
         The weight to place on getting image templates in u-band. Since there
         are so few u-visits, it can be helpful to turn this up a
@@ -991,6 +1022,11 @@ def gen_long_gaps_survey(
             time_after_twi=time_after_twi,
             HA_min=HA_min,
             HA_max=HA_max,
+            m5_weight=m5_weight,
+            footprint_weight=footprint_weight,
+            slewtime_weight=slewtime_weight,
+            stayband_weight=stayband_weight,
+            template_weight=template_weight,
             u_template_weight=u_template_weight,
             g_template_weight=g_template_weight,
             blob_names=blob_names,

@@ -4,6 +4,12 @@
 Version History
 ===============
 
+v0.17.7
+-------
+* Flatten `Footprint` coverage over SV survey, using ConstantFootprint instead of time-dependent footprint. Increase weight on footprint basis function.
+* Add more g band visits to flatten coverage across bandpasses. This makes it more likely to get templates in all of the remaining griz bands in SV.
+* Rewrite constraint on ecliptic longitude - previous constraint was written as longitude > 285 or longitude < -5, but the ecliptic longitude ranger here is 0-360 so this latter part of the constraint was doing nothing other than being confusing. Rewritten to be simply ecliptic longitude > 285 degrees. 
+
 v0.17.6
 -------
 * Add minimum viable area for all kinds of pairs surveys, to avoid triggering these when there is not enough area to get a useful pairs (useful in terms of a minimum time separation, but also to avoid many filter changes).
