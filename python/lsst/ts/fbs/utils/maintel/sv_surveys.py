@@ -563,7 +563,9 @@ def gen_template_surveys(
         detailer_list = []
         detailer_list.append(
             detailers.CameraRotDetailer(
-                min_rot=np.min(camera_rot_limits), max_rot=np.max(camera_rot_limits)
+                min_rot=np.min(camera_rot_limits),
+                max_rot=np.max(camera_rot_limits),
+                nnights=100,
             )
         )
         detailer_list.append(detailers.CloseAltDetailer())
@@ -806,7 +808,9 @@ def blob_for_long(
         detailer_list = []
         detailer_list.append(
             detailers.CameraRotDetailer(
-                min_rot=np.min(camera_rot_limits), max_rot=np.max(camera_rot_limits)
+                min_rot=np.min(camera_rot_limits),
+                max_rot=np.max(camera_rot_limits),
+                nnights=100,
             )
         )
         detailer_list.append(detailers.CloseAltDetailer())
@@ -1116,7 +1120,9 @@ def gen_greedy_surveys(
     surveys = []
     detailer_list = [
         detailers.CameraRotDetailer(
-            min_rot=np.min(camera_rot_limits), max_rot=np.max(camera_rot_limits)
+            min_rot=np.min(camera_rot_limits),
+            max_rot=np.max(camera_rot_limits),
+            nnights=100,
         )
     ]
     if "u" in bands:
@@ -1329,7 +1335,9 @@ def generate_blobs(
         detailer_list = []
         detailer_list.append(
             detailers.CameraRotDetailer(
-                min_rot=np.min(camera_rot_limits), max_rot=np.max(camera_rot_limits)
+                min_rot=np.min(camera_rot_limits),
+                max_rot=np.max(camera_rot_limits),
+                nnights=100,
             )
         )
         detailer_list.append(detailers.CloseAltDetailer())
@@ -1598,7 +1606,9 @@ def generate_twi_blobs(
         detailer_list = []
         detailer_list.append(
             detailers.CameraRotDetailer(
-                min_rot=np.min(camera_rot_limits), max_rot=np.max(camera_rot_limits)
+                min_rot=np.min(camera_rot_limits),
+                max_rot=np.max(camera_rot_limits),
+                nnights=100,
             )
         )
         detailer_list.append(detailers.CloseAltDetailer())
