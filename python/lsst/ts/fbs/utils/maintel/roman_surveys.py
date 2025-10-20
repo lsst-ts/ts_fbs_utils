@@ -22,6 +22,7 @@
 __all__ = ["gen_roman_on_season", "gen_roman_off_season"]
 
 import copy
+
 import rubin_scheduler.scheduler.basis_functions as bf
 import rubin_scheduler.scheduler.detailers as detailers
 from rubin_scheduler.scheduler.surveys import DeepDrillingSurvey
@@ -70,9 +71,9 @@ def gen_roman_on_season(
     per_night: bool = False,
     camera_ddf_rot_limit: float = 75.0,
     camera_ddf_rot_per_visit: float = 2.0,
-    exptime=EXPTIME,
-    nexp=NEXP,
-    science_program=SCIENCE_PROGRAM,
+    exptime: float = EXPTIME,
+    nexp: int = NEXP,
+    science_program: str = SCIENCE_PROGRAM,
     safety_mask_params: dict | None = None,
 ) -> DeepDrillingSurvey:
     """Generate a survey configured to observe the Roman field(s) during an
@@ -190,9 +191,9 @@ def gen_roman_off_season(
     per_night: bool = False,
     camera_ddf_rot_limit: float = 75.0,
     camera_ddf_rot_per_visit: float = 2.0,
-    exptime=EXPTIME,
-    nexp=NEXP,
-    science_program=SCIENCE_PROGRAM,
+    exptime: float = EXPTIME,
+    nexp: int = NEXP,
+    science_program: str = SCIENCE_PROGRAM,
     safety_mask_params: dict | None = None,
 ) -> DeepDrillingSurvey:
     """Generate a survey configured to observe the Roman field(s) outside

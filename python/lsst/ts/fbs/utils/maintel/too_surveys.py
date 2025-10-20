@@ -26,7 +26,6 @@ from copy import deepcopy
 
 import numpy as np
 import numpy.typing as npt
-import rubin_scheduler.scheduler.basis_functions as basis_functions
 import rubin_scheduler.scheduler.detailers as detailers
 from rubin_scheduler.scheduler.detailers import BandPickToODetailer
 from rubin_scheduler.scheduler.surveys import ToOScriptedSurvey
@@ -36,8 +35,6 @@ from .lsst_surveys import (
     EXPTIME,
     NEXP,
     SCIENCE_PROGRAM,
-    U_EXPTIME,
-    U_NEXP,
     safety_masks,
 )
 
@@ -68,7 +65,7 @@ def gen_too_surveys(
         rubin_scheduler) into shorter exposures (60s) or not?
         Splitting long exposures requires creation of nightly coadds, which
         is not currently available. However long exposures may also pose
-        risks of tripping the sensors. 
+        risks of tripping the sensors.
     long_exp_nsnaps : `int`
         The number of snaps for longer exposures. (60s??)
     n_snaps : `int`
@@ -105,7 +102,7 @@ def gen_too_surveys(
     # XXX--instructions say do 4th night only 1/3 of the time.
     # Just leaving off for now
 
-    times = [0, 24, 48]
+    times = np.array([0, 24, 48], float)
     bands_at_times = ["ugrizy", "ugrizy", "ugrizy"]
     nvis = [3, 1, 1]
     exptimes = [120.0, 120.0, 120.0]
@@ -135,7 +132,7 @@ def gen_too_surveys(
     # GW gold and GW unidentified gold
     ############
 
-    times = [0, 2, 4, 24, 48, 72]
+    times = np.array([0, 2, 4, 24, 48, 72], float)
     bands_at_times = ["gri", "gri", "gri", "ri", "ri", "ri"]
     nvis = [4, 4, 4, 6, 6, 6]
     exptimes = [30.0, 30.0, 30.0, 30.0, 30.0, 30.0]
@@ -165,7 +162,7 @@ def gen_too_surveys(
     # GW silver and GW unidentified silver
     ############
 
-    times = [0, 24, 48, 72]
+    times = np.array([0, 24, 48, 72], float)
     bands_at_times = ["gi", "gi", "gi", "gi"]
     nvis = [1, 4, 4, 4]
     exptimes = [30.0, 30.0, 30.0, 30.0]
@@ -221,7 +218,7 @@ def gen_too_surveys(
             require_dark=True,
         ),
     ]
-    times = np.array([0, 2, 7, 9, 39]) * 24
+    times = np.array([0, 2, 7, 9, 39], float) * 24
     bands_at_times = ["rzi"] * times.size
     nvis = [1] * times.size
     exptimes = [EXPTIME] * times.size
@@ -253,7 +250,7 @@ def gen_too_surveys(
     # Lensed BNS
     ############
 
-    times = np.array([1.0, 1.0, 25, 25, 49, 49])
+    times = np.array([1.0, 1.0, 25, 25, 49, 49], float)
     bands_at_times = ["g", "r"] * 3
     nvis = [1, 3] * 3
     exptimes = [EXPTIME, EXPTIME] * 3
@@ -281,7 +278,7 @@ def gen_too_surveys(
     )
 
     # This is the small skymap (15 deg^2 case)
-    times = np.array([1.0, 1.0, 25, 25, 49, 49])
+    times = np.array([1.0, 1.0, 25, 25, 49, 49], float)
     bands_at_times = ["g", "r"] * 3
     nvis = [180, 120] * 3
     exptimes = [30] * times.size
@@ -312,7 +309,7 @@ def gen_too_surveys(
     # Neutrino detector followup
     ############
 
-    times = [0, 0, 15 / 60.0, 0, 24, 24, 144, 144]
+    times = np.array([0.0, 0.0, 15.0 / 60.0, 0.0, 24.0, 24.0, 144.0, 144.0], float)
     bands_at_times = ["u", "g", "r", "z", "g", "r", "g", "rz"]
     exptimes = [
         30,
@@ -355,7 +352,7 @@ def gen_too_surveys(
     # but this should work for now. Want to add a detailer to add a dither
     # position.
 
-    times = [0, 33 / 60.0, 66 / 60.0]
+    times = np.array([0, 33 / 60.0, 66 / 60.0], float)
     bands_at_times = ["r"] * 3
     nvis = [1] * 3
     exptimes = [EXPTIME] * 3
@@ -382,7 +379,7 @@ def gen_too_surveys(
         )
     )
 
-    times = [0, 10 / 60.0, 20 / 60.0]
+    times = np.array([0, 10 / 60.0, 20 / 60.0])
     bands_at_times = ["z"] * 3
     nvis = [2] * 3
     exptimes = [15.0] * 3
@@ -416,7 +413,7 @@ def gen_too_surveys(
     # in the region in 1s and 15s exposures for i band, until
     # a counterpart is identified
 
-    times = [0, 0, 0, 0] * 4
+    times = np.array([0, 0, 0, 0] * 4, float)
     bands_at_times = ["i", "i", "i", "i"] * 4
     nvis = [1, 1, 1, 1] * 4
     exptimes = [1, 15, 1, 15] * 4

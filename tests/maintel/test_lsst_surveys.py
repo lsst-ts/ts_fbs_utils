@@ -19,7 +19,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
 import unittest
 
 import lsst.ts.fbs.utils.maintel.lsst_surveys as lsst_surveys
@@ -29,11 +28,12 @@ import numpy as np
 import rubin_scheduler.scheduler.basis_functions as basis_functions
 from rubin_scheduler.scheduler.surveys import LongGapSurvey
 from rubin_scheduler.scheduler.utils import CurrentAreaMap, make_rolling_footprints
+from rubin_scheduler.site_models import Almanac
 from rubin_scheduler.utils import SURVEY_START_MJD
 
 
 class Test_lsst_Surveys(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         # Generate footprint over the sky
         self.nside = 32
         sky = CurrentAreaMap(nside=self.nside)
@@ -51,7 +51,7 @@ class Test_lsst_Surveys(unittest.TestCase):
         footprint_mask = footprints_hp["r"] * 0
         footprint_mask[np.where(footprints_hp["r"] > 0)] = 1
 
-        # Use the Almanac to find the position of the sun at the start of survey
+        # Use Almanac to find the position of the sun at the start of survey
         almanac = Almanac(mjd_start=SURVEY_START_MJD)
         sun_moon_info = almanac.get_sun_moon_positions(SURVEY_START_MJD)
         sun_ra_start = sun_moon_info["sun_RA"].copy()

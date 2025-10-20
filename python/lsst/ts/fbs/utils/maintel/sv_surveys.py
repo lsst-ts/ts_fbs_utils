@@ -33,7 +33,7 @@ from rubin_scheduler.scheduler.surveys import (
 from rubin_scheduler.scheduler.utils import Footprints
 from rubin_scheduler.utils import DEFAULT_NSIDE, SURVEY_START_MJD
 
-from .ddf_presched import generate_ddf_scheduled_obs
+from .sv_ddf_presched import generate_ddf_scheduled_obs
 
 __all__ = [
     "safety_masks",
@@ -178,7 +178,7 @@ def safety_masks(
 def standard_bf(
     nside: int = DEFAULT_NSIDE,
     bandname: str = "g",
-    bandname2: str = "i",
+    bandname2: str | None = "i",
     m5_weight: float = 6.0,
     footprint_weight: float = 1.5,
     slewtime_weight: float = 3.0,
@@ -340,7 +340,7 @@ def standard_bf(
     else:
         bfs.append((bf.BandChangeBasisFunction(bandname=bandname), stayband_weight))
 
-    if n_obs_template is not None:
+    if footprints is not None and n_obs_template is not None:
         if bandname2 is not None:
             bfs.append(
                 (
@@ -396,7 +396,7 @@ def standard_bf(
 def gen_lvk_templates(
     footprints_hp: npt.NDArray,
     nside: int = DEFAULT_NSIDE,
-    bands: tuple[str] = ("g", "i"),
+    bands: list[str] = ["g", "i"],
     survey_start: float = SURVEY_START_MJD,
     camera_rot_limits: tuple[float, float] = CAMERA_ROT_LIMITS,
     exptime: float = EXPTIME,
@@ -647,7 +647,7 @@ def gen_template_surveys(
                 area_required=area_required,
                 survey_name=survey_name,
                 science_program=science_program,
-                observation_reason=f"template_blob_{bandname}_{pair_time :.1f}",
+                observation_reason=f"template_blob_{bandname}_{pair_time:.1f}",
                 ignore_obs=ignore_obs,
                 nexp=nexp,
                 detailers=detailer_list,
@@ -669,7 +669,7 @@ def blob_for_long(
     nexp: int = NEXP,
     u_exptime: float = U_EXPTIME,
     u_nexp: int = U_NEXP,
-    n_obs_template: dict = None,
+    n_obs_template: dict | None = None,
     pair_time: float = 33.0,
     area_required: float = 150.0,
     season: float = 365.25,
@@ -882,7 +882,7 @@ def blob_for_long(
             detailer_list.append(detailers.TakeAsPairsDetailer(bandname=bandname2))
 
         if observation_reason is None:
-            observation_reason = f"triplet_pairs_{bandname}{bandname2}_{pair_time :.1f}"
+            observation_reason = f"triplet_pairs_{bandname}{bandname2}_{pair_time:.1f}"
 
         surveys.append(
             BlobSurvey(
@@ -1064,7 +1064,7 @@ def gen_greedy_surveys(
     stayband_weight: float = 100.0,
     repeat_weight: float = -1.0,
     footprints: Footprints | None = None,
-    science_program=SCIENCE_PROGRAM,
+    science_program: str = SCIENCE_PROGRAM,
 ) -> list[GreedySurvey]:
     """Generate greedy (single-best choice visits) Surveys.
 
@@ -1199,7 +1199,7 @@ def generate_blobs(
     nexp: int = NEXP,
     u_exptime: float = U_EXPTIME,
     u_nexp: int = U_NEXP,
-    n_obs_template: dict = None,
+    n_obs_template: dict | None = None,
     pair_time: float = 33.0,
     area_required: float = 150.0,
     season: float = 365.25,
@@ -1453,7 +1453,7 @@ def generate_blobs(
         observation_reason = f"pairs_{bandname}"
         if bandname2 is not None:
             observation_reason += f"{bandname2}"
-        observation_reason += f"_{pair_time :.1f}"
+        observation_reason += f"_{pair_time:.1f}"
 
         surveys.append(
             BlobSurvey(
@@ -1486,7 +1486,7 @@ def generate_twi_blobs(
     camera_rot_limits: tuple[float, float] = CAMERA_ROT_LIMITS,
     exptime: float = EXPTIME,
     nexp: int = NEXP,
-    n_obs_template: dict = None,
+    n_obs_template: dict | None = None,
     pair_time: float = 15.0,
     area_required: float = 50.0,
     season: float = 365.25,
@@ -1683,7 +1683,7 @@ def generate_twi_blobs(
         observation_reason = f"pairs_{bandname}"
         if bandname2 is not None:
             observation_reason += f"{bandname2}"
-        observation_reason += f"_{pair_time :.1f}"
+        observation_reason += f"_{pair_time:.1f}"
 
         surveys.append(
             BlobSurvey(

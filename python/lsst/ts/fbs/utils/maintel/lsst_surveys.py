@@ -31,6 +31,7 @@ __all__ = (
 )
 
 import copy
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
@@ -45,7 +46,6 @@ from rubin_scheduler.scheduler.surveys import (
 from rubin_scheduler.scheduler.utils import (
     ConstantFootprint,
     Footprints,
-    ScheduledObservationArray,
     ecliptic_area,
 )
 from rubin_scheduler.utils import DEFAULT_NSIDE, SURVEY_START_MJD
@@ -184,7 +184,7 @@ def safety_masks(
 def standard_bf(
     nside: int = DEFAULT_NSIDE,
     bandname: str = "g",
-    bandname2: str = "i",
+    bandname2: str | None = "i",
     m5_weight: float = 6.0,
     footprint_weight: float = 1.5,
     slewtime_weight: float = 3.0,
@@ -552,7 +552,7 @@ def gen_template_surveys(
                 ideal_pair_time=pair_time,
                 survey_name=survey_name,
                 science_program=science_program,
-                observation_reason=f"template_blob_{bandname}_{pair_time :.1f}",
+                observation_reason=f"template_blob_{bandname}_{pair_time:.1f}",
                 ignore_obs=ignore_obs,
                 nexp=nexp,
                 detailers=detailer_list,
@@ -575,7 +575,7 @@ def blob_for_long(
     nexp: int = NEXP,
     u_exptime: float = U_EXPTIME,
     u_nexp: int = U_NEXP,
-    n_obs_template: dict = None,
+    n_obs_template: dict | None = None,
     pair_time: float = 33.0,
     season: float = 365.25,
     season_start_hour: float = -4.0,
@@ -773,7 +773,7 @@ def blob_for_long(
             detailer_list.append(detailers.TakeAsPairsDetailer(bandname=bandname2))
 
         if observation_reason is None:
-            observation_reason = f"triplet_pairs_{bandname}{bandname2}_{pair_time :.1f}"
+            observation_reason = f"triplet_pairs_{bandname}{bandname2}_{pair_time:.1f}"
 
         surveys.append(
             BlobSurvey(
@@ -878,14 +878,14 @@ def gen_long_gaps_survey(
     """
     # Only copy the safety_mask_params here for the ScriptedSurvey.
     # The blob_for_long survey will copy/update on its own.
-    if safety_mask_params is None:
-        safety_mask_params_scripted = {"nside": nside}
-    else:
-        safety_mask_params_scripted = copy.deepcopy(safety_mask_params)
-    if (
-        "shadow_minutes" not in safety_mask_params_scripted
-        or safety_mask_params["shadow_minutes"] < pair_time
-    ):
+    safety_mask_params_scripted: dict[str, Any] = {"nside": nside}
+    if safety_mask_params is not None:
+        for key in safety_mask_params:
+            safety_mask_params_scripted[key] = safety_mask_params[key]
+            if key == "shadow_minutes":
+                if safety_mask_params[key] < pair_time:
+                    safety_mask_params_scripted[key] = pair_time
+    if "shadow_minutes" not in safety_mask_params_scripted:
         safety_mask_params_scripted["shadow_minutes"] = pair_time
 
     surveys = []
@@ -922,8 +922,9 @@ def gen_long_gaps_survey(
             safety_mask_params=safety_mask_params,
             pair_pad=pair_pad,
         )
+        masks = safety_masks(**safety_mask_params_scripted)
         scripted = ScriptedSurvey(
-            safety_masks(**safety_mask_params_scripted),
+            masks,
             nside=nside,
             ignore_obs=["blob", "DDF", "twi", "pair", "templates", "ToO"],
             science_program=science_program,
@@ -1104,7 +1105,7 @@ def generate_blobs(
     nexp: int = NEXP,
     u_exptime: float = U_EXPTIME,
     u_nexp: int = U_NEXP,
-    n_obs_template: dict = None,
+    n_obs_template: dict | None = None,
     pair_time: float = 33.0,
     season: float = 365.25,
     season_start_hour: float = -4.0,
@@ -1356,7 +1357,7 @@ def generate_blobs(
         observation_reason = f"pairs_{bandname}"
         if bandname2 is not None:
             observation_reason += f"{bandname2}"
-        observation_reason += f"_{pair_time :.1f}"
+        observation_reason += f"_{pair_time:.1f}"
 
         surveys.append(
             BlobSurvey(
@@ -1388,7 +1389,7 @@ def generate_twi_blobs(
     camera_rot_limits: tuple[float, float] = CAMERA_ROT_LIMITS,
     exptime: float = EXPTIME,
     nexp: int = NEXP,
-    n_obs_template: dict = None,
+    n_obs_template: dict[str, int] | None = None,
     pair_time: float = 15.0,
     season: float = 365.25,
     season_start_hour: float = -4.0,
@@ -1428,7 +1429,7 @@ def generate_twi_blobs(
         Exposure time for visits.
     nexp : `int`
         Number of exposures per visit.
-    n_obs_template : `dict`
+    n_obs_template : `dict` or None
         The number of observations to take every season in each band.
         If None, sets to 3 each. Default None.
     pair_time : `float`
@@ -1586,7 +1587,7 @@ def generate_twi_blobs(
         observation_reason = f"pairs_{bandname}"
         if bandname2 is not None:
             observation_reason += f"{bandname2}"
-        observation_reason += f"_{pair_time :.1f}"
+        observation_reason += f"_{pair_time:.1f}"
 
         surveys.append(
             BlobSurvey(
