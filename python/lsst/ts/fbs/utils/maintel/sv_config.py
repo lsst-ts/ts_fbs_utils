@@ -19,14 +19,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from typing import Any
+
 import healpy as hp
 import numpy as np
 from astropy.time import Time
 from rubin_scheduler.scheduler.utils import (
+    ConstantFootprint,
     CurrentAreaMap,
     generate_all_sky,
     make_rolling_footprints,
-    ConstantFootprint,
 )
 from rubin_scheduler.site_models import Almanac
 from rubin_scheduler.utils import DEFAULT_NSIDE
@@ -63,7 +65,7 @@ def survey_footprint(
         set of keys, along with additional information such as the almanac.
         This is used in the SV survey configuration.
     """
-    survey_info = {}
+    survey_info: dict[str, Any] = {}
     survey_info["nside"] = nside
     survey_info["survey_start"] = Time(survey_start_mjd, format="mjd", scale="utc")
     if almanac is None:

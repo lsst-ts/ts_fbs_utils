@@ -108,7 +108,11 @@ def ddf_slopes(
 
     # Add extra adjustment to boost visits in seasons 0, 1, and 2
     # and maybe -1.
-    if boost_early_factor is not None:
+    if (
+        boost_early_factor is not None
+        and boost_factor_fractional is not None
+        and boost_factor_third is not None
+    ):
         early_season = np.where(season_list == -1)[0]
         if (len(early_season) > 0) & (boost_factor_fractional > 0):
             season_vals[early_season] = season_seq * boost_factor_fractional
@@ -217,7 +221,7 @@ def optimize_ddf_times(
     mask_even_odd: bool | None = None,
     moon_illum_lt: float | None = None,
     moon_illum_gt: float | None = None,
-) -> list[npt.NDArray, npt.NDArray, npt.NDArray, npt.NDArray]:
+) -> tuple[list[float], npt.NDArray, npt.NDArray, npt.NDArray]:
     """
 
     Parameters
@@ -323,9 +327,8 @@ def optimize_ddf_times(
     if g_depth_limit is not None:
         m5_mask[np.where(ddf_grid["%s_m5_g" % ddf_name] < g_depth_limit)] = 0
 
-    eo_mask = 1
+    eo_mask = np.ones(ngrid, dtype=bool)
     if mask_even_odd is not None:
-        eo_mask = np.ones(ngrid, dtype=bool)
         is_odd_indx = night % 2 != 0
         is_even_indx = night % 2 == 0
         if mask_even_odd:
@@ -333,13 +336,11 @@ def optimize_ddf_times(
         else:
             eo_mask[is_odd_indx] = 0
 
-    moon_illum_mask = 1
+    moon_illum_mask = np.ones(ngrid, dtype=bool)
     if moon_illum_lt is not None:
-        moon_illum_mask = np.ones(ngrid, dtype=bool)
         indx = np.where(ddf_grid["moon_phase"] > moon_illum_lt)[0]
         moon_illum_mask[indx] = 0
     if moon_illum_gt is not None:
-        moon_illum_mask = np.ones(ngrid, dtype=bool)
         indx = np.where(ddf_grid["moon_phase"] < moon_illum_gt)[0]
         moon_illum_mask[indx] = 0
 
@@ -396,14 +397,14 @@ def optimize_ddf_times(
             boost_factor_fractional=boost_factor_fractional,
         )
     else:
-        return [], [], [], []
+        return [], np.array([]), np.array([]), np.array([])
 
     # Identify which nights (only scheduling 1 sequence per night)
     # would be usable, based on the masks above.
     night_mask = unights * 0
     # which unights are in potential nights
-    indx = np.isin(unights, potential_nights)
-    night_mask[indx] = 1
+    n_indx = np.isin(unights, potential_nights)
+    night_mask[n_indx] = 1
 
     # scale things down if we don't have enough nights
     n_possible_nights = np.sum(night_mask)
@@ -440,7 +441,7 @@ def optimize_ddf_times(
 
 def generate_ddf_scheduled_obs(
     ddf_config_file: str,
-    data_file: str = None,
+    data_file: str | None = None,
     mjd_tol: float = 15,
     expt: dict = {"u": 38, "g": 30, "r": 30, "i": 30, "z": 30, "y": 30},
     nsnaps: dict = {"u": 1, "g": 1, "r": 1, "i": 1, "z": 1, "y": 1},
@@ -456,7 +457,7 @@ def generate_ddf_scheduled_obs(
     overhead: float = 4.0,
     illum_limit: float = 40.0,
     science_program: str | None = None,
-):
+) -> ScheduledObservationArray:
     """Generate the prescheduled observations for the DDFs.
 
     Parameters
