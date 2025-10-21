@@ -1,14 +1,14 @@
-{% set data= load_setup_py_data() %}
+{ % set data= load_setup_py_data() % }
 package:
   name: ts-fbs-utils
-  version: {{ data.get('version') }}
+  version: { { data.get('version') } }
 
 source:
   path: ../
 
 build:
   noarch: python
-  script: {{ PYTHON }} -m pip install --no-deps --ignore-installed .
+  script: { { PYTHON } } -m pip install --no-deps --ignore-installed .
   script_env:
     - RUBIN_SIM_DATA_DIR={{ PREFIX }}
 
@@ -16,8 +16,8 @@ test:
   requires:
     - ts-conda-build =0.4
     - ts-utils
-    - rubin-scheduler >=3.17.0
-    - {{ pin_compatible('rubin-scheduler',  min_pin='x') }}
+    - rubin-scheduler >=3.18.1
+    - { { pin_compatible('rubin-scheduler',  min_pin='x') } }
   source_files:
     - python
     - tests
@@ -42,5 +42,5 @@ requirements:
     - ts-conda-build
   run:
     - python {{ python }}
-    - {{ pin_compatible('rubin-scheduler', min_pin='x') }}
+    - { { pin_compatible('rubin-scheduler', min_pin='x') } }
     - ts-utils
