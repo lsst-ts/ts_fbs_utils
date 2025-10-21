@@ -14,9 +14,9 @@ build:
 
 test:
   requires:
-    - ts-conda-build =0.4
+    - ts-conda-build =0.5
     - ts-utils
-    - rubin-scheduler >=3.6
+    - rubin-scheduler >=3.18.1
     - {{ pin_compatible('rubin-scheduler',  min_pin='x') }}
   source_files:
     - python
