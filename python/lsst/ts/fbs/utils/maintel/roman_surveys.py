@@ -25,7 +25,7 @@ import copy
 
 import rubin_scheduler.scheduler.basis_functions as bf
 import rubin_scheduler.scheduler.detailers as detailers
-from rubin_scheduler.scheduler.surveys import DeepDrillingSurvey
+from rubin_scheduler.scheduler.surveys import FieldSurvey
 from rubin_scheduler.utils import DEFAULT_NSIDE, special_locations
 
 from .lsst_surveys import EXPTIME, NEXP, SCIENCE_PROGRAM, safety_masks
@@ -75,7 +75,12 @@ def gen_roman_on_season(
     nexp: int = NEXP,
     science_program: str = SCIENCE_PROGRAM,
     safety_mask_params: dict | None = None,
-) -> DeepDrillingSurvey:
+    shadow_minutes: float = 12,
+    sequence: str = "giriz",
+    nvisits: dict | None = None,
+    nexps: dict | None = None,
+    exptimes: dict | None = None,
+) -> FieldSurvey:
     """Generate a survey configured to observe the Roman field(s) during an
     'on' season.
 
@@ -102,6 +107,18 @@ def gen_roman_on_season(
         Name of the science program for the survey.
     safety_mask_params : `dict`
         A dictionary of additional kwargs to pass to the standard safety masks.
+    shadow_minutes : `float`
+        Shadow time passed to safety masks, the expected time
+        it takes for a sequence to take. Will overide values in
+        safety_mask_params if larger. Minutes.
+    sequence : `str`
+        Band names to use in the sequence
+    nvisits : `dict`
+        Number of visits for each band. Passed to FieldSurvey.
+    nexps : `dict`
+        Number of exposures for each band. Passed to FieldSurvey.
+    exptimes : `dict`
+        Exposure times for each band. Passed to FieldSurvey.
 
     Returns
     -------
@@ -110,13 +127,23 @@ def gen_roman_on_season(
         (single exposure each band), every day while the RGES field
         is being observed by Roman.
     """
+    if nvisits is None:
+        nvisits = {"g": 1, "r": 1, "i": 1, "z": 1}
+    if nexps is None:
+        nexps = {}
+        for key in nvisits:
+            nexps[key] = nexp
+
+    if exptimes is None:
+        exptimes = {}
+        for key in nvisits:
+            exptimes[key] = exptime
+
     if safety_mask_params is None:
         safety_mask_params = {}
         safety_mask_params["nside"] = nside
     else:
         safety_mask_params = copy.deepcopy(safety_mask_params)
-    # Estimate of sequence time, given sequence defined below.
-    shadow_minutes = 12
     if (
         "shadow_minutes" not in safety_mask_params
         or safety_mask_params["shadow_minutes"] < shadow_minutes
@@ -169,16 +196,16 @@ def gen_roman_on_season(
     )
     details.append(detailers.LabelRegionsAndDDFs())
 
-    survey = DeepDrillingSurvey(
+    survey = FieldSurvey(
         basis_functions,
         RA=RA,
         dec=dec,
-        sequence="giriz",
+        sequence=sequence,
         # This may need some work if rapid filter changes cause problems.
         # However, this survey doesn't execute until RGES is in season (2028?)
-        nvis=[1, 1, 1, 1, 1],
-        exptime=exptime,
-        nexp=nexp,
+        nvisits=nvisits,
+        nexps=nexps,
+        exptimes=exptimes,
         survey_name=survey_name,
         detailers=details,
     )
@@ -195,7 +222,12 @@ def gen_roman_off_season(
     nexp: int = NEXP,
     science_program: str = SCIENCE_PROGRAM,
     safety_mask_params: dict | None = None,
-) -> DeepDrillingSurvey:
+    shadow_minutes: float = 11,
+    sequence: str = "griz",
+    nvisits: dict | None = None,
+    nexps: dict | None = None,
+    exptimes: dict | None = None,
+) -> FieldSurvey:
     """Generate a survey configured to observe the Roman field(s) outside
     of the 'on' seasons (during 'off' seasons).
 
@@ -214,14 +246,26 @@ def gen_roman_off_season(
     camera_ddf_rot_per_visit : `float`
         The rotational dither offset to apply per visit.
         In degrees.
-    exptime : `float`
-        The exposure time per visit.
+    wind_speed_maximum : `float`
+        Maximum wind speed to allow (m/s).
     nexp : `int`
         The number of snaps (exposures) per visit.
     science_program : `str`
         Name of the science program for the survey.
     safety_mask_params : `dict`
         A dictionary of additional kwargs to pass to the standard safety masks.
+    shadow_minutes : `float`
+        Shadow time passed to safety masks, the expected time
+        it takes for a sequence to take. Will overide values in
+        safety_mask_params if larger. Minutes.
+    sequence : `str`
+        Band names to use in the sequence
+    nvisits : `dict`
+        Number of visits for each band. Passed to FieldSurvey.
+    nexps : `dict`
+        Number of exposures for each band. Passed to FieldSurvey.
+    exptimes : `dict`
+        Exposure times for each band. Passed to FieldSurvey.
 
     Returns
     -------
@@ -230,13 +274,25 @@ def gen_roman_off_season(
         every third day while the RGES field is visible but not being
         observed by Roman.
     """
+    # updated these to 2 visits before filter change
+    # original plan is 1 per band -- can AOS handle this?
+    if nvisits is None:
+        nvisits = {"g": 2, "r": 2, "i": 2, "z": 2}
+    if nexps is None:
+        nexps = {}
+        for key in nvisits:
+            nexps[key] = nexp
+
+    if exptimes is None:
+        exptimes = {}
+        for key in nvisits:
+            exptimes[key] = exptime
+
     if safety_mask_params is None:
         safety_mask_params = {}
         safety_mask_params["nside"] = nside
     else:
         safety_mask_params = copy.deepcopy(safety_mask_params)
-    # Estimate of sequence time, given sequence defined below.
-    shadow_minutes = 11
     if (
         "shadow_minutes" not in safety_mask_params
         or safety_mask_params["shadow_minutes"] < shadow_minutes
@@ -267,7 +323,6 @@ def gen_roman_off_season(
     basis_functions.append(
         bf.InTimeWindowBasisFunction(mjd_windows=field_info["seasons_off"])
     )
-    basis_functions.append(bf.AirmassPointRangeBasisFunction(RA, dec, nside=nside))
 
     # Add a dither detailer, so it dithers between each set of exposures
     details = []
@@ -290,16 +345,14 @@ def gen_roman_off_season(
     )
     details.append(detailers.LabelRegionsAndDDFs())
 
-    survey = DeepDrillingSurvey(
+    survey = FieldSurvey(
         basis_functions,
         RA=RA,
         dec=dec,
-        sequence="griz",
-        # updated these to 2 visits before filter change
-        # original plan is 1 per band -- can AOS handle this?
-        nvis=[2, 2, 2, 2],
-        exptime=exptime,
-        nexp=nexp,
+        sequence=sequence,
+        nvisits=nvisits,
+        nexps=nexps,
+        exptimes=exptimes,
         survey_name=survey_name,
         detailers=details,
     )
