@@ -26,7 +26,7 @@ __all__ = (
     "gen_template_surveys",
     "gen_greedy_surveys",
     "generate_blobs",
-    "generate_twi_blobs",
+    "generate_short_blobs",
     "generate_twilight_near_sun",
 )
 
@@ -1380,7 +1380,7 @@ def generate_blobs(
     return surveys
 
 
-def generate_twi_blobs(
+def generate_short_blobs(
     footprints: Footprints,
     nside: int = DEFAULT_NSIDE,
     band1s: list[str] = ["r", "i", "z", "y"],
