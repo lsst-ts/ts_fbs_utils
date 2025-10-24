@@ -72,9 +72,9 @@ def gen_roman_on_season(
     camera_ddf_rot_limit: float = 75.0,
     camera_ddf_rot_per_visit: float = 2.0,
     sequence: str = "giriz",
-    nvisits: dict | None = None,
-    nexps: dict | None = None,
-    exptimes: dict | None = None,
+    nvisits: dict | int = 1,
+    nexps: dict | int = NEXP,
+    exptimes: dict | float = EXPTIME,
     science_program: str = SCIENCE_PROGRAM,
     safety_mask_params: dict | None = None,
 ) -> FieldSurvey:
@@ -98,12 +98,15 @@ def gen_roman_on_season(
         In degrees.
     sequence : `str`
         Band names to use in the sequence
-    nvisits : `dict`
+    nvisits : `dict` or `int`
         Number of visits for each band. Passed to FieldSurvey.
-    nexps : `dict`
+        If nvisits is an int, this is applied to each band in `sequence`.
+    nexps : `dict` or `int`
         Number of exposures for each band. Passed to FieldSurvey.
-    exptimes : `dict`
+        If nexps is an int, this is applied to each band in `sequence`.
+    exptimes : `dict` or `float`
         Exposure times for each band. Passed to FieldSurvey.
+        If exptimes is a float, this is applied to each band in `sequence`.
     science_program : `str`
         Name of the science program for the survey.
     safety_mask_params : `dict`
@@ -116,13 +119,6 @@ def gen_roman_on_season(
         (single exposure each band), every day while the RGES field
         is being observed by Roman.
     """
-    if nvisits is None:
-        nvisits = {"g": 1, "r": 1, "i": 1, "z": 1}
-    if nexps is None:
-        nexps = {}
-        for key in nvisits:
-            nexps[key] = NEXP
-
     if exptimes is None:
         exptimes = {}
         for key in nvisits:
@@ -208,9 +204,9 @@ def gen_roman_off_season(
     camera_ddf_rot_limit: float = 75.0,
     camera_ddf_rot_per_visit: float = 2.0,
     sequence: str = "griz",
-    nvisits: dict | None = None,
-    nexps: dict | None = None,
-    exptimes: dict | None = None,
+    nvisits: dict | int = 2,
+    nexps: dict | int = NEXP,
+    exptimes: dict | float = EXPTIME,
     science_program: str = SCIENCE_PROGRAM,
     safety_mask_params: dict | None = None,
 ) -> FieldSurvey:
@@ -234,12 +230,15 @@ def gen_roman_off_season(
         In degrees.
     sequence : `str`
         Band names to use in the sequence
-    nvisits : `dict`
+    nvisits : `dict` or `int` or None
         Number of visits for each band. Passed to FieldSurvey.
-    nexps : `dict`
+        If nvisits is an int, this is applied to each band in `sequence`.
+    nexps : `dict` or `int`
         Number of exposures for each band. Passed to FieldSurvey.
-    exptimes : `dict`
+        If nexps is an int, this is applied to each band in `sequence`.
+    exptimes : `dict` or `float`
         Exposure times for each band. Passed to FieldSurvey.
+        If exptimes is a float, this is applied to each band in `sequence`.
     science_program : `str`
         Name of the science program for the survey.
     safety_mask_params : `dict`
@@ -252,20 +251,6 @@ def gen_roman_off_season(
         every third day while the RGES field is visible but not being
         observed by Roman.
     """
-    # updated these to 2 visits before filter change
-    # original plan is 1 per band -- can AOS handle this?
-    if nvisits is None:
-        nvisits = {"g": 2, "r": 2, "i": 2, "z": 2}
-    if nexps is None:
-        nexps = {}
-        for key in nvisits:
-            nexps[key] = NEXP
-
-    if exptimes is None:
-        exptimes = {}
-        for key in nvisits:
-            exptimes[key] = EXPTIME
-
     if safety_mask_params is None:
         safety_mask_params = {}
         safety_mask_params["nside"] = nside

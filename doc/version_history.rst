@@ -4,6 +4,10 @@
 Version History
 ===============
 
+v0.19.0
+-------
+* Modify the Roman survey configurations for fbs_config_lsst_survey to use FieldSurvey instead of DeepDrillingSurvey.
+
 v0.18.0
 -------
 * Add lsst_surveys, roman_surveys, and too_surveys for use with LSST main survey configuration. The lsst_surveys are similar but not identical to the sv_surveys. Notably, kwargs for the safety_masks are now passed to all surveys in order to configure these at ts_config_scheduler. The ToO surveys are based on the 2024 workshop configurations plus updates during commissioning. The roman_surveys are temporary placeholders, but include observations for off-season RGES monitoring.
