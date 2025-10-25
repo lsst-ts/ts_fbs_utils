@@ -98,8 +98,8 @@ class Test_lsst_Surveys(unittest.TestCase):
         )
         assert len(surveys) > 0
 
-    def test_generate_twi_blobs(self) -> None:
-        surveys = lsst_surveys.generate_twi_blobs(
+    def test_generate_short_blobs(self) -> None:
+        surveys = lsst_surveys.generate_short_blobs(
             footprints=self.footprints,
             nside=self.nside,
         )

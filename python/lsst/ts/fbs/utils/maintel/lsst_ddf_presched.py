@@ -715,7 +715,9 @@ def generate_ddf_scheduled_obs(
                     obs["scheduler_note"] = "DD:%s" % ddf_name.replace("_a", "_b")
                     obs["target_name"] = "ddf_" + ddf_name.replace("_a", "_b").lower()
                     obs["science_program"] = science_program
-                    obs["observation_reason"] = "ddf_" + ddf_name.lower()
+                    obs["observation_reason"] = (
+                        "ddf_" + ddf_name.replace("_a", "_b").lower()
+                    )
 
                     obs["mjd_tol"] = mjd_tol
                     obs["dist_tol"] = dist_tol
