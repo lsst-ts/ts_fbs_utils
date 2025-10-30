@@ -85,6 +85,7 @@ def safety_masks(
     max_az_sunrise: float = 290,
     time_to_sunrise: float = 3.0,
     apply_time_limited_shadow: bool = True,
+    sun_alt_limit: float | None = None,
 ) -> list[bf.BaseBasisFunction]:
     """Basic safety mask basis functions.
 
@@ -127,8 +128,10 @@ def safety_masks(
     time_to_sunrise : `float`, optional
         Hours before daybreak (sun @ alt=0) to start the azimuth avoidance
         mask.
-    apply_time_limited_shadow : `float`, optional
+    apply_time_limited_shadow : `bool`, optional
         Flag for whether to apply the morning (time_to_sunrise) azimuth mask.
+    sun_alt_limit : `float` or None, optional
+        Maximum sun altitude (deg) required before proposing targets.
 
     Returns
     -------
@@ -178,6 +181,10 @@ def safety_masks(
                 sun_keys=["sunrise"],
             )
         )
+
+    if sun_alt_limit is not None:
+        mask_bfs.append(bf.SunAltLimitBasisFunction(alt_limit=sun_alt_limit))
+
     return mask_bfs
 
 

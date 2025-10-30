@@ -7,6 +7,8 @@ Version History
 v0.19.0
 -------
 * Modify the Roman survey configurations for fbs_config_lsst_survey to use FieldSurvey instead of DeepDrillingSurvey.
+* Rename `generate_twi_blobs` to be `generate_short_blobs` to be more reflective of their actual use.
+* Adds sun_alt_limit option to safety masks.
 
 v0.18.0
 -------
