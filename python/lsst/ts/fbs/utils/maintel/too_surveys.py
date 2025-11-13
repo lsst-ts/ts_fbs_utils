@@ -190,6 +190,45 @@ def gen_too_surveys(
     )
 
     ############
+    # GW large
+    ############
+
+    times = np.array(
+        [
+            0,
+            48,
+            96,
+            144,
+        ],
+        float,
+    )
+    bands_at_times = ["gi", "gi", "gi", "gi"]
+    nvis = [2, 2, 2, 2]
+    exptimes = [30.0, 30.0, 30.0, 30.0]
+    too_surveys.append(
+        ToOScriptedSurvey(
+            masks,
+            nside=nside,
+            followup_footprint=too_footprint,
+            times=times,
+            bands_at_times=bands_at_times,
+            nvis=nvis,
+            exptimes=exptimes,
+            detailers=deepcopy(detailer_list),
+            too_types_to_follow=["GW_large"],
+            survey_name="ToO, GW_large",
+            # Update target_name to match the alert event ID
+            target_name_base="GW_large",
+            observation_reason="too_gw_large",
+            science_program=science_program,
+            split_long=split_long,
+            flushtime=48,
+            n_snaps=long_exp_nsnaps,
+            event_gen_detailers=None,
+        )
+    )
+
+    ############
     # BBH hole-black hole GW merger
     # If nearby (dist < 2200 Mpc) and dark time, use ugi
     # If distant (dist > 2200 Mpc) and dark time, use rgi
