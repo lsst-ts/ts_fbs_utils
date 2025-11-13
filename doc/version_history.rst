@@ -4,6 +4,10 @@
 Version History
 ===============
 
+v0.19.1
+-------
+* Add gw_large configuration for ToO surveys, as specified 2025-11-13
+
 v0.19.0
 -------
 * Modify the Roman survey configurations for fbs_config_lsst_survey to use FieldSurvey instead of DeepDrillingSurvey.
