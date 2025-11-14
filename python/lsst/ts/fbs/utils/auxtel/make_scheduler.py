@@ -21,7 +21,6 @@
 
 __all__ = ["MakeScheduler"]
 
-import dataclasses
 import enum
 import typing
 
