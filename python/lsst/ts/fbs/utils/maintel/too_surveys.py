@@ -203,7 +203,7 @@ def gen_too_surveys(
         float,
     )
     bands_at_times = ["gi", "gi", "gi", "gi"]
-    nvis = [2, 2, 2, 2]
+    nvis = [1, 1, 1, 1]
     exptimes = [30.0, 30.0, 30.0, 30.0]
     too_surveys.append(
         ToOScriptedSurvey(
@@ -214,12 +214,13 @@ def gen_too_surveys(
             bands_at_times=bands_at_times,
             nvis=nvis,
             exptimes=exptimes,
+            return_n_limit=100,
             detailers=deepcopy(detailer_list),
-            too_types_to_follow=["GW_large"],
-            survey_name="ToO, GW_large",
+            too_types_to_follow=["GW_case_large"],
+            survey_name="ToO, GW_case_large",
             # Update target_name to match the alert event ID
-            target_name_base="GW_large",
-            observation_reason="too_gw_large",
+            target_name_base="GW_case_large",
+            observation_reason="too_gw_case_large",
             science_program=science_program,
             split_long=split_long,
             flushtime=48,
