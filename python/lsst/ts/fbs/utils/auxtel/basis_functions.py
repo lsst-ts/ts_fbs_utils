@@ -45,6 +45,8 @@ def get_basis_functions_image_survey(
     avoid_wind: bool = True,
     include_slew: bool = True,
     sun_alt_limit: float = -12,
+    min_alt: float = 26.0,
+    max_alt: float = 85.0,
 ) -> typing.List[basis_functions.BaseBasisFunction]:
     """Get the basis functions for the image survey.
 
@@ -86,6 +88,12 @@ def get_basis_functions_image_survey(
     sun_alt_limit : `float`, optional
         Sun altitude limit for the survey (degrees).
         Sun must be below this limit for survey to be feasible.
+    min_alt : `float`, optional
+        Minimum altitude for the survey (degrees).
+        Targets will not be scheduled below this altitude.
+    max_alt : `float`, optional
+        Maximum altitude for the survey (degrees).
+        Targets will not be scheduled above this altitude.
 
     Returns
     -------
@@ -96,7 +104,7 @@ def get_basis_functions_image_survey(
         basis_functions.SunAltLimitBasisFunction(alt_limit=sun_alt_limit),
         basis_functions.MoonAvoidanceBasisFunction(nside=nside),
         basis_functions.AltAzShadowMaskBasisFunction(
-            min_alt=26.0, max_alt=85.0, nside=nside, shadow_minutes=0.0, pad=0.0
+            min_alt=min_alt, max_alt=max_alt, nside=nside, shadow_minutes=0.0, pad=0.0
         ),
         # Note that band_names should include ONLY the bands in use, as
         # the VisitGap will not trigger until all bands are satisfied
@@ -163,6 +171,8 @@ def get_basis_functions_cwfs_survey(
     time_gap_min: float,
     wind_speed_maximum: float,
     sun_alt_limit: float = -7,
+    min_alt: float = 26.0,
+    max_alt: float = 85.0,
 ) -> typing.List[basis_functions.BaseBasisFunction]:
     """Get the basis functions for the CWFS survey.
 
@@ -183,6 +193,12 @@ def get_basis_functions_cwfs_survey(
     sun_alt_limit : `float`, optional
         Sun altitude limit for the survey (degrees).
         Sun must be below this limit for survey to be feasible.
+    min_alt : `float`, optional
+        Minimum altitude for the survey (degrees).
+        Targets will not be scheduled below this altitude.
+    max_alt : `float`, optional
+        Maximum altitude for the survey (degrees).
+        Targets will not be scheduled above this altitude.
 
     Returns
     -------
@@ -196,7 +212,7 @@ def get_basis_functions_cwfs_survey(
         basis_functions.SlewtimeBasisFunction(nside=nside, filtername="i"),
         basis_functions.MoonAvoidanceBasisFunction(nside=nside),
         basis_functions.AltAzShadowMaskBasisFunction(
-            min_alt=26.0, max_alt=85.0, nside=nside
+            min_alt=min_alt, max_alt=max_alt, nside=nside
         ),
         basis_functions.VisitGap(note=note, gap_min=time_gap_min),
         basis_functions.AvoidDirectWind(
@@ -219,6 +235,8 @@ def get_basis_functions_spectroscopic_survey(
     note_interest: str,
     include_slew: bool = True,
     sun_alt_limit: float = -10,
+    min_alt: float = 26.0,
+    max_alt: float = 85.0,
 ) -> typing.List[basis_functions.BaseBasisFunction]:
     """Get basis functions for spectroscopic survey.
 
@@ -250,11 +268,16 @@ def get_basis_functions_spectroscopic_survey(
     sun_alt_limit : `float`, optional
         Sun altitude limit for the survey (degrees).
         Sun must be below this limit for survey to be feasible.
+    min_alt : `float`, optional
+        Minimum altitude for the survey (degrees).
+        Targets will not be scheduled below this altitude.
+    max_alt : `float`, optional
+        Maximum altitude for the survey (degrees).
+        Targets will not be scheduled above this altitude.
 
     Returns
     -------
-    list of basis_functions.BaseBasisFunctio
-        List of basis functions.
+    `list` of `basis_functions.BaseBasisFunction`
     """
 
     bfs = [
@@ -263,7 +286,7 @@ def get_basis_functions_spectroscopic_survey(
             nside=nside, moon_distance=moon_distance
         ),
         basis_functions.AltAzShadowMaskBasisFunction(
-            min_alt=26.0, max_alt=85.0, shadow_minutes=0.0, pad=0.0, nside=nside
+            min_alt=min_alt, max_alt=max_alt, shadow_minutes=0.0, pad=0.0, nside=nside
         ),
         basis_functions.VisitGap(note=note, gap_min=gap_min),
     ]
