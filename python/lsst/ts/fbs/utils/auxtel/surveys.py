@@ -20,6 +20,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import typing
+from pathlib import Path
 
 import astropy.units as u
 import numpy as np
@@ -37,7 +38,7 @@ from .basis_functions import (
 )
 
 
-def get_auxtel_targets(infile: str | None = None) -> dict:
+def get_auxtel_targets(infile: Path | None = None) -> dict:
     """Load potential targets for auxtel observations.
 
     Targets can be split into different categories for convenience.
