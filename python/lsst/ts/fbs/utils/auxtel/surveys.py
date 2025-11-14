@@ -20,11 +20,12 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import typing
+from pathlib import Path
 
 import astropy.units as u
 import numpy as np
 import yaml
-from rubin_scheduler.scheduler.detailers import BaseDetailer, TrackingInfoDetailer
+from rubin_scheduler.scheduler.detailers import BaseDetailer
 from rubin_scheduler.scheduler.surveys import BaseSurvey, FieldSurvey, GreedySurvey
 from rubin_scheduler.scheduler.utils import ObservationArray
 
@@ -37,7 +38,7 @@ from .basis_functions import (
 )
 
 
-def get_auxtel_targets(infile: str | None = None) -> dict:
+def get_auxtel_targets(infile: Path | None = None) -> dict:
     """Load potential targets for auxtel observations.
 
     Targets can be split into different categories for convenience.
@@ -148,6 +149,8 @@ def generate_image_survey_from_target(
     avoid_wind: bool = True,
     include_slew: bool = True,
     sun_alt_limit: float = -12,
+    min_alt: float = 26.0,
+    max_alt: float = 85.0,
 ) -> BaseSurvey:
     """Generate image survey, for single Target with dithers
 
@@ -170,6 +173,13 @@ def generate_image_survey_from_target(
     sun_alt_limit : `float`, optional
         Sun altitude limit for the survey (degrees).
         Sun must be below this limit for survey to be feasible.
+    min_alt : `float`, optional
+        Minimum altitude for the survey (degrees).
+        Targets will not be scheduled below this altitude.
+    max_alt : `float`, optional
+        Maximum altitude for the survey (degrees).
+        Targets will not be scheduled above this altitude.
+
 
     Returns
     -------
@@ -191,6 +201,8 @@ def generate_image_survey_from_target(
         additional_notes=None,
         include_slew=include_slew,
         sun_alt_limit=sun_alt_limit,
+        min_alt=min_alt,
+        max_alt=max_alt,
     )
 
     # Set up a sequence of nexp exposures per filter
@@ -235,6 +247,8 @@ def generate_cwfs_survey(
     wind_speed_maximum: float,
     cwfs_block_name: str,
     sun_alt_limit: float = -7,
+    min_alt: float = 26.0,
+    max_alt: float = 85.0,
 ) -> BaseSurvey:
     """Generate Curvature Wavefront Sensing Survey.
 
@@ -250,6 +264,12 @@ def generate_cwfs_survey(
         Name of the cwfs block survey.
     sun_alt_limit : `float`
         Maximum sun altitude before scheduling cwfs survey.
+    min_alt : `float`, optional
+        Minimum altitude for the survey (degrees).
+        Targets will not be scheduled below this altitude.
+    max_alt : `float`, optional
+        Maximum altitude for the survey (degrees).
+        Targets will not be scheduled above this altitude.
 
 
     Returns
@@ -263,6 +283,8 @@ def generate_cwfs_survey(
         time_gap_min=time_gap_min,
         wind_speed_maximum=wind_speed_maximum,
         sun_alt_limit=sun_alt_limit,
+        min_alt=min_alt,
+        max_alt=max_alt,
     )
 
     return GreedySurvey(
@@ -284,6 +306,8 @@ def generate_spectroscopic_survey(
     survey_detailers: typing.List[BaseDetailer],
     include_slew: bool = True,
     sun_alt_limit: float = -7,
+    min_alt: float = 26.0,
+    max_alt: float = 85.0,
 ) -> BaseSurvey:
     """Generate Spectroscopic Survey.
 
@@ -304,6 +328,13 @@ def generate_spectroscopic_survey(
     sun_alt_limit : `float`, optional
         Sun altitude limit for the survey (degrees).
         Sun must be below this limit for survey to be feasible.
+    min_alt : `float`, optional
+        Minimum altitude for the survey (degrees).
+        Targets will not be scheduled below this altitude.
+    max_alt : `float`, optional
+        Maximum altitude for the survey (degrees).
+        Targets will not be scheduled above this altitude.
+
 
     Returns
     -------
@@ -323,6 +354,8 @@ def generate_spectroscopic_survey(
         nobs_reference=nfields,
         include_slew=include_slew,
         sun_alt_limit=sun_alt_limit,
+        min_alt=min_alt,
+        max_alt=max_alt,
     )
 
     observation = ObservationArray(n=target.nexp)

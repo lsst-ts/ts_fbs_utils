@@ -38,6 +38,6 @@ class AssertSurvey(typing.Protocol):
         self,
         spec_targets: typing.List[Target],
         image_tiles: typing.List[Tiles],
-        image_targest: typing.List[Target],
+        image_targets: typing.List[Target],
     ) -> None:
         pass

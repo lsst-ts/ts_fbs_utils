@@ -4,6 +4,13 @@
 Version History
 ===============
 
+v0.19.2
+-------
+* Rename gw_large to GW_case_large
+* Make number of observations requested match plan (2 visits, one in g, one in i)
+* Make GW_case_large too survey only return 100 visits at a time, so that HA/Alt don't get too out of sync with planned limits.
+* Add feature to allow alt limits to be configurable for AuxTel surveys.
+
 v0.19.1
 -------
 * Add gw_large configuration for ToO surveys, as specified 2025-11-13
