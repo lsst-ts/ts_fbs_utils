@@ -4,6 +4,10 @@
 Version History
 ===============
 
+v0.19.3
+-------
+* Configure ToO surveys to use 1snap for 30s visits.
+
 v0.19.2
 -------
 * Rename gw_large to GW_case_large

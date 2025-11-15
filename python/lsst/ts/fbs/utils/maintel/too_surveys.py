@@ -44,7 +44,7 @@ def gen_too_surveys(
     detailer_list: list[detailers.BaseDetailer] | None = None,
     too_footprint: npt.NDArray | None = None,
     split_long: bool = False,
-    long_exp_nsnaps: int = 2,
+    long_exp_nsnaps: int = NEXP,
     n_snaps: int = NEXP,
     science_program: str = SCIENCE_PROGRAM,
     safety_mask_params: dict | None = None,
