@@ -4,6 +4,11 @@
 Version History
 ===============
 
+v0.19.4
+-------
+* Shorten ToO survey names to save some characters
+* Pick up new detailer from `rubin_scheduler` for substituting filters in case desired filter not mounted.
+
 v0.19.3
 -------
 * Add new `stability_surveys` class with `gen_az_el_rot_stability_survey` to generate a list of FieldAltAzSurveys at user provided positions. 
