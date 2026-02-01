@@ -46,11 +46,10 @@ def gen_too_surveys(
     nside: int = DEFAULT_NSIDE,
     detailer_list: list[detailers.BaseDetailer] | None = None,
     too_footprint: npt.NDArray | None = None,
-    long_exp_nsnaps: int = 2,
-    split_long: bool | None = None,
     n_snaps: int = NEXP,
     science_program: str = SCIENCE_PROGRAM,
     safety_mask_params: dict | None = None,
+    split_long: bool = False,
 ) -> list[ToOScriptedSurvey]:
     """Generate a list of ToO surveys to follow up
     events passed in Conditions.
@@ -63,12 +62,9 @@ def gen_too_surveys(
         List of survey detailers.
     too_footprint : `np.ndarray` or None
         Footprint to contain ToOs within (such as the lsst footprint).
-    split_long : None
-        Deprecated.
-    long_exp_nsnaps : `int`
-        The number of snaps for longer exposures. (60s??)
     n_snaps : `int`
-        The number of snaps per visit for other exposures. (??)
+        The number of snaps per visit for all exposures.
+        Should always be 1 (this should be deprecated soon).
     science_program : `str`
         Metadata to identify the science program for the visit.
     safety_mask_params : `dict` or None
@@ -118,7 +114,7 @@ def gen_too_surveys(
             too_types_to_follow=["GW_case_A"],
             survey_name="ToO, GW_A",
             flushtime=48.0,
-            n_snaps=long_exp_nsnaps,
+            n_snaps=n_snaps,
             # Update target_name to match the alert event ID
             target_name_base="GW_A",
             observation_reason="too_gw_a",
@@ -151,7 +147,7 @@ def gen_too_surveys(
             observation_reason="too_gw_b_c",
             science_program=science_program,
             flushtime=48,
-            n_snaps=long_exp_nsnaps,
+            n_snaps=n_snaps,
         )
     )
 
@@ -180,7 +176,7 @@ def gen_too_surveys(
             observation_reason="too_gw_d_e",
             science_program=science_program,
             flushtime=48,
-            n_snaps=long_exp_nsnaps,
+            n_snaps=n_snaps,
             event_gen_detailers=None,
         )
     )
@@ -210,7 +206,6 @@ def gen_too_surveys(
             bands_at_times=bands_at_times,
             nvis=nvis,
             exptimes=exptimes,
-            return_n_limit=100,
             detailers=deepcopy(detailer_list),
             too_types_to_follow=["GW_case_large"],
             survey_name="ToO, GW_large",
@@ -219,7 +214,7 @@ def gen_too_surveys(
             observation_reason="too_gw_large",
             science_program=science_program,
             flushtime=48,
-            n_snaps=long_exp_nsnaps,
+            n_snaps=n_snaps,
             event_gen_detailers=None,
         )
     )
@@ -342,7 +337,7 @@ def gen_too_surveys(
             observation_reason="too_lensed_bns_b",
             science_program=science_program,
             flushtime=48.0,
-            n_snaps=long_exp_nsnaps,
+            n_snaps=n_snaps,
         )
     )
 
