@@ -105,7 +105,7 @@ def gen_az_el_rot_stability_survey(
     if safety_mask_params is None:
         safety_mask_params = {
             "nside": nside,
-            "wind_speed_maximum": 20,
+            "wind_speed_maximum": None,
             "shadow_minutes": 0,
             "apply_time_limited_shadow": False,
             "time_to_sunrise": 3.0,
@@ -165,8 +165,6 @@ def gen_az_el_rot_stability_survey(
     ]
 
     safety_masks_basis_functions = safety_masks(**safety_mask_params)
-    # Remove avoid wind basis function
-    safety_masks_basis_functions.pop(2)
 
     survey_lists = []
     for target in target_dict:
