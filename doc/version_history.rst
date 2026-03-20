@@ -4,6 +4,11 @@
 Version History
 ===============
 
+v0.19.3
+-------
+* Add new `stability_surveys` class with `gen_az_el_rot_stability_survey` to generate a list of FieldAltAzSurveys at user provided positions. 
+* Update `safety_masks` to allow user to pass None for wind_speed_maximum and skip adding AvoidDirectWind basis function.
+
 v0.19.2
 -------
 * Rename gw_large to GW_case_large
