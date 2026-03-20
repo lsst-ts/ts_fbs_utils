@@ -44,6 +44,7 @@ from .lsst_surveys import EXPTIME, safety_masks
 
 class StabilityTarget(TypedDict):
     note: str
+    name: str
     alt: float
     az: float
     rotTelPos: float
@@ -56,7 +57,6 @@ def gen_az_el_rot_stability_survey(
     science_program: str,
     observation_reason: str = "fbs driven aos stability test",
     sequence: list[str] = ["i"],
-    nvisits: dict | int = 1,
     nvis_per_cycle: int = 100,
     exptimes: dict | float = EXPTIME,
     nside: int = DEFAULT_NSIDE,
@@ -79,17 +79,18 @@ def gen_az_el_rot_stability_survey(
     observation_reason : `str`
         Str to use for the observation reason for the survey.
     sequence : list[str], default ["i"]
-        Band names to use in the sequence.
-    nvisits : `dict` or `int`
-        Number of visits for each band at each position cycle. Passed to
-        FieldSurvey. If nvisits is an int, this is applied to each band in
-        `sequence`.
+        Band names to use in the sequence. Note that 1 image will be taken per
+        band listed in sequences. It is recommended to only use 1 filter in the
+        sequence to prevent the coordinate drifting too much between successive
+        targets.
     nvis_per_cycle : `dict` or `int`
         Number of visits per position cycle. Total number of exposures at each
-        position cycle is len(bands) * nvisits * nvis_per_cycle.
+        position cycle is len(sequence) * nvis_per_cycle.
     exptimes : `dict` or `float`
         Exposure times for each band. Passed to FieldSurvey.
         If exptimes is a float, this is applied to each band in `sequence`.
+        Default is 30s, this should be updated if a different exposure time is
+        needed (e.g. 38s for u band).
     nside : `int`
         The HEALpix nside for the survey, used for basis functions.
     safety_mask_params : `dict`
@@ -115,20 +116,10 @@ def gen_az_el_rot_stability_survey(
 
     block_name = science_program
 
-    # For these alt-az-rotTel tests, should specify only a single visit
-    # at a time, so sequence is 1 visit long. If multiple bands are
-    # needed, the sequence will have to be longer but should be as short
-    # as possible to avoid rotator and alt/az <-> RA/Dec drift.
     sequence = sequence
-    nvisits = nvisits
     exptimes = exptimes
-    # For each survey (alt/az/rotTelPos combo) how many visits each time
-    # before going on to the next target?
     nvis_per_cycle = nvis_per_cycle
 
-    # Using the current time in the note
-    # and requiring this to reset daily means that
-    # this does require the FBS to reconfigured, from cold-start daily.
     day_obs = int(
         Time(int(Time.now().mjd - 0.5), format="mjd", scale="utc")
         .iso[0:10]
@@ -136,13 +127,10 @@ def gen_az_el_rot_stability_survey(
     )
     scheduler_root = f"{block_name} {day_obs}"
 
-    # Setup alt, az, rotTelPos values
     _az_values = az_values
     _alt_values = el_values
     _rot_values = rot_values
 
-    # List of alt, az, rotTelPos to use -- in DEGREES.
-    # Note order is important and will set the order of observation.
     target_dict: dict[str, StabilityTarget] = {}
 
     for alt in _alt_values:
@@ -151,6 +139,7 @@ def gen_az_el_rot_stability_survey(
                 name = f"alt:{alt:.1f} az:{az:.1f} rotTel:{rotTelPos:.0f}"
                 target_dict[name] = {
                     "note": f"{scheduler_root} {name}",
+                    "name": f"{name}",
                     "alt": alt,
                     "az": az,
                     "rotTelPos": rotTelPos,
@@ -178,7 +167,7 @@ def gen_az_el_rot_stability_survey(
                 BalanceVisits(
                     nobs_reference=nvis_per_cycle * n_pointings,
                     note_survey=tt["note"],
-                    note_interest=f"AOS {scheduler_root}",
+                    note_interest=f"{scheduler_root}",
                     nside=nside,
                 ),
             ]
@@ -186,11 +175,11 @@ def gen_az_el_rot_stability_survey(
             alt=tt["alt"],
             az=tt["az"],
             sequence=sequence,
-            nvisits=nvisits,
+            nvisits=1,
             exptimes=exptimes,
             ignore_obs=None,
             survey_name=tt["note"],
-            target_name=tt["note"],
+            target_name=tt["name"],
             science_program=block_name,
             observation_reason=observation_reason,
             scheduler_note=tt["note"],
