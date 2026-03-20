@@ -75,7 +75,7 @@ BLOB_SURVEY_PARAMS_DEFAULTS = {
 def safety_masks(
     nside: int = DEFAULT_NSIDE,
     moon_distance: float = 30,
-    wind_speed_maximum: float = 20.0,
+    wind_speed_maximum: float | None = 20.0,
     min_alt: float = 20,
     max_alt: float = 86.5,
     min_az: float = 0,
@@ -103,9 +103,10 @@ def safety_masks(
         Default of None uses rubin_scheduler.utils.get_default_nside.
     moon_distance : `float`, optional
         Moon avoidance distance, in degrees.
-    wind_speed_maximum : `float`, optional
+    wind_speed_maximum : `float` or None. optional
         Wind speed maximum to apply to the wind avoidance basis function,
-        in m/s.
+        in m/s. If None, the AvoidDirectWindSpeed basis function will not be
+        used.
     min_alt : `float`, optional
         Minimum altitude (in degrees) to observe.
     max_alt : `float`, optional
@@ -147,10 +148,12 @@ def safety_masks(
     )
     # Avoid bright planets
     mask_bfs.append(bf.PlanetMaskBasisFunction(nside=nside))
-    # Avoid the wind
-    mask_bfs.append(
-        bf.AvoidDirectWind(nside=nside, wind_speed_maximum=wind_speed_maximum)
-    )
+
+    # Avoid the wind if not None
+    if wind_speed_maximum is not None:
+        mask_bfs.append(
+            bf.AvoidDirectWind(nside=nside, wind_speed_maximum=wind_speed_maximum)
+        )
     # Avoid the alt/az limits - this will pick up limits from the
     # yaml file configurations for the summit as well
     mask_bfs.append(
