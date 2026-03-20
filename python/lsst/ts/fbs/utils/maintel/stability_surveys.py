@@ -64,16 +64,19 @@ def gen_az_el_rot_stability_survey(
 ) -> list[FieldSurvey]:
     """Generate a set of stability surveys, designed to execute a series of
     images at predefined Az El Rot positions. The result will be a list of
-    FieldAltAzSurvey for each position combination provided.
+    FieldAltAzSurveys.
 
     Parameters
     ----------
     az_values : list of `float`
         Azimuth values in degrees.
+        az_values, el_values and rot_values must have the same length.
     el_values : list of `float`
         Elevation values in degrees.
+        az_values, el_values and rot_values must have the same length.
     rot_values : list of `float`
         Rotator values (rotTelPos) in degrees.
+        az_values, el_values and rot_values must have the same length.
     science_program : `str`
         Name of the science program for the survey.
     observation_reason : `str`
@@ -123,17 +126,20 @@ def gen_az_el_rot_stability_survey(
 
     target_dict: dict[str, StabilityTarget] = {}
 
-    for alt in el_values:
-        for az in az_values:
-            for rotTelPos in rot_values:
-                name = f"alt:{alt:.1f} az:{az:.1f} rotTel:{rotTelPos:.0f}"
-                target_dict[name] = {
-                    "note": f"{scheduler_root} {name}",
-                    "name": f"{name}",
-                    "alt": alt,
-                    "az": az,
-                    "rotTelPos": rotTelPos,
-                }
+    if not (len(az_values) == len(el_values) == len(rot_values)):
+        raise ValueError(
+            "az_values, el_values, and rot_values must have the same length."
+        )
+
+    for alt, az, rot_tel_pos in zip(el_values, az_values, rot_values):
+        name = f"alt:{alt:.1f} az:{az:.1f} rotTel:{rot_tel_pos:.0f}"
+        target_dict[name] = {
+            "note": f"{scheduler_root} {name}",
+            "name": name,
+            "alt": alt,
+            "az": az,
+            "rotTelPos": rot_tel_pos,
+        }
 
     n_pointings = len(target_dict)
 
