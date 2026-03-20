@@ -114,28 +114,18 @@ def gen_az_el_rot_stability_survey(
             "max_az_sunrise": 255,
         }
 
-    block_name = science_program
-
-    sequence = sequence
-    exptimes = exptimes
-    nvis_per_cycle = nvis_per_cycle
-
     day_obs = int(
         Time(int(Time.now().mjd - 0.5), format="mjd", scale="utc")
         .iso[0:10]
         .replace("-", "")
     )
-    scheduler_root = f"{block_name} {day_obs}"
-
-    _az_values = az_values
-    _alt_values = el_values
-    _rot_values = rot_values
+    scheduler_root = f"{science_program} {day_obs}"
 
     target_dict: dict[str, StabilityTarget] = {}
 
-    for alt in _alt_values:
-        for az in _az_values:
-            for rotTelPos in _rot_values:
+    for alt in el_values:
+        for az in az_values:
+            for rotTelPos in rot_values:
                 name = f"alt:{alt:.1f} az:{az:.1f} rotTel:{rotTelPos:.0f}"
                 target_dict[name] = {
                     "note": f"{scheduler_root} {name}",
@@ -180,7 +170,7 @@ def gen_az_el_rot_stability_survey(
             ignore_obs=None,
             survey_name=tt["note"],
             target_name=tt["name"],
-            science_program=block_name,
+            science_program=science_program,
             observation_reason=observation_reason,
             scheduler_note=tt["note"],
             nside=nside,
