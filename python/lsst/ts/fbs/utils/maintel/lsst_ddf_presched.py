@@ -37,7 +37,12 @@ import pandas as pd
 from rubin_scheduler.data import get_data_dir
 from rubin_scheduler.scheduler.utils import ScheduledObservationArray
 from rubin_scheduler.site_models import Almanac
-from rubin_scheduler.utils import SURVEY_START_MJD, calc_season, ddf_locations
+from rubin_scheduler.utils import (
+    SURVEY_START_MJD,
+    calc_season,
+    ddf_locations,
+    mjd2dayobs,
+)
 
 
 def calculate_checksum(filenames: list[str]) -> bytes:
@@ -675,6 +680,7 @@ def generate_ddf_scheduled_obs(
             )[0]
 
         for mjd in mjds:
+            dayobs_string = mjd2dayobs(mjd)
             for bandname in sequence_dict:
                 if "EDFS" in ddf_name:
                     obs = ScheduledObservationArray(
@@ -687,7 +693,7 @@ def generate_ddf_scheduled_obs(
                     obs["exptime"] = expt[bandname]
                     obs["band"] = bandname
                     obs["nexp"] = nsnaps[bandname]
-                    obs["scheduler_note"] = "DD:%s" % ddf_name
+                    obs["scheduler_note"] = "DD:%s" % ddf_name + ", " + dayobs_string
                     obs["target_name"] = "ddf_" + ddf_name.lower()
                     obs["science_program"] = science_program
                     obs["observation_reason"] = "ddf_" + ddf_name.lower()
@@ -712,7 +718,9 @@ def generate_ddf_scheduled_obs(
                     obs["exptime"] = expt[bandname]
                     obs["band"] = bandname
                     obs["nexp"] = nsnaps[bandname]
-                    obs["scheduler_note"] = "DD:%s" % ddf_name.replace("_a", "_b")
+                    obs["scheduler_note"] = (
+                        "DD:%s" % ddf_name.replace("_a", "_b") + ", " + dayobs_string
+                    )
                     obs["target_name"] = "ddf_" + ddf_name.replace("_a", "_b").lower()
                     obs["science_program"] = science_program
                     obs["observation_reason"] = (
@@ -739,7 +747,7 @@ def generate_ddf_scheduled_obs(
                     obs["exptime"] = expt[bandname]
                     obs["band"] = bandname
                     obs["nexp"] = nsnaps[bandname]
-                    obs["scheduler_note"] = "DD:%s" % ddf_name
+                    obs["scheduler_note"] = "DD:%s" % ddf_name + ", " + dayobs_string
                     obs["target_name"] = "ddf_" + ddf_name.lower()
                     obs["science_program"] = science_program
                     obs["observation_reason"] = "ddf_" + ddf_name.lower()
@@ -756,4 +764,16 @@ def generate_ddf_scheduled_obs(
                     all_scheduled_obs.append(obs)
 
     result = np.concatenate(all_scheduled_obs)
+    # add an index per dayobs
+    u_notes = np.unique(result["scheduler_note"])
+    for note in u_notes:
+        indx = np.where(result["scheduler_note"] == note)[0]
+        tag = np.arange(np.size(indx)).astype(str)
+        result["scheduler_note"][indx] = np.char.add(
+            result["scheduler_note"][indx], ", "
+        )
+        result["scheduler_note"][indx] = np.char.add(
+            result["scheduler_note"][indx], tag
+        )
+
     return result
