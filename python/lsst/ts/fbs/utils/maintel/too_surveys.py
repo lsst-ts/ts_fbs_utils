@@ -27,7 +27,10 @@ from copy import deepcopy
 import numpy as np
 import numpy.typing as npt
 import rubin_scheduler.scheduler.detailers as detailers
-from rubin_scheduler.scheduler.detailers import BandPickToODetailer
+from rubin_scheduler.scheduler.detailers import (
+    BandPickToODetailer,
+    BandSubstituteDetailer,
+)
 from rubin_scheduler.scheduler.surveys import ToOScriptedSurvey
 from rubin_scheduler.utils import DEFAULT_NSIDE
 
@@ -43,11 +46,10 @@ def gen_too_surveys(
     nside: int = DEFAULT_NSIDE,
     detailer_list: list[detailers.BaseDetailer] | None = None,
     too_footprint: npt.NDArray | None = None,
-    split_long: bool = False,
-    long_exp_nsnaps: int = 2,
     n_snaps: int = NEXP,
     science_program: str = SCIENCE_PROGRAM,
     safety_mask_params: dict | None = None,
+    split_long: bool = False,
 ) -> list[ToOScriptedSurvey]:
     """Generate a list of ToO surveys to follow up
     events passed in Conditions.
@@ -60,16 +62,9 @@ def gen_too_surveys(
         List of survey detailers.
     too_footprint : `np.ndarray` or None
         Footprint to contain ToOs within (such as the lsst footprint).
-    split_long : `bool`
-        Split long exposures (longer than 30s with the current defaults in
-        rubin_scheduler) into shorter exposures (60s) or not?
-        Splitting long exposures requires creation of nightly coadds, which
-        is not currently available. However long exposures may also pose
-        risks of tripping the sensors.
-    long_exp_nsnaps : `int`
-        The number of snaps for longer exposures. (60s??)
     n_snaps : `int`
-        The number of snaps per visit for other exposures. (??)
+        The number of snaps per visit for all exposures.
+        Should always be 1 (this should be deprecated soon).
     science_program : `str`
         Metadata to identify the science program for the visit.
     safety_mask_params : `dict` or None
@@ -117,13 +112,12 @@ def gen_too_surveys(
             exptimes=exptimes,
             detailers=deepcopy(detailer_list),
             too_types_to_follow=["GW_case_A"],
-            survey_name="ToO, GW_case_A",
-            split_long=split_long,
+            survey_name="ToO, GW_A",
             flushtime=48.0,
-            n_snaps=long_exp_nsnaps,
+            n_snaps=n_snaps,
             # Update target_name to match the alert event ID
-            target_name_base="GW_case_A",
-            observation_reason="too_gw_case_a",
+            target_name_base="GW_A",
+            observation_reason="too_gw_a",
             science_program=science_program,
         )
     )
@@ -147,14 +141,13 @@ def gen_too_surveys(
             exptimes=exptimes,
             detailers=deepcopy(detailer_list),
             too_types_to_follow=["GW_case_B", "GW_case_C"],
-            survey_name="ToO, GW_case_B_C",
+            survey_name="ToO, GW_B_C",
             # Update target_name to match the alert event ID
-            target_name_base="GW_case_B_C",
-            observation_reason="too_gw_case_b_c",
+            target_name_base="GW_B_C",
+            observation_reason="too_gw_b_c",
             science_program=science_program,
-            split_long=split_long,
             flushtime=48,
-            n_snaps=long_exp_nsnaps,
+            n_snaps=n_snaps,
         )
     )
 
@@ -177,14 +170,13 @@ def gen_too_surveys(
             exptimes=exptimes,
             detailers=deepcopy(detailer_list),
             too_types_to_follow=["GW_case_D", "GW_case_E"],
-            survey_name="ToO, GW_case_D_E",
+            survey_name="ToO, GW_D_E",
             # Update target_name to match the alert event ID
-            target_name_base="GW_case_D_E",
-            observation_reason="too_gw_case_d_e",
+            target_name_base="GW_D_E",
+            observation_reason="too_gw_d_e",
             science_program=science_program,
-            split_long=split_long,
             flushtime=48,
-            n_snaps=long_exp_nsnaps,
+            n_snaps=n_snaps,
             event_gen_detailers=None,
         )
     )
@@ -214,17 +206,15 @@ def gen_too_surveys(
             bands_at_times=bands_at_times,
             nvis=nvis,
             exptimes=exptimes,
-            return_n_limit=100,
             detailers=deepcopy(detailer_list),
             too_types_to_follow=["GW_case_large"],
-            survey_name="ToO, GW_case_large",
+            survey_name="ToO, GW_large",
             # Update target_name to match the alert event ID
-            target_name_base="GW_case_large",
-            observation_reason="too_gw_case_large",
+            target_name_base="GW_large",
+            observation_reason="too_gw_large",
             science_program=science_program,
-            split_long=split_long,
             flushtime=48,
-            n_snaps=long_exp_nsnaps,
+            n_snaps=n_snaps,
             event_gen_detailers=None,
         )
     )
@@ -263,6 +253,15 @@ def gen_too_surveys(
     nvis = [1] * times.size
     exptimes = [EXPTIME] * times.size
 
+    if detailer_list is not None:
+        more_detailers = deepcopy(detailer_list)
+    else:
+        more_detailers = []
+
+    more_detailers.append(
+        BandSubstituteDetailer(band_original="z", band_replacement="y")
+    )
+
     too_surveys.append(
         ToOScriptedSurvey(
             masks,
@@ -272,14 +271,13 @@ def gen_too_surveys(
             bands_at_times=bands_at_times,
             nvis=nvis,
             exptimes=exptimes,
-            detailers=deepcopy(detailer_list),
+            detailers=more_detailers,
             too_types_to_follow=["BBH_case_A", "BBH_case_B", "BBH_case_C"],
             survey_name="ToO, BBH",
             # Update target_name to match the alert event ID
             target_name_base="BBH",
             observation_reason="too_bbh",
             science_program=science_program,
-            split_long=split_long,
             flushtime=48,
             n_snaps=n_snaps,
             event_gen_detailers=event_detailers,
@@ -306,12 +304,11 @@ def gen_too_surveys(
             exptimes=exptimes,
             detailers=deepcopy(detailer_list),
             too_types_to_follow=["lensed_BNS_case_A"],
-            survey_name="ToO, LensedBNS_A",
+            survey_name="ToO, L_BNS_A",
             # Update target_name to match the alert event ID
             target_name_base="LensedBNS_A",
             observation_reason="too_lensed_bns_a",
             science_program=science_program,
-            split_long=split_long,
             flushtime=48.0,
             n_snaps=n_snaps,
         )
@@ -334,14 +331,13 @@ def gen_too_surveys(
             exptimes=exptimes,
             detailers=deepcopy(detailer_list),
             too_types_to_follow=["lensed_BNS_case_B"],
-            survey_name="ToO, LensedBNS_B",
+            survey_name="ToO, L_BNS_B",
             # Update target_name to match the alert event ID
             target_name_base="LensedBNS_B",
             observation_reason="too_lensed_bns_b",
             science_program=science_program,
-            split_long=split_long,
             flushtime=48.0,
-            n_snaps=long_exp_nsnaps,
+            n_snaps=n_snaps,
         )
     )
 
@@ -363,6 +359,15 @@ def gen_too_surveys(
     ]
     nvis = [1, 4, 1, 1, 4, 1, 4, 1]
 
+    if detailer_list is not None:
+        more_detailers = deepcopy(detailer_list)
+    else:
+        more_detailers = []
+
+    more_detailers.append(
+        BandSubstituteDetailer(band_original="z", band_replacement="y")
+    )
+
     too_surveys.append(
         ToOScriptedSurvey(
             masks,
@@ -372,14 +377,13 @@ def gen_too_surveys(
             bands_at_times=bands_at_times,
             nvis=nvis,
             exptimes=exptimes,
-            detailers=deepcopy(detailer_list),
+            detailers=more_detailers,
             too_types_to_follow=["neutrino"],
             survey_name="ToO, neutrino",
             # Update target_name to match the alert event ID
             target_name_base="neutrino",
             observation_reason="too_neutrino",
             science_program=science_program,
-            split_long=split_long,
             flushtime=20 * 24,
             n_snaps=n_snaps,
         )
@@ -413,7 +417,6 @@ def gen_too_surveys(
             target_name_base="SSO_night",
             observation_reason="too_sso_general",
             science_program=science_program,
-            split_long=split_long,
             flushtime=3.0,
             n_snaps=n_snaps,
         )
@@ -424,6 +427,15 @@ def gen_too_surveys(
     nvis = [2] * 3
     exptimes = [15.0] * 3
 
+    if detailer_list is not None:
+        more_detailers = deepcopy(detailer_list)
+    else:
+        more_detailers = []
+
+    more_detailers.append(
+        BandSubstituteDetailer(band_original="z", band_replacement="y")
+    )
+
     too_surveys.append(
         ToOScriptedSurvey(
             masks,
@@ -433,14 +445,13 @@ def gen_too_surveys(
             bands_at_times=bands_at_times,
             nvis=nvis,
             exptimes=exptimes,
-            detailers=deepcopy(detailer_list),
+            detailers=more_detailers,
             too_types_to_follow=["SSO_twilight"],
             survey_name="ToO, SSO_twi",
             # Update target_name to match the alert event ID
             target_name_base="SSO_twi",
             observation_reason="too_sso_twi",
             science_program=science_program,
-            split_long=split_long,
             flushtime=3.0,
             n_snaps=n_snaps,
         )
@@ -469,12 +480,11 @@ def gen_too_surveys(
             exptimes=exptimes,
             detailers=deepcopy(detailer_list),
             too_types_to_follow=["SN_Galactic"],
-            survey_name="ToO, galactic SN",
+            survey_name="ToO, gal_SN",
             # Update target_name to match the alert event ID
             target_name_base="SN_Galactic",
             observation_reason="too_sn_galactic",
             science_program=science_program,
-            split_long=split_long,
             flushtime=48.0,
             n_snaps=n_snaps,
         )

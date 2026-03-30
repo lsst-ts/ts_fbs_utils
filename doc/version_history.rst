@@ -4,6 +4,15 @@
 Version History
 ===============
 
+v0.20.0
+-------
+* Requires rubin_scheduler update to 3.21.0
+* Shorten ToO scheduler notes and observation reasons to save some characters - removing "case"
+* Note that "follow too type" still includes case as expected
+* Pick up new detailer from `rubin_scheduler` for substituting filters in case desired filter not mounted.
+* Drop "split_long" kwargs and require explicit configuration of exposure time instead.
+* Reset GW_case_large too survey to return the default 500 visits at a time, to allow better ChunkByHADetailer use, especially between filters. This does raise the question of excessively long queues again, but this needs a different answer.
+
 v0.19.3
 -------
 * Add new `stability_surveys` class with `gen_az_el_rot_stability_survey` to generate a list of FieldAltAzSurveys at user provided positions. 
