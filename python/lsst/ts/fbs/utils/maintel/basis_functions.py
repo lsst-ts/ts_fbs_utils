@@ -126,7 +126,7 @@ def get_basis_functions_blob_survey(
     wind_speed_maximum: float,
     footprint: object,
 ) -> list[basis_functions.BaseBasisFunction]:
-    """Get the basis functions for the blob survey.
+    """Get the basis functions for the blob survey (not FBS v5).
 
     Parameters
     ----------
@@ -171,7 +171,7 @@ def get_basis_functions_ddf_survey(
     wind_speed_maximum: float,
     gap_min: float,
 ) -> list[basis_functions.BaseBasisFunction]:
-    """Get the basis functions for the DDF survey.
+    """Get the basis functions for a DDF survey (not FBS v5).
 
     Parameters
     ----------
