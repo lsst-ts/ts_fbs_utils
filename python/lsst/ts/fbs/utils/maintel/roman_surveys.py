@@ -28,7 +28,7 @@ import rubin_scheduler.scheduler.detailers as detailers
 from rubin_scheduler.scheduler.surveys import FieldSurvey
 from rubin_scheduler.utils import DEFAULT_NSIDE, special_locations
 
-from .lsst_surveys import EXPTIME, NEXP, SCIENCE_PROGRAM, safety_masks
+from .lsst_surveys import EXPTIME, SCIENCE_PROGRAM, standard_masks
 
 
 def def_roman_info() -> dict:
@@ -73,10 +73,10 @@ def gen_roman_on_season(
     camera_ddf_rot_per_visit: float = 2.0,
     sequence: str = "giriz",
     nvisits: dict | int = 1,
-    nexps: dict | int = NEXP,
     exptimes: dict | float = EXPTIME,
     science_program: str = SCIENCE_PROGRAM,
-    safety_mask_params: dict | None = None,
+    standard_mask_params: dict | None = None,
+    ignore_obs: list | None = None,
 ) -> FieldSurvey:
     """Generate a survey configured to observe the Roman field(s) during an
     'on' season.
@@ -101,16 +101,16 @@ def gen_roman_on_season(
     nvisits : `dict` or `int`
         Number of visits for each band. Passed to FieldSurvey.
         If nvisits is an int, this is applied to each band in `sequence`.
-    nexps : `dict` or `int`
-        Number of exposures for each band. Passed to FieldSurvey.
-        If nexps is an int, this is applied to each band in `sequence`.
     exptimes : `dict` or `float`
         Exposure times for each band. Passed to FieldSurvey.
         If exptimes is a float, this is applied to each band in `sequence`.
     science_program : `str`
         Name of the science program for the survey.
-    safety_mask_params : `dict`
+    standard_mask_params : `dict`
         A dictionary of additional kwargs to pass to the standard safety masks.
+    ignore_obs : `list` or `None`
+        List of strings to match within scheduler_note to flag observations
+        to ignore.
 
     Returns
     -------
@@ -124,18 +124,18 @@ def gen_roman_on_season(
         for key in nvisits:
             exptimes[key] = EXPTIME
 
-    if safety_mask_params is None:
-        safety_mask_params = {}
-        safety_mask_params["nside"] = nside
+    if standard_mask_params is None:
+        standard_mask_params = {}
+        standard_mask_params["nside"] = nside
     else:
-        safety_mask_params = copy.deepcopy(safety_mask_params)
+        standard_mask_params = copy.deepcopy(standard_mask_params)
     # Estimate of sequence time, given sequence defined below.
     shadow_minutes = 12
     if (
-        "shadow_minutes" not in safety_mask_params
-        or safety_mask_params["shadow_minutes"] < shadow_minutes
+        "shadow_minutes" not in standard_mask_params
+        or standard_mask_params["shadow_minutes"] < shadow_minutes
     ):
-        safety_mask_params["shadow_minutes"] = shadow_minutes
+        standard_mask_params["shadow_minutes"] = shadow_minutes
 
     field_info = def_roman_info()
 
@@ -145,7 +145,7 @@ def gen_roman_on_season(
     survey_name = "DD: RGES_onseason"
 
     # Add some feasability basis functions.
-    basis_functions = safety_masks(**safety_mask_params)
+    basis_functions = standard_masks(**standard_mask_params)
     # These are crude hard limits. Nominally we would try to
     # pre-schedule these when they would be at the best airamss
     # in the night.
@@ -190,9 +190,10 @@ def gen_roman_on_season(
         sequence=sequence,
         nvisits=nvisits,
         exptimes=exptimes,
-        nexps=nexps,
+        nexps=1,
         survey_name=survey_name,
         detailers=details,
+        ignore_obs=ignore_obs,
     )
     return survey
 
@@ -205,10 +206,10 @@ def gen_roman_off_season(
     camera_ddf_rot_per_visit: float = 2.0,
     sequence: str = "griz",
     nvisits: dict | int = 2,
-    nexps: dict | int = NEXP,
     exptimes: dict | float = EXPTIME,
     science_program: str = SCIENCE_PROGRAM,
-    safety_mask_params: dict | None = None,
+    standard_mask_params: dict | None = None,
+    ignore_obs: list | None = None,
 ) -> FieldSurvey:
     """Generate a survey configured to observe the Roman field(s) outside
     of the 'on' seasons (during 'off' seasons).
@@ -233,16 +234,16 @@ def gen_roman_off_season(
     nvisits : `dict` or `int` or None
         Number of visits for each band. Passed to FieldSurvey.
         If nvisits is an int, this is applied to each band in `sequence`.
-    nexps : `dict` or `int`
-        Number of exposures for each band. Passed to FieldSurvey.
-        If nexps is an int, this is applied to each band in `sequence`.
     exptimes : `dict` or `float`
         Exposure times for each band. Passed to FieldSurvey.
         If exptimes is a float, this is applied to each band in `sequence`.
     science_program : `str`
         Name of the science program for the survey.
-    safety_mask_params : `dict`
+    standard_mask_params : `dict`
         A dictionary of additional kwargs to pass to the standard safety masks.
+    ignore_obs : `list` or `None`
+        List of strings to match within scheduler_note to flag observations
+        to ignore.
 
     Returns
     -------
@@ -251,18 +252,18 @@ def gen_roman_off_season(
         every third day while the RGES field is visible but not being
         observed by Roman.
     """
-    if safety_mask_params is None:
-        safety_mask_params = {}
-        safety_mask_params["nside"] = nside
+    if standard_mask_params is None:
+        standard_mask_params = {}
+        standard_mask_params["nside"] = nside
     else:
-        safety_mask_params = copy.deepcopy(safety_mask_params)
+        standard_mask_params = copy.deepcopy(standard_mask_params)
     # Estimate of sequence time, given sequence defined below.
     shadow_minutes = 11
     if (
-        "shadow_minutes" not in safety_mask_params
-        or safety_mask_params["shadow_minutes"] < shadow_minutes
+        "shadow_minutes" not in standard_mask_params
+        or standard_mask_params["shadow_minutes"] < shadow_minutes
     ):
-        safety_mask_params["shadow_minutes"] = shadow_minutes
+        standard_mask_params["shadow_minutes"] = shadow_minutes
 
     field_info = def_roman_info()
     RA = field_info["RA"]
@@ -272,7 +273,7 @@ def gen_roman_off_season(
 
     # Add some feasability basis functions. Maybe just give it a
     # set of nights where it can execute for now.
-    basis_functions = safety_masks(**safety_mask_params)
+    basis_functions = standard_masks(**standard_mask_params)
     # These are crude hard limits. Nominally we would try
     # to pre-schedule these when they would be at the best
     # airamss in the night.
@@ -317,9 +318,10 @@ def gen_roman_off_season(
         dec=dec,
         sequence=sequence,
         nvisits=nvisits,
-        nexps=nexps,
+        nexps=1,
         exptimes=exptimes,
         survey_name=survey_name,
         detailers=details,
+        ignore_obs=ignore_obs,
     )
     return survey
