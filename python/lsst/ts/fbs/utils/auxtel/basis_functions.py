@@ -39,7 +39,7 @@ def get_basis_functions_image_survey(
     nobs_reference: int,
     nobs_survey: int,
     note_interest: str | None,
-    filter_names: list,
+    band_names: list,
     gap_min: float,
     additional_notes: list[tuple[str, int]] | None = None,
     avoid_wind: bool = True,
@@ -70,7 +70,7 @@ def get_basis_functions_image_survey(
     note_interest : `str`
         A substring that maps to surveys to be accounted for against the
         reference number of observations.
-    filter_names : `list` [ `str` ]
+    band_names : `list` [ `str` ]
          List of filter names that need be observed before activating.
     gap_min : `float`
         Gap between subsequent observations, in minutes.
@@ -108,7 +108,7 @@ def get_basis_functions_image_survey(
         ),
         # Note that band_names should include ONLY the bands in use, as
         # the VisitGap will not trigger until all bands are satisfied
-        basis_functions.VisitGap(note=note, filter_names=filter_names, gap_min=gap_min),
+        basis_functions.VisitGap(note=note, band_names=band_names, gap_min=gap_min),
     ]
 
     if avoid_wind:
@@ -126,9 +126,9 @@ def get_basis_functions_image_survey(
     if include_slew:
         bfs.extend(
             [
-                basis_functions.SlewtimeBasisFunction(nside=nside, filtername="g"),
-                basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
-                basis_functions.SlewtimeBasisFunction(nside=nside, filtername="i"),
+                basis_functions.SlewtimeBasisFunction(nside=nside, bandname="g"),
+                basis_functions.SlewtimeBasisFunction(nside=nside, bandname="r"),
+                basis_functions.SlewtimeBasisFunction(nside=nside, bandname="i"),
             ]
         )
 
@@ -207,9 +207,9 @@ def get_basis_functions_cwfs_survey(
 
     return [
         basis_functions.M5DiffBasisFunction(nside=nside),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="g"),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="i"),
+        basis_functions.SlewtimeBasisFunction(nside=nside, bandname="g"),
+        basis_functions.SlewtimeBasisFunction(nside=nside, bandname="r"),
+        basis_functions.SlewtimeBasisFunction(nside=nside, bandname="i"),
         basis_functions.MoonAvoidanceBasisFunction(nside=nside),
         basis_functions.AltAzShadowMaskBasisFunction(
             min_alt=min_alt, max_alt=max_alt, nside=nside
@@ -306,9 +306,9 @@ def get_basis_functions_spectroscopic_survey(
     if include_slew:
         bfs.extend(
             [
-                basis_functions.SlewtimeBasisFunction(nside=nside, filtername="g"),
-                basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
-                basis_functions.SlewtimeBasisFunction(nside=nside, filtername="i"),
+                basis_functions.SlewtimeBasisFunction(nside=nside, bandname="g"),
+                basis_functions.SlewtimeBasisFunction(nside=nside, bandname="r"),
+                basis_functions.SlewtimeBasisFunction(nside=nside, bandname="i"),
             ]
         )
     return bfs

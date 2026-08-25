@@ -61,6 +61,6 @@ def get_detailers_field_survey() -> list[detailers.BaseDetailer]:
 
     detailer_list = [
         detailers.CameraSmallRotPerObservationListDetailer(per_visit_rot=0.5),
-        detailers.DitherDetailer(max_dither=0.2, per_night=False),
+        detailers.DitherDetailer(max_dither=0.2, dither=False),
     ]
     return detailer_list

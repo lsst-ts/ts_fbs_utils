@@ -128,14 +128,14 @@ class MakeScheduler:
         simple_fp = {"r": blank_map + 1}
 
         footprints = Footprint(60218.0, 3.27717639)
-        for filtername in simple_fp:
-            footprints.set_footprint(filtername, simple_fp[filtername])
+        for bandname in simple_fp:
+            footprints.set_footprint(bandname, simple_fp[bandname])
 
         blob_survey = generate_blob_survey(
             nside,
             footprints=footprints,
             wind_speed_maximum=wind_speed_maximum,
-            filter_names="r",
+            band_names="r",
             survey_name=survey_name,
         )
 
