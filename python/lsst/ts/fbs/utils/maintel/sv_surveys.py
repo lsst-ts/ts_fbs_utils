@@ -442,14 +442,8 @@ def gen_lvk_templates(
         )
         lvk_templates.append(s)
 
-    # Remove detailer (drop this when updated at rubin_scheduler)
-    bad_detailer = detailers.Rottep2RotspDesiredDetailer
     for survey in lvk_templates:
-        good_dets = []
-        for det in survey.detailers:
-            if not isinstance(det, bad_detailer):
-                good_dets.append(det)
-        survey.detailers = good_dets
+        survey.detailers = [detailers.RotspUpdateDetailer()]
 
     return lvk_templates
 

@@ -33,8 +33,7 @@ from rubin_scheduler.scheduler.basis_functions import (
 )
 from rubin_scheduler.scheduler.detailers import (
     AltAz2RaDecDetailer,
-    CopyValueDetailer,
-    Rottep2RotspDesiredDetailer,
+    RotspUpdateDetailer,
 )
 from rubin_scheduler.scheduler.surveys import FieldAltAzSurvey, FieldSurvey
 from rubin_scheduler.utils import DEFAULT_NSIDE
@@ -145,8 +144,7 @@ def gen_az_el_rot_stability_survey(
 
     detailers = [
         AltAz2RaDecDetailer(),
-        Rottep2RotspDesiredDetailer(),
-        CopyValueDetailer(source="rotSkyPos_desired", destination="rotSkyPos"),
+        RotspUpdateDetailer(),
     ]
 
     safety_masks_basis_functions = safety_masks(**safety_mask_params)
