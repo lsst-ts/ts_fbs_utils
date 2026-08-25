@@ -113,7 +113,7 @@ def get_basis_functions_image_survey(
 
     if avoid_wind:
         bfs.append(
-            basis_functions.AvoidDirectWind(
+            basis_functions.MaskDirectWindBasisFunction(
                 wind_speed_maximum=wind_speed_maximum, nside=nside
             )
         )
@@ -215,7 +215,7 @@ def get_basis_functions_cwfs_survey(
             min_alt=min_alt, max_alt=max_alt, nside=nside
         ),
         basis_functions.VisitGap(note=note, gap_min=time_gap_min),
-        basis_functions.AvoidDirectWind(
+        basis_functions.MaskDirectWindBasisFunction(
             wind_speed_maximum=wind_speed_maximum, nside=nside
         ),
         basis_functions.SunAltLimitBasisFunction(alt_limit=sun_alt_limit),
@@ -251,7 +251,7 @@ def get_basis_functions_spectroscopic_survey(
     ha_limits : `list` of `tuple` of (`float`, `float`)
         Hour angle limits, in hours.
     avoid_wind : `bool`
-        If True, include AvoidDirectWind basis function
+        If True, include MaskDirectWindBasisFunction basis function
     include_slew: `bool`
         If True, include slewtime basis functions
     wind_speed_maximum : `float`
@@ -298,7 +298,7 @@ def get_basis_functions_spectroscopic_survey(
 
     if avoid_wind:
         bfs.append(
-            basis_functions.AvoidDirectWind(
+            basis_functions.MaskDirectWindBasisFunction(
                 wind_speed_maximum=wind_speed_maximum, nside=nside
             )
         )

@@ -318,7 +318,7 @@ def generate_spectroscopic_survey(
     target : `Target`
         Target for the image survey.
     avoid_wind : `bool`
-        Include AvoidDirectWind basis function.
+        Include MaskDirectWindBasisFunction basis function.
     wind_speed_maximum : `float`
         Maximum wind speed (in m/s).
     survey_detailers : `list` of `detailers.BaseDetailer`

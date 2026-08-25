@@ -107,7 +107,7 @@ def get_basis_functions_star_tracker_survey(
             min_alt=26.0, max_alt=85.0, nside=nside
         ),
         basis_functions.VisitGap(note=note, filter_names=filter_names, gap_min=gap_min),
-        basis_functions.AvoidDirectWind(
+        basis_functions.MaskDirectWindBasisFunction(
             wind_speed_maximum=wind_speed_maximum, nside=nside
         ),
         basis_functions.BalanceVisits(
@@ -155,7 +155,7 @@ def get_basis_functions_blob_survey(
         basis_functions.AltAzShadowMaskBasisFunction(
             min_alt=26.0, max_alt=85.0, nside=nside
         ),
-        basis_functions.AvoidDirectWind(
+        basis_functions.MaskDirectWindBasisFunction(
             wind_speed_maximum=wind_speed_maximum, nside=nside
         ),
         basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
@@ -201,7 +201,7 @@ def get_basis_functions_ddf_survey(
         basis_functions.AltAzShadowMaskBasisFunction(
             min_alt=26.0, max_alt=85.0, nside=nside
         ),
-        basis_functions.AvoidDirectWind(
+        basis_functions.MaskDirectWindBasisFunction(
             wind_speed_maximum=wind_speed_maximum, nside=nside
         ),
         basis_functions.VisitGap(note=survey_name, gap_min=gap_min),
@@ -240,7 +240,7 @@ def get_basis_functions_field_survey(
         basis_functions.MoonAvoidanceBasisFunction(
             nside=nside, moon_distance=moon_distance
         ),
-        basis_functions.AvoidDirectWind(
+        basis_functions.MaskDirectWindBasisFunction(
             wind_speed_maximum=wind_speed_maximum, nside=nside
         ),
         # Mask parts of the sky in alt/az, including parts of the sky that will
