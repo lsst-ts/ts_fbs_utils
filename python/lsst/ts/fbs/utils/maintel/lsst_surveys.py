@@ -92,7 +92,7 @@ def safety_masks(
     Avoids the moon, bright planets, high wind, and
     areas on the sky out of bounds, using
     the MoonAvoidanceBasisFunction, PlanetMaskBasisFunction,
-    AvoidDirectWindBasisFunction, and the AltAzShadowMaskBasisFunction.
+    MaskDirectWindBasisFunction, and the AltAzShadowMaskBasisFunction.
     Adds the default AltAzShadowMaskTimeLimited basis function to avoid
     pointing toward sunrise late in the night during commissioning.
 
@@ -105,8 +105,8 @@ def safety_masks(
         Moon avoidance distance, in degrees.
     wind_speed_maximum : `float` or None. optional
         Wind speed maximum to apply to the wind avoidance basis function,
-        in m/s. If None, the AvoidDirectWindSpeed basis function will not be
-        used.
+        in m/s. If None, the MaskDirectWindBasisFunction basis function
+        will not be used.
     min_alt : `float`, optional
         Minimum altitude (in degrees) to observe.
     max_alt : `float`, optional
@@ -152,7 +152,9 @@ def safety_masks(
     # Avoid the wind if not None
     if wind_speed_maximum is not None:
         mask_bfs.append(
-            bf.AvoidDirectWind(nside=nside, wind_speed_maximum=wind_speed_maximum)
+            bf.MaskDirectWindBasisFunction(
+                nside=nside, wind_speed_maximum=wind_speed_maximum
+            )
         )
     # Avoid the alt/az limits - this will pick up limits from the
     # yaml file configurations for the summit as well

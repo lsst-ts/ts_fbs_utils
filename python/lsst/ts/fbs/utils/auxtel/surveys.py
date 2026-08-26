@@ -100,7 +100,7 @@ def generate_image_survey_from_tiles(
         wind_speed_maximum=wind_speed_maximum,
         nobs_reference=nfields,
         nobs_survey=len(target.filters),
-        filter_names=target.filters,
+        band_names=target.filters,
         gap_min=target.visit_gap,
         additional_notes=[(target.target_name.split("_")[0], 32)],
     )
@@ -110,7 +110,7 @@ def generate_image_survey_from_tiles(
     for filter_obs, observation in zip(target.filters, sequence):
         observation["RA"] = target.ra.to(u.rad).value
         observation["dec"] = target.dec.to(u.rad).value
-        observation["filter"] = filter_obs
+        observation["band"] = filter_obs
         observation["exptime"] = target.exptime
         observation["nexp"] = target.nexp
         observation["scheduler_note"] = target.survey_name
@@ -196,7 +196,7 @@ def generate_image_survey_from_target(
         wind_speed_maximum=wind_speed_maximum,
         nobs_reference=0,
         nobs_survey=0,
-        filter_names=target.filters,
+        band_names=target.filters,
         gap_min=target.visit_gap,
         additional_notes=None,
         include_slew=include_slew,
@@ -210,7 +210,7 @@ def generate_image_survey_from_target(
     for filter_obs, observation in zip(target.filters, sequence):
         observation["RA"] = target.ra.to(u.rad).value
         observation["dec"] = target.dec.to(u.rad).value
-        observation["filter"] = filter_obs
+        observation["band"] = filter_obs
         observation["exptime"] = target.exptime
         observation["nexp"] = 1
         observation["scheduler_note"] = target.survey_name
@@ -318,7 +318,7 @@ def generate_spectroscopic_survey(
     target : `Target`
         Target for the image survey.
     avoid_wind : `bool`
-        Include AvoidDirectWind basis function.
+        Include MaskDirectWindBasisFunction basis function.
     wind_speed_maximum : `float`
         Maximum wind speed (in m/s).
     survey_detailers : `list` of `detailers.BaseDetailer`
@@ -361,7 +361,7 @@ def generate_spectroscopic_survey(
     observation = ObservationArray(n=target.nexp)
     observation["RA"] = target.ra.to(u.rad).value
     observation["dec"] = target.dec.to(u.rad).value
-    observation["filter"] = "r"
+    observation["band"] = "r"
     observation["exptime"] = target.exptime
     observation["nexp"] = 1
     observation["scheduler_note"] = target.survey_name
