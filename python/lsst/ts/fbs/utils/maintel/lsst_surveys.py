@@ -627,6 +627,15 @@ def gen_template_surveys(
         )
 
         # Mask anything observed n_obs_template times.
+        # reset_per_season influences whether the templates are
+        # acquired 'fast' or 'slow' (together with the n_obs_template value).
+        # This could be a kwarg instead, but given that we are likely to
+        # replace how this works anyway -- just choosing based on night_max
+        # seems fine.
+        if night_max > 366:
+            reset_per_season = True
+        else:
+            reset_per_season = False
         bfs.append(
             (
                 bf.MaskAfterNObsSeeingBasisFunction(
@@ -634,7 +643,7 @@ def gen_template_surveys(
                     n_max=n_obs_template[bandname],
                     bandname=bandname,
                     seeing_fwhm_max=dec_fwhm_max,
-                    reset_per_season=False,
+                    reset_per_season=reset_per_season,
                 ),
                 0.0,
             )
@@ -1034,6 +1043,7 @@ def gen_long_gaps_survey(
 def gen_greedy_surveys(
     nside: int = DEFAULT_NSIDE,
     bands: list[str] = ["u", "g", "r", "i", "z", "y"],
+    dark_only: list[str] = ["u", "g"],
     ignore_obs: list[str] = ["DD", "twilight_near_sun", "ToO"],
     camera_rot_limits: tuple[float, float] = CAMERA_ROT_LIMITS,
     exptime: float = EXPTIME,
@@ -1058,6 +1068,9 @@ def gen_greedy_surveys(
     bands : `list` [ `str` ]
         Bands in which to generate greedy surveys.
         Default ['r', 'i', 'z', 'y'].
+    dark_only : `list` [`str`]
+        These bandpasses should only execute during times when the moon
+        is down and it is not twilight.
     ignore_obs : `str` or `list` of `str`
         Ignore observations by surveys that include the given substring(s).
     camera_rot_limits : `list` [ `float` ]
@@ -1144,7 +1157,7 @@ def gen_greedy_surveys(
                 slewtime_weight=slewtime_weight,
                 stayband_weight=stayband_weight,
                 footprints=footprints,
-                strict=False,
+                strict=True,
             )
         )
 
@@ -1157,6 +1170,13 @@ def gen_greedy_surveys(
                 repeat_weight,
             )
         )
+
+        if bandname in dark_only:
+            # Add some basis functions to block dark_only bandpasses from
+            # executing during bright sky conditions (twilight or moon up).
+            bfs.append((bf.NotTwilightBasisFunction(), 0.0))
+            bfs.append((bf.MoonAltLimitBasisFunction(alt_limit=-5), 0.0))
+
         masks = standard_masks(**standard_mask_params)
         for m in masks:
             bfs.append((m, 0))
@@ -1267,6 +1287,7 @@ def generate_blobs(
     scheduled_respect : `float`
         Ensure that blobs don't start within this many minutes of scheduled
         observations (from a ScriptedSurvey). Also used for start of twilight.
+        In practice, this also sets the minimum pair time.
     science_program : `str`
         The science_program to use for visits from these surveys.
     blob_survey_params : `dict` or None
