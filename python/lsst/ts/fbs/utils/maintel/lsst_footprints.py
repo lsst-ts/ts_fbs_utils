@@ -135,9 +135,12 @@ def get_footprints(
             tmp_fp = np.where(footprints_hp_array[key] > 0, 1.0, 0.0)
             # Remove known templated areas
             tmp_fp = np.where(known_templates[key] > 0, 0.0, tmp_fp)
+            # Potentially we could also remove other parts of thes sky,
+            # however at present we have no conclusion on whether to exclude
+            # dusty-plane y band (current only candidate).
         template_fp.set_footprint(key, tmp_fp)
 
-    # Set up a mask to contain ToO and neomicro surveys within LSST footprint.
+    # Set up mask to contain ToO and micro surveys within full LSST footprint.
     r_indx = footprints.bands["r"]
     footprint_mask = np.where(footprints.footprints[r_indx] > 0, 1.0, 0.0)
 
