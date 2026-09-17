@@ -34,7 +34,6 @@ from rubin_scheduler.utils import DEFAULT_NSIDE
 from .lsst_surveys import (
     EXPTIME,
     SCIENCE_PROGRAM,
-    STANDARD_MASK_DEFAULTS,
     standard_masks,
 )
 
@@ -69,7 +68,7 @@ def gen_too_surveys(
         of visits in response to ToO events in the Conditions objects.
     """
     if standard_mask_params is None:
-        standard_mask_params = STANDARD_MASK_DEFAULTS
+        standard_mask_params = {}
         standard_mask_params["nside"] = nside
     else:
         standard_mask_params = deepcopy(standard_mask_params)
