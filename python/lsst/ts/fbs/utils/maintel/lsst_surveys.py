@@ -415,6 +415,8 @@ def gen_template_surveys(
     blob_survey_params: dict | None = None,
     standard_mask_params: dict | None = None,
     pair_pad: float = 5.0,
+    extinction_limit: float = 2.0,
+    reset_per_season=False,
 ) -> list[BlobSurvey]:
     """Surveys that are intended to acquire template visits in a convenient yet
     aggressive manner. Visits are aquired in pairs, with shorter than standard
@@ -505,6 +507,9 @@ def gen_template_surveys(
     pair_pad : `float`
         How much extra time (in minutes) to pad above the necessary pair time
         for shadow basis function.
+    extinction_limit : `float`
+        Add detailer so visits get extinction_limit added to them.
+        Default 2.
     """
 
     if n_obs_template is None:
@@ -548,11 +553,12 @@ def gen_template_surveys(
         )
         detailer_list.append(detailers.LabelRegionsAndDDFs())
         # Add extinction_limit detailer for cloud masking in queue_manager.
-        detailer_list.append(
-            detailers.ExtinctionLimitDetailer(
-                extinction_limit=standard_mask_params["cloud_limit"]
+        if extinction_limit is not None:
+            detailer_list.append(
+                detailers.ExtinctionLimitDetailer(
+                    extinction_limit=extinction_limit
+                )
             )
-        )
 
         # For the bandpasses in use in this template survey,
         # find the seeing_fwhm_max using the minimum value for these bands.
@@ -614,10 +620,6 @@ def gen_template_surveys(
         )
 
         # Mask anything observed n_obs_template times.
-        # reset_per_season influences whether the templates are
-        # acquired 'fast' or 'slow' (together with the n_obs_template value).
-        # reset_per_season = True is not great for one year templates,
-        # but for more than one year it's necessary.
         bfs.append(
             (
                 bf.MaskAfterNObsSeeingBasisFunction(
@@ -625,7 +627,7 @@ def gen_template_surveys(
                     n_max=n_obs_template[bandname],
                     bandname=bandname,
                     seeing_fwhm_max=dec_fwhm_max,
-                    reset_per_season=True,
+                    reset_per_season=reset_per_season,
                 ),
                 0.0,
             )
@@ -712,6 +714,7 @@ def blob_for_long(
     blob_survey_params: dict | None = None,
     standard_mask_params: dict | None = None,
     pair_pad: float = 5.0,
+    extinction_limit: float = 2.0,
 ) -> list[BlobSurvey]:
     """
     Generate surveys that take observations in blobs.
@@ -808,11 +811,11 @@ def blob_for_long(
             detailers.BandNexp(bandname="u", nexp=1, exptime=u_exptime)
         )
         detailer_list.append(detailers.LabelRegionsAndDDFs())
-        if standard_mask_params["apply_cloud_mask"]:
+        if extinction_limit is not None:
             # Add extinction_limit detailer for cloud masking in queue_manager.
             detailer_list.append(
                 detailers.ExtinctionLimitDetailer(
-                    extinction_limit=standard_mask_params["cloud_limit"]
+                    extinction_limit=extinction_limit
                 )
             )
 
@@ -1040,6 +1043,7 @@ def gen_greedy_surveys(
     footprints: Footprints | None = None,
     science_program: str = SCIENCE_PROGRAM,
     standard_mask_params: dict | None = None,
+    extinction_limit: float = 10.0,
 ) -> list[GreedySurvey]:
     """Generate greedy (single-best choice visits) Surveys.
 
@@ -1113,11 +1117,11 @@ def gen_greedy_surveys(
     ]
     detailer_list.append(detailers.LabelRegionsAndDDFs())
     # This is probably False (to allow greedy survey to always run).
-    if standard_mask_params["apply_cloud_mask"]:
+    if extinction_limit is not None:
         # Add extinction_limit detailer for cloud masking in queue_manager.
         detailer_list.append(
             detailers.ExtinctionLimitDetailer(
-                extinction_limit=standard_mask_params["cloud_limit"]
+                extinction_limit=extinction_limit
             )
         )
 
@@ -1228,6 +1232,7 @@ def generate_blobs(
     blob_survey_params: dict | None = None,
     standard_mask_params: dict | None = None,
     pair_pad: float = 5.0,
+    extinction_limit: float = 2.0,
 ) -> list[BlobSurvey]:
     """Generate surveys that take observations in blobs.
 
@@ -1303,7 +1308,7 @@ def generate_blobs(
         blob_survey_params = BLOB_SURVEY_PARAMS_DEFAULTS
 
     if survey_start is None:
-        survey_start = footprints.mjd_start
+        survey_start = footprints.footprint_list[0].mjd_start
 
     if standard_mask_params is None:
         standard_mask_params = {"nside": nside}
@@ -1335,11 +1340,11 @@ def generate_blobs(
             )
         detailer_list.append(detailers.FlushForSchedDetailer())
         detailer_list.append(detailers.LabelRegionsAndDDFs())
-        if standard_mask_params["apply_cloud_mask"]:
+        if extinction_limit is not None:
             # Add extinction_limit detailer for cloud masking in queue_manager.
             detailer_list.append(
                 detailers.ExtinctionLimitDetailer(
-                    extinction_limit=standard_mask_params["cloud_limit"]
+                    extinction_limit=extinction_limit
                 )
             )
 
@@ -1494,6 +1499,7 @@ def generate_twilight_near_sun(
     ignore_obs: list[str] = ["DD", "pair", "long", "blob", "greedy", "template", "ToO"],
     science_program: str = SCIENCE_PROGRAM,
     standard_mask_params: dict | None = None,
+    extinction_limit: float = 2,
 ) -> list[BlobSurvey]:
     """Generate a survey for observing NEO objects in twilight.
 
@@ -1594,11 +1600,11 @@ def generate_twilight_near_sun(
         )
         detailer_list.append(detailers.RandomBandDetailer(bands=bands))
         detailer_list.append(detailers.LabelRegionsAndDDFs())
-        if standard_mask_params["apply_cloud_mask"]:
+        if extinction_limit is not None:
             # Add extinction_limit detailer for cloud masking in queue_manager.
             detailer_list.append(
                 detailers.ExtinctionLimitDetailer(
-                    extinction_limit=standard_mask_params["cloud_limit"]
+                    extinction_limit=extinction_limit
                 )
             )
 
