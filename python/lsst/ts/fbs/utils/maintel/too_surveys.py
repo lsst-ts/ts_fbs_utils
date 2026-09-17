@@ -43,6 +43,7 @@ def gen_too_surveys(
     too_footprint: npt.NDArray | None = None,
     science_program: str = SCIENCE_PROGRAM,
     standard_mask_params: dict | None = None,
+    for_simulation: bool = False,
 ) -> list[ToOScriptedSurvey]:
     """Generate a list of ToO surveys to follow up
     events passed in Conditions.
@@ -59,6 +60,8 @@ def gen_too_surveys(
         Metadata to identify the science program for the visit.
     standard_mask_params : `dict` or None
         A dictionary of additional kwargs to mass to the standard safety masks.
+    for simulation : `bool`
+        Are we running a sim, then set Solar System to update mjd.
 
     Returns
     -------
@@ -383,6 +386,7 @@ def gen_too_surveys(
             observation_reason="too_sso_general",
             science_program=science_program,
             flushtime=3.0,
+            update_mjd0=for_simulation,
         )
     )
 
