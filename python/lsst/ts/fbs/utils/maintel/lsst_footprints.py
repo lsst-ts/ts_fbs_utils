@@ -118,6 +118,7 @@ def get_footprints(
         order_roll=1,
         n_cycles=roll_n_cycles,
         uniform=roll_uniform,
+        u5=True,
     )
 
     # Create template footprint.
