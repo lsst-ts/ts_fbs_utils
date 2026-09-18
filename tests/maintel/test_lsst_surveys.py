@@ -36,17 +36,17 @@ class Test_lsst_Surveys(unittest.TestCase):
     def setUp(self) -> None:
         # Generate footprints over the sky
         self.nside = 32
-        self.footprints, self.template_fp = lsst_footprints.get_footprints(self.nside)
+        self.footprints, self.template_fp, footprint_mask = lsst_footprints.get_footprints(self.nside)
 
     def test_footprints(self) -> None:
-        footprints, template_fp = lsst_footprints.get_footprints(self.nside)
+        footprints, template_fp, footprint_mask = lsst_footprints.get_footprints(self.nside)
         assert len(footprints.footprints[0]) == hp.nside2npix(self.nside)
         # Check that all bands are present in footprints and template_fp
         for band in "ugrizy":
             assert band in self.footprints.bands
             assert band in self.template_fp.bands
         # Check that only the bands in the bandpasses are actually non-zero
-        footprints, template_fp = lsst_footprints.get_footprints(
+        footprints, template_fp, footprint_mask = lsst_footprints.get_footprints(
             self.nside, bandpasses=("g", "r")
         )
         for band in "gr":
