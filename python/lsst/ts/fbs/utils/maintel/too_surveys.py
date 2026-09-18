@@ -25,6 +25,7 @@ from copy import deepcopy
 
 import numpy as np
 import numpy.typing as npt
+import rubin_scheduler.scheduler.basis_functions as bf
 import rubin_scheduler.scheduler.detailers as detailers
 from rubin_scheduler.scheduler.detailers import BandPickToODetailer
 from rubin_scheduler.scheduler.surveys import ToOScriptedSurvey
@@ -33,7 +34,6 @@ from rubin_scheduler.utils import DEFAULT_NSIDE
 from .lsst_surveys import (
     EXPTIME,
     SCIENCE_PROGRAM,
-    standard_masks,
 )
 
 
@@ -41,6 +41,7 @@ def gen_too_surveys(
     nside: int = DEFAULT_NSIDE,
     detailer_list: list[detailers.BaseDetailer] | None = None,
     too_footprint: npt.NDArray | None = None,
+    masks: list[bf.BaseBasisFunction] | None = None,
     science_program: str = SCIENCE_PROGRAM,
     standard_mask_params: dict | None = None,
     for_simulation: bool = False,
@@ -56,10 +57,10 @@ def gen_too_surveys(
         List of survey detailers.
     too_footprint : `np.ndarray` or None
         Footprint to contain ToOs within (such as the lsst footprint).
+    masks : `list` of `bf.BaseBasisFunction` or None
+        A list of masks to apply to the ToO surveys.
     science_program : `str`
         Metadata to identify the science program for the visit.
-    standard_mask_params : `dict` or None
-        A dictionary of additional kwargs to mass to the standard safety masks.
     for simulation : `bool`
         Are we running a sim, then set Solar System to update mjd.
 
@@ -69,13 +70,6 @@ def gen_too_surveys(
         A list of ToO surveys configured to trigger a pre-specified sequence
         of visits in response to ToO events in the Conditions objects.
     """
-    if standard_mask_params is None:
-        standard_mask_params = {}
-        standard_mask_params["nside"] = nside
-    else:
-        standard_mask_params = deepcopy(standard_mask_params)
-    # No value of shadow_minutes with ToO surveys?
-    masks = standard_masks(**standard_mask_params)
 
     too_surveys = []
 
