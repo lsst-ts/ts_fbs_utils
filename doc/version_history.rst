@@ -4,6 +4,14 @@
 Version History
 ===============
 
+v0.19.4
+-------
+* Update rubin_scheduler to v4.5.
+* Use 'band' instead of 'filter' where this touches the FBS. (bandname not filtername, etc).
+* Update CameraRotDitherDetailer and DitherDetailer kwargs to new 'dither' or 'per_night' versions.
+* Use `MaskDirectWindBasisFunction` instead of deprecated `AvoidDirectWindBasisFunction`.
+* Use `RotspUpdateDetailer` instead of deprecated `Rottep2RotspDesiredDetailer`.
+
 v0.19.3
 -------
 * Add new `stability_surveys` class with `gen_az_el_rot_stability_survey` to generate a list of FieldAltAzSurveys at user provided positions. 

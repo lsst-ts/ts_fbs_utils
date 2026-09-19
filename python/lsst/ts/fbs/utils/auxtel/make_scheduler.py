@@ -240,8 +240,8 @@ class MakeScheduler:
         cwfs_block_name : `str`
             Name of the cwfs block survey.
         avoid_wind : `bool`
-            If True, include AvoidDirectWind basis function in spectroscopic
-            survey.
+            If True, include MaskDirectWindBasisFunction basis function
+            in spectroscopic survey.
         cwfs_time_gap : `int`
             Time gap in minutes for cwfs survey.
         equal_spec_image : `bool`
