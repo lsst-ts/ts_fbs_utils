@@ -19,8 +19,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-__all__ = ["get_data_dir", "get_auxtel_tiles", "get_maintel_tiles"]
+__all__ = [
+    "get_data_dir",
+    "get_auxtel_tiles",
+    "get_maintel_tiles",
+    "get_pointing_model_grid_data",
+]
 
+import os
 import pathlib
 
 from astropy.io import ascii
@@ -29,6 +35,11 @@ from astropy.table import Table
 
 def get_data_dir() -> pathlib.Path:
     """Return the data directory of this package."""
+    if "LSST_TS_FBS_UTILS_DATA_PATH" in os.environ:
+        data_path = pathlib.Path(os.environ["LSST_TS_FBS_UTILS_DATA_PATH"])
+        if data_path.exists():
+            return data_path.resolve().parents[0]
+
     return pathlib.Path(__file__).resolve().parents[0] / "data"
 
 
@@ -58,6 +69,27 @@ def get_maintel_tiles() -> Table:
     """
     return ascii.read(
         str(get_data_dir() / "maintel_tiles.txt"),
+        format="basic",
+        fast_reader=False,
+        guess=False,
+    )
+
+
+def get_pointing_model_grid_data(science_program: str) -> Table:
+    """Get pointing model tiles.
+
+    Parameters
+    ----------
+    science_program : `str`
+        Name of the science program.
+
+    Returns
+    -------
+    `Table`
+        Pointing tiles as astropy tables.
+    """
+    return ascii.read(
+        str(get_data_dir() / f"pointing-tiles-{science_program.lower()}.txt"),
         format="basic",
         fast_reader=False,
         guess=False,

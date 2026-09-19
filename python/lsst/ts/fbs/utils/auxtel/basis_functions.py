@@ -34,14 +34,19 @@ def get_basis_functions_image_survey(
     ra: float,
     nside: int,
     note: str,
-    ha_limits: typing.List[typing.Tuple[float, float]],
+    ha_limits: typing.List[typing.Tuple[float, float]] | None,
     wind_speed_maximum: float,
     nobs_reference: int,
     nobs_survey: int,
-    note_interest: str,
-    filter_names: list,
+    note_interest: str | None,
+    band_names: list,
     gap_min: float,
     additional_notes: list[tuple[str, int]] | None = None,
+    avoid_wind: bool = True,
+    include_slew: bool = True,
+    sun_alt_limit: float = -12,
+    min_alt: float = 26.0,
+    max_alt: float = 85.0,
 ) -> typing.List[basis_functions.BaseBasisFunction]:
     """Get the basis functions for the image survey.
 
@@ -65,7 +70,7 @@ def get_basis_functions_image_survey(
     note_interest : `str`
         A substring that maps to surveys to be accounted for against the
         reference number of observations.
-    filter_names : `list` [ `str` ]
+    band_names : `list` [ `str` ]
          List of filter names that need be observed before activating.
     gap_min : `float`
         Gap between subsequent observations, in minutes.
@@ -74,37 +79,78 @@ def get_basis_functions_image_survey(
         RewardNObsSequence basis function to reward completing a set of tiles.
         The first element should be the substring that defines the tile set,
         and the second should be the number of tiles.
-        ...
+    avoid_wind : `bool`, optional
+        If True, add the wind avoidance basis function.
+        If False, drop basis function entirely.
+        Makes use align with the spectroscopic survey.
+    include_slew : `bool`, optional
+        Include slewtime basis functions (or not).
+    sun_alt_limit : `float`, optional
+        Sun altitude limit for the survey (degrees).
+        Sun must be below this limit for survey to be feasible.
+    min_alt : `float`, optional
+        Minimum altitude for the survey (degrees).
+        Targets will not be scheduled below this altitude.
+    max_alt : `float`, optional
+        Maximum altitude for the survey (degrees).
+        Targets will not be scheduled above this altitude.
+
     Returns
     -------
     `list` of `basis_functions.BaseBasisFunction`
     """
 
-    sun_alt_limit = -12.0
-
     bfs = [
-        basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
-        basis_functions.HourAngleLimitBasisFunction(RA=ra, ha_limits=ha_limits),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="g"),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="i"),
+        basis_functions.SunAltLimitBasisFunction(alt_limit=sun_alt_limit),
         basis_functions.MoonAvoidanceBasisFunction(nside=nside),
-        basis_functions.ZenithShadowMaskBasisFunction(
-            min_alt=26.0, max_alt=85.0, nside=nside
+        basis_functions.AltAzShadowMaskBasisFunction(
+            min_alt=min_alt, max_alt=max_alt, nside=nside, shadow_minutes=0.0, pad=0.0
         ),
-        basis_functions.VisitGap(note=note, filter_names=filter_names, gap_min=gap_min),
-        basis_functions.AvoidDirectWind(
-            wind_speed_maximum=wind_speed_maximum, nside=nside
-        ),
-        basis_functions.BalanceVisits(
-            nobs_reference=nobs_reference, note_survey=note, note_interest=note_interest
-        ),
-        basis_functions.RewardNObsSequence(
-            n_obs_survey=nobs_survey,
-            note_survey=note,
-            nside=nside,
-        ),
+        # Note that band_names should include ONLY the bands in use, as
+        # the VisitGap will not trigger until all bands are satisfied
+        basis_functions.VisitGap(note=note, band_names=band_names, gap_min=gap_min),
     ]
+
+    if avoid_wind:
+        bfs.append(
+            basis_functions.MaskDirectWindBasisFunction(
+                wind_speed_maximum=wind_speed_maximum, nside=nside
+            )
+        )
+
+    if ha_limits is not None:
+        bfs.append(
+            basis_functions.HourAngleLimitBasisFunction(RA=ra, ha_limits=ha_limits)
+        )
+
+    if include_slew:
+        bfs.extend(
+            [
+                basis_functions.SlewtimeBasisFunction(nside=nside, bandname="g"),
+                basis_functions.SlewtimeBasisFunction(nside=nside, bandname="r"),
+                basis_functions.SlewtimeBasisFunction(nside=nside, bandname="i"),
+            ]
+        )
+
+    # The basis functions below are really only relevant for image
+    # surveys based on using Tiles for dithering.
+    if nobs_survey > 0:
+        bfs.append(
+            basis_functions.RewardNObsSequence(
+                n_obs_survey=nobs_survey,
+                note_survey=note,
+                nside=nside,
+            )
+        )
+
+    if note_interest is not None:
+        bfs.append(
+            basis_functions.BalanceVisits(
+                nobs_reference=nobs_reference,
+                note_survey=note,
+                note_interest=note_interest,
+            )
+        )
 
     if additional_notes is not None:
         for additional_note, additional_nobs in additional_notes:
@@ -124,6 +170,9 @@ def get_basis_functions_cwfs_survey(
     note: str,
     time_gap_min: float,
     wind_speed_maximum: float,
+    sun_alt_limit: float = -7,
+    min_alt: float = 26.0,
+    max_alt: float = 85.0,
 ) -> typing.List[basis_functions.BaseBasisFunction]:
     """Get the basis functions for the CWFS survey.
 
@@ -141,27 +190,35 @@ def get_basis_functions_cwfs_survey(
     wind_speed_maximum : `float`
         Maximum wind speed tolerated for the observations of the survey,
         in m/s.
+    sun_alt_limit : `float`, optional
+        Sun altitude limit for the survey (degrees).
+        Sun must be below this limit for survey to be feasible.
+    min_alt : `float`, optional
+        Minimum altitude for the survey (degrees).
+        Targets will not be scheduled below this altitude.
+    max_alt : `float`, optional
+        Maximum altitude for the survey (degrees).
+        Targets will not be scheduled above this altitude.
 
     Returns
     -------
     `list` of `basis_functions.BaseBasisFunction`
     """
-    sun_alt_limit = -12.0
 
     return [
-        basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
         basis_functions.M5DiffBasisFunction(nside=nside),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="g"),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="i"),
+        basis_functions.SlewtimeBasisFunction(nside=nside, bandname="g"),
+        basis_functions.SlewtimeBasisFunction(nside=nside, bandname="r"),
+        basis_functions.SlewtimeBasisFunction(nside=nside, bandname="i"),
         basis_functions.MoonAvoidanceBasisFunction(nside=nside),
-        basis_functions.ZenithShadowMaskBasisFunction(
-            min_alt=26.0, max_alt=85.0, nside=nside
+        basis_functions.AltAzShadowMaskBasisFunction(
+            min_alt=min_alt, max_alt=max_alt, nside=nside
         ),
         basis_functions.VisitGap(note=note, gap_min=time_gap_min),
-        basis_functions.AvoidDirectWind(
+        basis_functions.MaskDirectWindBasisFunction(
             wind_speed_maximum=wind_speed_maximum, nside=nside
         ),
+        basis_functions.SunAltLimitBasisFunction(alt_limit=sun_alt_limit),
     ]
 
 
@@ -176,6 +233,10 @@ def get_basis_functions_spectroscopic_survey(
     moon_distance: float,
     nobs_reference: int,
     note_interest: str,
+    include_slew: bool = True,
+    sun_alt_limit: float = -10,
+    min_alt: float = 26.0,
+    max_alt: float = 85.0,
 ) -> typing.List[basis_functions.BaseBasisFunction]:
     """Get basis functions for spectroscopic survey.
 
@@ -190,7 +251,9 @@ def get_basis_functions_spectroscopic_survey(
     ha_limits : `list` of `tuple` of (`float`, `float`)
         Hour angle limits, in hours.
     avoid_wind : `bool`
-        if True, include AvoidDirectWind basis function
+        If True, include MaskDirectWindBasisFunction basis function
+    include_slew: `bool`
+        If True, include slewtime basis functions
     wind_speed_maximum : `float`
         Maximum wind speed, in m/s.
     gap_min : `float`
@@ -200,34 +263,52 @@ def get_basis_functions_spectroscopic_survey(
     note_interest : `str`
         A substring that maps to surveys to be accounted for against the
         reference number of observations.
+    include_slew : `bool`, optional
+        Include slewtime basis functions (or not).
+    sun_alt_limit : `float`, optional
+        Sun altitude limit for the survey (degrees).
+        Sun must be below this limit for survey to be feasible.
+    min_alt : `float`, optional
+        Minimum altitude for the survey (degrees).
+        Targets will not be scheduled below this altitude.
+    max_alt : `float`, optional
+        Maximum altitude for the survey (degrees).
+        Targets will not be scheduled above this altitude.
 
     Returns
     -------
-    list of basis_functions.BaseBasisFunction
-        List of basis functions.
+    `list` of `basis_functions.BaseBasisFunction`
     """
-    sun_alt_limit = -12.0
 
     bfs = [
-        basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
-        basis_functions.HourAngleLimitBasisFunction(RA=ra, ha_limits=ha_limits),
-        basis_functions.M5DiffBasisFunction(nside=nside),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="g"),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="i"),
+        basis_functions.SunAltLimitBasisFunction(alt_limit=sun_alt_limit),
         basis_functions.MoonAvoidanceBasisFunction(
             nside=nside, moon_distance=moon_distance
         ),
-        basis_functions.ZenithShadowMaskBasisFunction(
-            min_alt=26.0, max_alt=85.0, nside=nside
+        basis_functions.AltAzShadowMaskBasisFunction(
+            min_alt=min_alt, max_alt=max_alt, shadow_minutes=0.0, pad=0.0, nside=nside
         ),
         basis_functions.VisitGap(note=note, gap_min=gap_min),
     ]
 
+    if ha_limits is not None:
+        bfs.append(
+            basis_functions.HourAngleLimitBasisFunction(RA=ra, ha_limits=ha_limits)
+        )
+
     if avoid_wind:
         bfs.append(
-            basis_functions.AvoidDirectWind(
+            basis_functions.MaskDirectWindBasisFunction(
                 wind_speed_maximum=wind_speed_maximum, nside=nside
             )
+        )
+
+    if include_slew:
+        bfs.extend(
+            [
+                basis_functions.SlewtimeBasisFunction(nside=nside, bandname="g"),
+                basis_functions.SlewtimeBasisFunction(nside=nside, bandname="r"),
+                basis_functions.SlewtimeBasisFunction(nside=nside, bandname="i"),
+            ]
         )
     return bfs

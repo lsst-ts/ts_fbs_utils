@@ -36,7 +36,9 @@ class Target:
     target_name : `str`
         Name of the target.
     survey_name : `str`
-        Name of the survey.
+        Name of the survey, for identification in the FBS.
+    science_program : `str`
+        Science program -- aka JSON BLOCK to execute for observations.
     ra : `Angle`
         Right ascention of the target as an astropy angle. Units are inferred.
     dec : `Angle`
@@ -64,6 +66,7 @@ class Target:
 
     target_name: str
     survey_name: str
+    science_program: str
     ra: Angle
     dec: Angle
     hour_angle_limit: typing.List[typing.Tuple[float, float]]

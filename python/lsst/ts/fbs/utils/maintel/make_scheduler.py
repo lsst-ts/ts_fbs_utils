@@ -53,12 +53,7 @@ from rubin_scheduler.scheduler.surveys import BaseSurvey
 from rubin_scheduler.scheduler.utils import Footprint
 
 from .. import Target, Tiles, get_maintel_tiles
-from .surveys import (
-    generate_anytime_survey,
-    generate_blob_survey,
-    generate_ddf_surveys,
-    generate_image_survey,
-)
+from .surveys import generate_blob_survey, generate_ddf_surveys, generate_image_survey
 
 
 class SurveyType(enum.IntEnum):
@@ -133,14 +128,14 @@ class MakeScheduler:
         simple_fp = {"r": blank_map + 1}
 
         footprints = Footprint(60218.0, 3.27717639)
-        for filtername in simple_fp:
-            footprints.set_footprint(filtername, simple_fp[filtername])
+        for bandname in simple_fp:
+            footprints.set_footprint(bandname, simple_fp[bandname])
 
         blob_survey = generate_blob_survey(
             nside,
             footprints=footprints,
             wind_speed_maximum=wind_speed_maximum,
-            filter_names="r",
+            band_names="r",
             survey_name=survey_name,
         )
 
@@ -151,10 +146,8 @@ class MakeScheduler:
             survey_base_name=survey_name,
         )
 
-        anytime_survey = generate_anytime_survey(nside=nside, survey_name=survey_name)
-
         surveys = (
-            [ddf_surveys, [blob_survey], [anytime_survey]]
+            [ddf_surveys, [blob_survey]]
             if survey_type == SurveyType.SIT
             else [image_survey]
         )

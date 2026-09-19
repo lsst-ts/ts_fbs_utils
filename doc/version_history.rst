@@ -4,6 +4,145 @@
 Version History
 ===============
 
+v0.19.4
+-------
+* Update rubin_scheduler to v4.5.
+* Use 'band' instead of 'filter' where this touches the FBS. (bandname not filtername, etc).
+* Update CameraRotDitherDetailer and DitherDetailer kwargs to new 'dither' or 'per_night' versions.
+* Use `MaskDirectWindBasisFunction` instead of deprecated `AvoidDirectWindBasisFunction`.
+* Use `RotspUpdateDetailer` instead of deprecated `Rottep2RotspDesiredDetailer`.
+
+v0.19.3
+-------
+* Add new `stability_surveys` class with `gen_az_el_rot_stability_survey` to generate a list of FieldAltAzSurveys at user provided positions. 
+* Update `safety_masks` to allow user to pass None for wind_speed_maximum and skip adding AvoidDirectWind basis function.
+
+v0.19.2
+-------
+* Rename gw_large to GW_case_large
+* Make number of observations requested match plan (2 visits, one in g, one in i)
+* Make GW_case_large too survey only return 100 visits at a time, so that HA/Alt don't get too out of sync with planned limits.
+* Add feature to allow alt limits to be configurable for AuxTel surveys.
+
+v0.19.1
+-------
+* Add gw_large configuration for ToO surveys, as specified 2025-11-13
+
+v0.19.0
+-------
+* Modify the Roman survey configurations for fbs_config_lsst_survey to use FieldSurvey instead of DeepDrillingSurvey.
+* Rename `generate_twi_blobs` to be `generate_short_blobs` to be more reflective of their actual use.
+* Adds sun_alt_limit option to safety masks.
+
+v0.18.0
+-------
+* Add lsst_surveys, roman_surveys, and too_surveys for use with LSST main survey configuration. The lsst_surveys are similar but not identical to the sv_surveys. Notably, kwargs for the safety_masks are now passed to all surveys in order to configure these at ts_config_scheduler. The ToO surveys are based on the 2024 workshop configurations plus updates during commissioning. The roman_surveys are temporary placeholders, but include observations for off-season RGES monitoring.
+
+v0.17.7
+-------
+* Flatten `Footprint` coverage over SV survey, using ConstantFootprint instead of time-dependent footprint. Increase weight on footprint basis function.
+* Add more g band visits to flatten coverage across bandpasses. This makes it more likely to get templates in all of the remaining griz bands in SV.
+* Rewrite constraint on ecliptic longitude - previous constraint was written as longitude > 285 or longitude < -5, but the ecliptic longitude ranger here is 0-360 so this latter part of the constraint was doing nothing other than being confusing. Rewritten to be simply ecliptic longitude > 285 degrees. 
+
+v0.17.6
+-------
+* Add minimum viable area for all kinds of pairs surveys, to avoid triggering these when there is not enough area to get a useful pairs (useful in terms of a minimum time separation, but also to avoid many filter changes).
+
+v0.17.5
+-------
+* Reduce primary SV survey area from approximately 3000 sq degrees to about 750, in response to concerns about remaining time available during commissioning and current image quality, plus ability to make and use templates.
+
+v0.17.4
+-------
+* Add a large `return_n_limit` value for the DDFs, which should prevent target shuffling which resulted in more filter changes.
+* Add per-visit dither detailers (translational and rotational) for DDFs.
+
+v0.17.3
+-------
+* Modify the default sun_alt_limit for spectroscopic and cwfs surveys to be -7 degrees.
+* Add configuration option for sun_alt_limit for cwfs survey (generate_cwfs_survey). 
+
+v0.17.2
+-------
+* Add a larger fiducial_FWHMEff for the M5DiffBasisFunctions. This makes it easier for SV surveys to take bluer-band visits instead of waiting for better seeing.
+
+v0.17.1
+-------
+* Fix some issues with the SV configuration: observation_reason needs underscores and no spaces, and n_obs template should not be 0 for surveys that use rubin_scheduler <= 3.10.0 if they also use the NObsPerYear basis function.
+
+v0.17.0
+-------
+* Add SV survey configuration support - generation of the footprint, as well as the various tiers of surveys (DDF, long-gaps (triplets), template gathering, standard pairs, twilight pairs, greedy (single) visits, and a final layer of early template gathering). This includes a DDF prescheduling generation file that more likely will long-term live in rubin_scheduler but is currently divergent from the version we have there (on purpose, to suppose "ocean" ddfs).
+
+v0.16.1
+-------
+
+* Fix bug in MakeFieldSurveyScheduler to make targets optional.
+* Update get_data_dir to allow users setting a altenative data path from an environment variable.
+* Added pointing tiles for block 387.
+
+v0.16.0
+-------
+
+* Update tools for building fieldsurvey scheduler configurations for LSSTCam
+* Move the definition of fieldsurvey pointing centers to ts_config_ocs for more rapid deployment of updates
+
+v0.15.1
+-------
+* Added SunAltLimitBasisFunctions to cwfs, imaging and spectroscopic surveys, to ensure that the FBS stops requesting targets beyond twilight time. The default values are -10 deg, -12 deg, and -10 deg respectively. Placing these limits lightens the load on the OSs around enabling and disabling the Scheduler near twilight.
+
+v0.15.0
+-------
+
+* In auxtel/surveys, add an imaging survey based on a single target, with a single (larger dither) detailer.
+* In auxtel/make_scheduler and utils.py - adds a type of imaging survey based on target, in addition to an imaging survey based on tiles (image_target, in addition to image_tiles). 
+* In auxtel/basis_functions, remove M5Diff basis functions from imaging and spectroscopy surveys, in order to choose targets based on time when desired rather than when the best m5 is achieved.
+* Adds data/auxtel_targets.yaml, to provide a list of targets for auxtel with easy configuration for individual targets.
+* In auxtel/surveys, adds a function to read the auxtel_targets.yaml file.
+* Extends the target.py data class to include `science_program` (aka json block) explicitly, separate from `survey_name`.
+
+v0.14.3
+-------
+
+* In auxtel/basis_functions, override default values for shadow_minutes and pad in AltAzShadowMaskBasisFunction.
+* In auxtel/surveys, pass target name as scheduler_note to field survey.
+
+v0.14.2
+-------
+
+* Update AuxTel Tiles.
+* Update github workflows to pin identify v2.6+
+
+v0.14.1
+-------
+
+* Add candidate targets for ComCam science scheduler configurations.
+
+v0.14.0
+-------
+
+* Update ``MakeFieldSurveyScheduler`` with ``add_field_altaz_surveys`` method, that will add ``FieldAltAzSurvey`` to the list of surveys.
+
+v0.13.1
+-------
+
+* Add candidate targets for ComCam science scheduler configurations.
+
+v0.13.0
+-------
+
+* Add utilities for generating ComCam science scheduler configurations.
+
+v0.12.0
+-------
+
+* General updates to support migration to rubin-scheduler >2.
+
+v0.11.0
+-------
+
+* Replace deprecated ``ZenithShadowMaskBasisFunction`` with ``AltAzShadowMaskBasisFunction``.
+
 v0.10.0
 -------
 
