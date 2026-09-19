@@ -19,8 +19,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+__all__ = ["get_footprints", "SURVEY_START_MJD"]
+
 import numpy as np
 import numpy.typing as npt
+from astropy.time import Time
 from rubin_scheduler.scheduler.utils import (
     CurrentAreaMap,
     Footprint,
@@ -29,12 +32,13 @@ from rubin_scheduler.scheduler.utils import (
     make_rolling_footprints,
 )
 from rubin_scheduler.site_models import Almanac
-from rubin_scheduler.utils import DEFAULT_NSIDE, SURVEY_START_MJD
+from rubin_scheduler.utils import DEFAULT_NSIDE
+
+SURVEY_START_MJD = Time("2026-10-15T12:00:00").mjd
 
 
 def get_footprints(
     nside: int = DEFAULT_NSIDE,
-    survey_start_mjd: float = SURVEY_START_MJD,
     bandpasses: tuple[str, ...] = ("u", "g", "r", "i", "z", "y"),
     roll_n_slice: int = 2,
     roll_scale: float = 0.9,
@@ -47,10 +51,6 @@ def get_footprints(
     -----------
     nside
         The NSIDE for the resolution of the footprint.
-    survey_start_mjd
-        The MJD of the survey start. This influences the footprint
-        returned at a given time, as there is a slope in the footprint
-        value over the observing season.
     bandpasses
         The list of bandpasses to include in the survey footprint.
         Deactivating or restricting bandpasses should be done here.
@@ -75,6 +75,15 @@ def get_footprints(
         the template footprint that already has the known templated
         area cut out;
         and a mask to constrain the ToO and near-sun twilight microsurvey.
+
+    Notes
+    -----
+    The survey start time is important for the footprint and is set
+    as a constant value SURVEY_START_MJD in this module, so as to
+    better enforce consistency in other parts of the survey configuration
+    (such as lsst_surveys and the ddf configuration).
+    When the survey_start_mjd is needed, import
+    lsst_footprints.SURVEY_START_MJD to get a self-consistent value.
     """
 
     # Generate footprint over the sky
@@ -102,14 +111,14 @@ def get_footprints(
             footprints_hp[key] = footprints_hp_array[key] * 0.0
 
     # Use the Almanac to find the position of the sun at the start of survey.
-    almanac = Almanac(mjd_start=survey_start_mjd)
-    sun_moon_info = almanac.get_sun_moon_positions(survey_start_mjd)
+    almanac = Almanac(mjd_start=SURVEY_START_MJD)
+    sun_moon_info = almanac.get_sun_moon_positions(SURVEY_START_MJD)
     sun_ra_start = sun_moon_info["sun_RA"].copy()
 
     # Define the rolling footprint
     footprints = make_rolling_footprints(
         fp_hp=footprints_hp,
-        mjd_start=survey_start_mjd,
+        mjd_start=SURVEY_START_MJD,
         sun_ra_start=sun_ra_start,
         nslice=roll_n_slice,
         scale=roll_scale,
@@ -124,7 +133,7 @@ def get_footprints(
     # Create template footprint.
     # Similar to rolling footprint but tracks visits separately
     # (only good seeing visits) and no rolling.
-    template_fp = Footprint(survey_start_mjd, sun_ra_start, nside=nside)
+    template_fp = Footprint(SURVEY_START_MJD, sun_ra_start, nside=nside)
     # Read already-acquired templates from disk and remove from template fp.
     known_templates = get_template_coverage(nside=nside)
     # Combine goal footprint and known footprint
