@@ -38,11 +38,12 @@ from rubin_scheduler.data import get_data_dir
 from rubin_scheduler.scheduler.utils import ScheduledObservationArray
 from rubin_scheduler.site_models import Almanac
 from rubin_scheduler.utils import (
-    SURVEY_START_MJD,
     calc_season,
     ddf_locations,
     mjd2dayobs,
 )
+
+from .lsst_footprints import SURVEY_START_MJD
 
 
 def calculate_checksum(filenames: list[str]) -> bytes:
@@ -533,8 +534,8 @@ def generate_ddf_scheduled_obs(
     nsnaps : `list of ints` ([1, 2, 2, 2, 2, 2])
         The number of snaps to use per band
     survey_start_mjd : `float`
-        Starting MJD of the survey. Default None, which calls
-        rubin_sim.utils.SURVEY_START_MJD
+        Starting MJD of the survey. Default None, which uses
+        lsst_footprints.SURVEY_START_MJD.
     survey_length : `float`
         Length of survey (years). Default 10.
     sequence_time : `float`, optional

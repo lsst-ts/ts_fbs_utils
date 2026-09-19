@@ -49,6 +49,8 @@ from rubin_scheduler.utils import (
     declination_dependent_fwhm,
 )
 
+from .lsst_footprints import SURVEY_START_MJD
+
 # Set up values to use as kwarg defaults.
 EXPTIME = 30.0
 U_EXPTIME = 38.0
@@ -608,6 +610,7 @@ def gen_template_surveys(
         )
 
         # Mask anything observed n_obs_template times.
+        # Note that this only applies to the first band in the pair.
         bfs.append(
             (
                 bf.MaskAfterNObsSeeingBasisFunction(
@@ -615,6 +618,7 @@ def gen_template_surveys(
                     n_max=n_obs_template[bandname],
                     bandname=bandname,
                     seeing_fwhm_max=dec_fwhm_max,
+                    mjd_start=SURVEY_START_MJD,
                     reset_per_season=reset_per_season,
                 ),
                 0.0,
@@ -1177,6 +1181,7 @@ def gen_greedy_surveys(
             )
         )
         # XXX-magic numbers
+        # Make the greedy survey less likely to immediately repeat a pointing.
         bfs.append(
             (
                 bf.VisitRepeatBasisFunction(
@@ -1268,7 +1273,6 @@ def generate_blobs(
     good_seeing_weight: float = 3.0,
     seeing_fwhm_best: float = 0.8,
     m5_penalty_max: float = 0.5,
-    survey_start: float | None = None,
     scheduled_respect: float = 15.0,
     science_program: str = SCIENCE_PROGRAM,
     blob_survey_params: dict | None = None,
@@ -1329,10 +1333,6 @@ def generate_blobs(
     m5_penalty_max : `float`
         The maximum penalty in 5-sigma limiting depth to consider
         still good for the 'good seeing' images. (in mag).
-    survey_start : `float`
-        The mjd that the survey started (used for determining season for
-        counting good seeing images within a season). Default of None
-        will use footprints.mjd_start
     scheduled_respect : `float`
         Ensure that blobs don't start within this many minutes of scheduled
         observations (from a ScriptedSurvey). Also used for start of twilight.
@@ -1351,9 +1351,6 @@ def generate_blobs(
     """
     if blob_survey_params is None:
         blob_survey_params = BLOB_SURVEY_PARAMS_DEFAULTS
-
-    if survey_start is None:
-        survey_start = footprints.footprint_list[0].mjd_start
 
     if standard_mask_params is None:
         standard_mask_params = {"nside": nside}
@@ -1427,7 +1424,7 @@ def generate_blobs(
                         bf.NGoodSeeingBasisFunction(
                             bandname=bandname,
                             nside=nside,
-                            mjd_start=survey_start,
+                            mjd_start=SURVEY_START_MJD,
                             footprint=footprints.get_footprint(bandname),
                             n_obs_desired=good_seeing[bandname],
                             seeing_fwhm_max=seeing_fwhm_best,
@@ -1442,7 +1439,7 @@ def generate_blobs(
                         bf.NGoodSeeingBasisFunction(
                             bandname=bandname2,
                             nside=nside,
-                            mjd_start=survey_start,
+                            mjd_start=SURVEY_START_MJD,
                             footprint=footprints.get_footprint(bandname2),
                             n_obs_desired=good_seeing[bandname2],
                             seeing_fwhm_max=seeing_fwhm_best,
@@ -1458,7 +1455,7 @@ def generate_blobs(
                         bf.NGoodSeeingBasisFunction(
                             bandname=bandname,
                             nside=nside,
-                            mjd_start=survey_start,
+                            mjd_start=SURVEY_START_MJD,
                             footprint=footprints.get_footprint(bandname),
                             n_obs_desired=good_seeing[bandname],
                             seeing_fwhm_max=seeing_fwhm_best,

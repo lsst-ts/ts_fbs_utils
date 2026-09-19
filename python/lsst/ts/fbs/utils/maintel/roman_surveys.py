@@ -76,6 +76,7 @@ def gen_roman_on_season(
     exptimes: dict | float = EXPTIME,
     science_program: str = SCIENCE_PROGRAM,
     standard_mask_params: dict | None = None,
+    extinction_limit: float | None = None,
     ignore_obs: list | None = None,
 ) -> FieldSurvey:
     """Generate a survey configured to observe the Roman field(s) during an
@@ -108,6 +109,9 @@ def gen_roman_on_season(
         Name of the science program for the survey.
     standard_mask_params : `dict`
         A dictionary of additional kwargs to pass to the standard safety masks.
+    extinction_limit : `float` or None
+        The extinction limit to apply to the survey for cloud dodging.
+        If None, no extinction limit is applied.
     ignore_obs : `list` or `None`
         List of strings to match within scheduler_note to flag observations
         to ignore.
@@ -146,6 +150,11 @@ def gen_roman_on_season(
 
     # Add some feasability basis functions.
     basis_functions = standard_masks(**standard_mask_params)
+    if extinction_limit is not None:
+        basis_functions.append(
+            bf.MaskCloudMapBasisFunction(extinction_limit=extinction_limit)
+        )
+
     # These are crude hard limits. Nominally we would try to
     # pre-schedule these when they would be at the best airamss
     # in the night.
@@ -182,6 +191,10 @@ def gen_roman_on_season(
         )
     )
     details.append(detailers.LabelRegionsAndDDFs())
+    if extinction_limit is not None:
+        details.append(
+            detailers.ExtinctionLimitDetailer(extinction_limit=extinction_limit)
+        )
 
     survey = FieldSurvey(
         basis_functions,
@@ -209,6 +222,7 @@ def gen_roman_off_season(
     exptimes: dict | float = EXPTIME,
     science_program: str = SCIENCE_PROGRAM,
     standard_mask_params: dict | None = None,
+    extinction_limit: float | None = None,
     ignore_obs: list | None = None,
 ) -> FieldSurvey:
     """Generate a survey configured to observe the Roman field(s) outside
@@ -241,6 +255,9 @@ def gen_roman_off_season(
         Name of the science program for the survey.
     standard_mask_params : `dict`
         A dictionary of additional kwargs to pass to the standard safety masks.
+    extinction_limit : `float` or None
+        The extinction limit to apply to the survey for cloud dodging.
+        If None, no extinction limit is applied.
     ignore_obs : `list` or `None`
         List of strings to match within scheduler_note to flag observations
         to ignore.
@@ -274,6 +291,11 @@ def gen_roman_off_season(
     # Add some feasability basis functions. Maybe just give it a
     # set of nights where it can execute for now.
     basis_functions = standard_masks(**standard_mask_params)
+    if extinction_limit is not None:
+        basis_functions.append(
+            bf.MaskCloudMapBasisFunction(extinction_limit=extinction_limit)
+        )
+
     # These are crude hard limits. Nominally we would try
     # to pre-schedule these when they would be at the best
     # airamss in the night.
@@ -311,6 +333,10 @@ def gen_roman_off_season(
         )
     )
     details.append(detailers.LabelRegionsAndDDFs())
+    if extinction_limit is not None:
+        details.append(
+            detailers.ExtinctionLimitDetailer(extinction_limit=extinction_limit)
+        )
 
     survey = FieldSurvey(
         basis_functions,
