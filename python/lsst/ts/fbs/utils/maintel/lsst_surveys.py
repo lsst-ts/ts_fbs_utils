@@ -384,6 +384,7 @@ def gen_template_surveys(
     additional_area_limits: tuple[float] = (10.0,),
     extra_HA_mins: tuple[float] = (1.25,),
     extra_HA_maxes: tuple[float] = (24.0 - 1.25,),
+    night_min: int = 0,
     night_max: int = 365,
     m5_weight: float = 6.0,
     apply_clouds_m5: bool = True,
@@ -461,6 +462,8 @@ def gen_template_surveys(
         When cleaning up the smaller area, additional_area_required,
         these small areas must fall within these HA requirements.
         Should be same length as additional_area_required.
+    night_min : `int`
+        The minimum number of nights after survey start to acquire templates.
     night_max : `int`
         The maximum number of nights after survey start to acquire templates.
     m5_weight : `float`
@@ -583,7 +586,14 @@ def gen_template_surveys(
             bfs.append((bf.MoonAltLimitBasisFunction(alt_limit=-5), 0.0))
 
         # Limit to first year
-        bfs.append((bf.OnlyBeforeNightBasisFunction(night_max=night_max), 0.0))
+        bfs.append(
+            (
+                bf.OnlyDuringNightsBasisFunction(
+                    night_min=night_min, night_max=night_max
+                ),
+                0.0,
+            )
+        )
 
         # Limit to only good seeing visits.
         bfs.append(
