@@ -37,7 +37,7 @@ from rubin_scheduler.scheduler.detailers import (
 from rubin_scheduler.scheduler.surveys import FieldAltAzSurvey, FieldSurvey
 from rubin_scheduler.utils import DEFAULT_NSIDE
 
-from .lsst_surveys import EXPTIME, safety_masks
+from .lsst_surveys import EXPTIME, standard_masks
 
 
 class StabilityTarget(TypedDict):
@@ -58,7 +58,7 @@ def gen_az_el_rot_stability_survey(
     nvis_per_cycle: int = 100,
     exptimes: dict | float = EXPTIME,
     nside: int = DEFAULT_NSIDE,
-    safety_mask_params: dict | None = None,
+    standard_mask_params: dict | None = None,
 ) -> list[FieldSurvey]:
     """Generate a set of stability surveys, designed to execute a series of
     images at predefined Az El Rot positions. The result will be a list of
@@ -94,7 +94,7 @@ def gen_az_el_rot_stability_survey(
         needed (e.g. 38s for u band).
     nside : `int`
         The HEALpix nside for the survey, used for basis functions.
-    safety_mask_params : `dict`
+    standard_mask_params : `dict`
         A dictionary of kwargs to pass to the standard safety masks.
 
 
@@ -104,8 +104,8 @@ def gen_az_el_rot_stability_survey(
         A list of `FieldAltAzSurvey` objects, one per Az/El/Rot combination.
     """
 
-    if safety_mask_params is None:
-        safety_mask_params = {
+    if standard_mask_params is None:
+        standard_mask_params = {
             "nside": nside,
             "wind_speed_maximum": None,
             "shadow_minutes": 0,
@@ -148,7 +148,7 @@ def gen_az_el_rot_stability_survey(
         AltAz2RaDecDetailer(),
     ]
 
-    safety_masks_basis_functions = safety_masks(**safety_mask_params)
+    masks_basis_functions = standard_masks(**standard_mask_params)
 
     survey_lists = []
     for target in target_dict:
@@ -166,7 +166,7 @@ def gen_az_el_rot_stability_survey(
                     nside=nside,
                 ),
             ]
-            + safety_masks_basis_functions,
+            + masks_basis_functions,
             alt=tt["alt"],
             az=tt["az"],
             sequence=sequence,
