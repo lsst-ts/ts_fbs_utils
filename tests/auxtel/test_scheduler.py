@@ -36,6 +36,8 @@ class TestMakeScheduler(unittest.TestCase):
     spec_detailers: typing.List[BaseDetailer]
     image_detailers_tiles: typing.List[BaseDetailer]
     cwfs_block_name: str
+    image_targets: typing.List[Target]
+    image_detailers_targets: typing.List[BaseDetailer]
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -269,4 +271,4 @@ class TestMakeScheduler(unittest.TestCase):
 
     @staticmethod
     def get_image_detailers() -> typing.List[BaseDetailer]:
-        return [CameraRotDetailer(max_rot=5.0, min_rot=1.0, per_night=False)]
+        return [CameraRotDetailer(max_rot=5.0, min_rot=1.0, dither="all")]

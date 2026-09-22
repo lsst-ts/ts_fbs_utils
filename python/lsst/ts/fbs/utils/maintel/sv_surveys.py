@@ -75,7 +75,7 @@ def safety_masks(
     Avoids the moon, bright planets, high wind, and
     areas on the sky out of bounds, using
     the MoonAvoidanceBasisFunction, PlanetMaskBasisFunction,
-    AvoidDirectWindBasisFunction, and the AltAzShadowMaskBasisFunction.
+    MaskDirectWindBasisFunction, and the AltAzShadowMaskBasisFunction.
     Adds the default AltAzShadowMaskTimeLimited basis function to avoid
     pointing toward sunrise late in the night during commissioning.
 
@@ -126,7 +126,9 @@ def safety_masks(
     mask_bfs.append(bf.PlanetMaskBasisFunction(nside=nside))
     # Avoid the wind
     mask_bfs.append(
-        bf.AvoidDirectWind(nside=nside, wind_speed_maximum=wind_speed_maximum)
+        bf.MaskDirectWindBasisFunction(
+            nside=nside, wind_speed_maximum=wind_speed_maximum
+        )
     )
     # Avoid the alt/az limits - this will pick up limits from the
     # yaml file configurations for the summit as well
@@ -442,14 +444,8 @@ def gen_lvk_templates(
         )
         lvk_templates.append(s)
 
-    # Remove detailer (drop this when updated at rubin_scheduler)
-    bad_detailer = detailers.Rottep2RotspDesiredDetailer
     for survey in lvk_templates:
-        good_dets = []
-        for det in survey.detailers:
-            if not isinstance(det, bad_detailer):
-                good_dets.append(det)
-        survey.detailers = good_dets
+        survey.detailers = [detailers.RotspUpdateDetailer()]
 
     return lvk_templates
 
