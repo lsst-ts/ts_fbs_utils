@@ -3,10 +3,5 @@ name: lint
 on: push
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install
-        run: |
-          $CONDA/bin/conda config --set solver classic
-          $CONDA/bin/conda install -c conda-forge -c lsstts pre-commit identify>=2.6 ts-pre-commit-config python=3.11 -y
+  call-workflow:
+    uses: lsst-ts/tssw_workflows/.github/workflows/lint.yaml@main
