@@ -1,1 +1,0 @@
-Updated linting rule to use tssw workflow.
