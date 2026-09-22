@@ -6,6 +6,19 @@ Version History
 
 .. towncrier release notes start
 
+v0.19.5 (2026-09-22)
+====================
+
+Other Changes and Additions
+---------------------------
+
+- Added github workflows to check changelog creation and enforce rebasing. (`SSW-2901 <https://rubinobs.atlassian.net//browse/SSW-2901>`_)
+- Updated license headers. (`SSW-2901 <https://rubinobs.atlassian.net//browse/SSW-2901>`_)
+- Added support for towncrier. (`SSW-2901 <https://rubinobs.atlassian.net//browse/SSW-2901>`_)
+- Updated linting rule to use tssw workflow. (`SSW-2901 <https://rubinobs.atlassian.net//browse/SSW-2901>`_)
+- Updated code formatting. (`SSW-2901 <https://rubinobs.atlassian.net//browse/SSW-2901>`_)
+
+
 v0.19.4
 -------
 * Update rubin_scheduler to v4.5.
