@@ -77,7 +77,7 @@ class Test_lsst_Surveys(unittest.TestCase):
         required_masks = [
             basis_functions.MoonAvoidanceBasisFunction,
             basis_functions.AltAzShadowMaskBasisFunction,
-            basis_functions.AvoidDirectWind,
+            basis_functions.MaskDirectWindBasisFunction,
         ]
         # There can be other masks too
         for req_mask in required_masks:

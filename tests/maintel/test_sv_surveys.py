@@ -40,7 +40,7 @@ class Test_SV_Surveys(unittest.TestCase):
         required_masks = [
             basis_functions.MoonAvoidanceBasisFunction,
             basis_functions.AltAzShadowMaskBasisFunction,
-            basis_functions.AvoidDirectWind,
+            basis_functions.MaskDirectWindBasisFunction,
         ]
         # There can be other masks too
         for req_mask in required_masks:
@@ -73,7 +73,7 @@ class Test_SV_Surveys(unittest.TestCase):
         )
         assert len(surveys) > 0
 
-    @unittest.skip
+    @unittest.skip("Datafiles not available in CI")
     def test_gen_ddf_surveys(self) -> None:
         surveys = sv_surveys.gen_ddf_surveys(
             ddf_config_file=os.path.join(get_data_dir(), "ddf_sv.dat")

@@ -36,7 +36,7 @@ def test_get_basis_functions_image_survey() -> None:
         nobs_reference=3,
         nobs_survey=30,
         note_interest="unit_test",
-        filter_names=["g", "r", "i"],
+        band_names=["g", "r", "i"],
         gap_min=144.0,
         additional_notes=[["unit_test", 32]],
         include_slew=True,

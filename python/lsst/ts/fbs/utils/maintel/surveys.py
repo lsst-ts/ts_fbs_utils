@@ -94,7 +94,7 @@ def generate_image_survey(
         wind_speed_maximum=wind_speed_maximum,
         nobs_reference=nfields,
         nobs_survey=len(target.filters),
-        filter_names=target.filters,
+        band_names=target.filters,
         gap_min=target.visit_gap,
     )
 
@@ -103,7 +103,7 @@ def generate_image_survey(
     for filter_obs, observation in zip(target.filters, sequence):
         observation["RA"] = target.ra.to(u.rad).value
         observation["dec"] = target.dec.to(u.rad).value
-        observation["filter"] = filter_obs
+        observation["band"] = filter_obs
         observation["exptime"] = target.exptime
         observation["nexp"] = target.nexp
         observation["scheduler_note"] = f"{target.survey_name}:{target.target_name}"
@@ -141,7 +141,7 @@ def generate_blob_survey(
     nside: int,
     wind_speed_maximum: float,
     footprints: object,
-    filter_names: str,
+    band_names: str,
     survey_name: str,
 ) -> BaseSurvey:
     """Generate blob survey.
@@ -154,8 +154,8 @@ def generate_blob_survey(
         Wind speed limit, in m/s.
     footprints : `object`
         Footprint object to generate the blob.
-    filter_names : `list` of `str`
-        List of filters to add to the blob survey.
+    band_names : `list` of `str`
+        List of bands to add to the blob survey.
     survey_name : `str`
         Name of survey.
 
@@ -174,7 +174,7 @@ def generate_blob_survey(
     blob_survey = BlobSurvey(
         basis_functions,
         basis_weights,
-        filtername1=filter_names,
+        bandname1=band_names,
         survey_name="Area",
         science_program=survey_name,
     )

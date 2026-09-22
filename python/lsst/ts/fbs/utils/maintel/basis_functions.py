@@ -61,7 +61,7 @@ def get_basis_functions_star_tracker_survey(
     nobs_reference: int,
     nobs_survey: int,
     note_interest: str,
-    filter_names: list,
+    band_names: list,
     gap_min: float,
 ) -> list[basis_functions.BaseBasisFunction]:
     """Get the basis functions for the image survey.
@@ -86,7 +86,7 @@ def get_basis_functions_star_tracker_survey(
     note_interest : `str`
         A substring that maps to surveys to be accounted for against the
         reference number of observations.
-    filter_names : `list` [ `str` ]
+    band_names : `list` [ `str` ]
          List of filter names that need be observed before activating.
     gap_min : `float`
         Gap between subsequent observations, in minutes.
@@ -101,13 +101,13 @@ def get_basis_functions_star_tracker_survey(
     return [
         basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
         basis_functions.HourAngleLimitBasisFunction(RA=ra, ha_limits=ha_limits),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="g"),
+        basis_functions.SlewtimeBasisFunction(nside=nside, bandname="g"),
         basis_functions.MoonAvoidanceBasisFunction(nside=nside),
         basis_functions.AltAzShadowMaskBasisFunction(
             min_alt=26.0, max_alt=85.0, nside=nside
         ),
-        basis_functions.VisitGap(note=note, filter_names=filter_names, gap_min=gap_min),
-        basis_functions.AvoidDirectWind(
+        basis_functions.VisitGap(note=note, band_names=band_names, gap_min=gap_min),
+        basis_functions.MaskDirectWindBasisFunction(
             wind_speed_maximum=wind_speed_maximum, nside=nside
         ),
         basis_functions.BalanceVisits(
@@ -147,18 +147,18 @@ def get_basis_functions_blob_survey(
 
     return [
         basis_functions.NotTwilightBasisFunction(sun_alt_limit=sun_alt_limit),
-        basis_functions.M5DiffBasisFunction(filtername="r", nside=nside),
+        basis_functions.M5DiffBasisFunction(bandname="r", nside=nside),
         basis_functions.FootprintBasisFunction(
-            filtername="r", footprint=footprint, nside=nside
+            bandname="r", footprint=footprint, nside=nside
         ),
         basis_functions.MoonAvoidanceBasisFunction(nside=nside),
         basis_functions.AltAzShadowMaskBasisFunction(
             min_alt=26.0, max_alt=85.0, nside=nside
         ),
-        basis_functions.AvoidDirectWind(
+        basis_functions.MaskDirectWindBasisFunction(
             wind_speed_maximum=wind_speed_maximum, nside=nside
         ),
-        basis_functions.SlewtimeBasisFunction(nside=nside, filtername="r"),
+        basis_functions.SlewtimeBasisFunction(nside=nside, bandname="r"),
         basis_functions.VisitRepeatBasisFunction(nside=nside),
     ]
 
@@ -201,7 +201,7 @@ def get_basis_functions_ddf_survey(
         basis_functions.AltAzShadowMaskBasisFunction(
             min_alt=26.0, max_alt=85.0, nside=nside
         ),
-        basis_functions.AvoidDirectWind(
+        basis_functions.MaskDirectWindBasisFunction(
             wind_speed_maximum=wind_speed_maximum, nside=nside
         ),
         basis_functions.VisitGap(note=survey_name, gap_min=gap_min),
@@ -240,7 +240,7 @@ def get_basis_functions_field_survey(
         basis_functions.MoonAvoidanceBasisFunction(
             nside=nside, moon_distance=moon_distance
         ),
-        basis_functions.AvoidDirectWind(
+        basis_functions.MaskDirectWindBasisFunction(
             wind_speed_maximum=wind_speed_maximum, nside=nside
         ),
         # Mask parts of the sky in alt/az, including parts of the sky that will
@@ -258,7 +258,7 @@ def get_basis_functions_field_survey(
         # Avoid revisits within 30 minutes -- sequence is about 60 minutes
         # long, don't repeat immediately
         basis_functions.AvoidFastRevisitsBasisFunction(
-            nside=nside, filtername=None, gap_min=30.0
+            nside=nside, bandname=None, gap_min=30.0
         ),
         # Reward fields that are rising, but don't mask out after zenith
         basis_functions.RewardRisingBasisFunction(
@@ -268,7 +268,7 @@ def get_basis_functions_field_survey(
         # for r band, so relying on skymap in r band .. if there isn't a stron
         # reason to go with the darkest pointing, it might be reasonable to
         # just drop this basis function
-        basis_functions.M5DiffBasisFunction(filtername="r", nside=nside),
+        basis_functions.M5DiffBasisFunction(bandname="r", nside=nside),
     ]
     return bfs
 
@@ -303,7 +303,7 @@ def get_basis_functions_anytime_survey(
             max_alt=82.0,
             nside=nside,
         ),
-        basis_functions.SlewtimeBasisFunction(filtername="r", nside=nside),
+        basis_functions.SlewtimeBasisFunction(bandname="r", nside=nside),
         basis_functions.TargetMapBasisFunction(target_map=target_map),
     ]
 
