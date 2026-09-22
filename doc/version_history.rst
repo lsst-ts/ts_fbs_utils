@@ -4,6 +4,8 @@
 Version History
 ===============
 
+.. towncrier release notes start
+
 v0.19.4
 -------
 * Update rubin_scheduler to v4.5.

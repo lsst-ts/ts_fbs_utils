@@ -1,6 +1,6 @@
 # This file is part of ts_fbs_utils.
 #
-# Developed for the Vera Rubin Observatory Telescope and Site System.
+# Developed for the Vera C. Rubin Observatory Telescope and Site Systems.
 # This product includes software developed by the LSST Project
 # (https://www.lsst.org).
 # See the COPYRIGHT file at the top-level directory of this distribution
@@ -13,11 +13,11 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
 
@@ -106,7 +106,7 @@ def main() -> None:
     with open(filename, "w") as fp:
         fp.write("Name Alt Az\n")
         for i, index in enumerate(sort_data):
-            (alt, az) = altaz_grid[index]
+            alt, az = altaz_grid[index]
             fp.write(f"{args.block}_{i+1:03d} {alt.deg:6.2f} {az.deg:7.2f}\n")
 
 

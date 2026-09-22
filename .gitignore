@@ -32,3 +32,4 @@ towncrier.toml
 
 # dev
 .idea
+.LICENSE.txt
