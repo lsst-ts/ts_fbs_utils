@@ -4,4 +4,5 @@ black: true
 flake8: true
 isort: true
 mypy: true
+towncrier: true
 insert-license: true
