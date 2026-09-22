@@ -20,6 +20,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 __all__ = (
+    "read_ddf_obs_array",
     "generate_ddf_scheduled_obs",
     "ddf_slopes",
     "match_cumulative",
@@ -38,12 +39,43 @@ from rubin_scheduler.data import get_data_dir
 from rubin_scheduler.scheduler.utils import ScheduledObservationArray
 from rubin_scheduler.site_models import Almanac
 from rubin_scheduler.utils import (
+    SURVEY_START_MJD,
     calc_season,
     ddf_locations,
     mjd2dayobs,
 )
 
-from .lsst_footprints import SURVEY_START_MJD
+
+def read_ddf_obs_array(expected_hex_digest: str) -> ScheduledObservationArray:
+    """Given the hash of a known pre-calculated DDF observation array,
+    read and return the ScheduledObservationArray.
+    """
+    pre_comp_file = (
+        Path(get_data_dir()) / "scheduler" / f"ts_ddf_array_{expected_hex_digest}.npz"
+    )
+    if os.path.exists(pre_comp_file):
+        loaded = np.load(pre_comp_file, allow_pickle=True)
+        hash_object = hashlib.sha256()
+        hash_object.update(loaded["hash_digest"])
+        hex_digest = hash_object.hexdigest()[:7]
+        if hex_digest == expected_hex_digest:
+            obs_array_loaded = loaded["obs_array"]
+            obs_array = ScheduledObservationArray(obs_array_loaded.size)
+            for key in obs_array_loaded.dtype.names:
+                obs_array[key] = obs_array_loaded[key]
+        else:
+            raise RuntimeError(
+                f"Provided hash {expected_hex_digest} does not match loaded file hash {hex_digest}. "
+                "Reach out for support so they can help you generate the correct file."
+            )
+        loaded.close()
+    else:
+        raise RuntimeError(
+            f"Pre-computed DDF files {pre_comp_file} not available. "
+            "Reach out for support so they can help execute the script "
+            "that will generate this file before proceeding."
+        )
+    return obs_array
 
 
 def calculate_checksum(filenames: list[str]) -> bytes:
@@ -482,7 +514,7 @@ def generate_ddf_scheduled_obs(
     configs_df: pd.DataFrame,
     data_file: str | None = None,
     mjd_tol: float = 15.0,
-    expt: dict = {"u": 38.0, "g": 29.2, "r": 29.2, "i": 29.2, "z": 29.2, "y": 29.2},
+    expt: dict = {"u": 38.0, "g": 30.0, "r": 30.0, "i": 30.9, "z": 30.0, "y": 30.0},
     alt_min: float = 25.0,
     alt_max: float = 85.0,
     HA_min: float = 21.0,
@@ -491,7 +523,6 @@ def generate_ddf_scheduled_obs(
     moon_min_distance: float = 25.0,
     dist_tol: float = 3.0,
     bands: str = "ugrizy",
-    nsnaps: dict = {"u": 1, "g": 2, "r": 2, "i": 2, "z": 2, "y": 2},
     survey_start_mjd: float = SURVEY_START_MJD,
     survey_length: float = 10.0,
     low_season_frac: float = 0.0,
@@ -531,11 +562,9 @@ def generate_ddf_scheduled_obs(
         The number of visits to make per band
     bands : `str` (ugrizy)
         The band names.
-    nsnaps : `list of ints` ([1, 2, 2, 2, 2, 2])
-        The number of snaps to use per band
     survey_start_mjd : `float`
-        Starting MJD of the survey. Default None, which uses
-        lsst_footprints.SURVEY_START_MJD.
+        Starting MJD of the survey. Default None, which calls
+        rubin_sim.utils.SURVEY_START_MJD
     survey_length : `float`
         Length of survey (years). Default 10.
     sequence_time : `float`, optional
@@ -614,9 +643,7 @@ def generate_ddf_scheduled_obs(
 
         for bandname in "ugrizy":
             sequence_dict[bandname] = row[bandname]
-            sequence_time += (expt[bandname] + overhead * nsnaps[bandname]) * row[
-                bandname
-            ]
+            sequence_time += (expt[bandname] + overhead) * row[bandname]
 
         mask_even_odd = None
         if row["even_odd"].strip() == "even":
@@ -693,8 +720,8 @@ def generate_ddf_scheduled_obs(
                     obs["flush_by_mjd"] = mjd + flush_length
                     obs["exptime"] = expt[bandname]
                     obs["band"] = bandname
-                    obs["nexp"] = nsnaps[bandname]
-                    obs["scheduler_note"] = "DD:%s" % ddf_name + ", " + dayobs_string
+                    obs["nexp"] = 1
+                    obs["scheduler_note"] = f"DD:{ddf_name}, {dayobs_string}"
                     obs["target_name"] = "ddf_" + ddf_name.lower()
                     obs["science_program"] = science_program
                     obs["observation_reason"] = "ddf_" + ddf_name.lower()
@@ -718,9 +745,9 @@ def generate_ddf_scheduled_obs(
                     obs["flush_by_mjd"] = mjd + flush_length
                     obs["exptime"] = expt[bandname]
                     obs["band"] = bandname
-                    obs["nexp"] = nsnaps[bandname]
+                    obs["nexp"] = 1
                     obs["scheduler_note"] = (
-                        "DD:%s" % ddf_name.replace("_a", "_b") + ", " + dayobs_string
+                        f"DD:{ddf_name.replace("_a", "_b")}, {dayobs_string}"
                     )
                     obs["target_name"] = "ddf_" + ddf_name.replace("_a", "_b").lower()
                     obs["science_program"] = science_program
@@ -747,8 +774,8 @@ def generate_ddf_scheduled_obs(
                     obs["flush_by_mjd"] = mjd + flush_length
                     obs["exptime"] = expt[bandname]
                     obs["band"] = bandname
-                    obs["nexp"] = nsnaps[bandname]
-                    obs["scheduler_note"] = "DD:%s" % ddf_name + ", " + dayobs_string
+                    obs["nexp"] = 1
+                    obs["scheduler_note"] = f"DD:{ddf_name}, {dayobs_string}"
                     obs["target_name"] = "ddf_" + ddf_name.lower()
                     obs["science_program"] = science_program
                     obs["observation_reason"] = "ddf_" + ddf_name.lower()
