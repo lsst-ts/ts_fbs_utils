@@ -380,6 +380,7 @@ def gen_template_surveys(
     u_exptime: float = U_EXPTIME,
     n_obs_template: dict | None = None,
     pair_time: float = 25.0,
+    max_radius_peak: float = 90.0,
     area_required: float = 50.0,
     HA_min: float = 2.5,
     HA_max: float = 24 - 2.5,
@@ -443,6 +444,9 @@ def gen_template_surveys(
         The time until the end of the first pass of the Blob.
         Since there is no second filter, this is the amount of time
         spent in the Blob.
+    max_radius_peak : `float`
+        Passed to survey, defines how far around the reward function
+        maximum to include (degrees).
     area_required : `float`
         The area required that needs templates, before the BlobSurvey will
         activate. Square degrees.
@@ -587,7 +591,7 @@ def gen_template_surveys(
             bfs.append((bf.NotTwilightBasisFunction(), 0.0))
             bfs.append((bf.MoonAltLimitBasisFunction(alt_limit=-5), 0.0))
 
-        # Limit to first year
+        # Limit to particular time period.
         bfs.append(
             (
                 bf.OnlyDuringNightsBasisFunction(
@@ -671,6 +675,7 @@ def gen_template_surveys(
                 exptime=exptime,
                 ideal_pair_time=pair_time,
                 dither="call",
+                max_radius_peak=max_radius_peak,
                 survey_name=survey_name,
                 science_program=science_program,
                 observation_reason=observation_reason,
