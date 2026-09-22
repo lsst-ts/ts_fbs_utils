@@ -106,7 +106,7 @@ def main() -> None:
     with open(filename, "w") as fp:
         fp.write("Name Alt Az\n")
         for i, index in enumerate(sort_data):
-            (alt, az) = altaz_grid[index]
+            alt, az = altaz_grid[index]
             fp.write(f"{args.block}_{i+1:03d} {alt.deg:6.2f} {az.deg:7.2f}\n")
 
 
