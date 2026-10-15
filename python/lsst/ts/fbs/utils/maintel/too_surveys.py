@@ -73,6 +73,9 @@ def gen_too_surveys(
 
     too_surveys = []
 
+    if masks is None:
+        masks = []
+
     ############
     # Generic GW followup
     ############
