@@ -73,7 +73,6 @@ BLOB_SURVEY_PARAMS_DEFAULTS = {
     "read_approx": 3.07,
     "flush_time": 30.0,
     "smoothing_kernel": None,
-    "nside": DEFAULT_NSIDE,
     "seed": 42,
     "twilight_scale": True,
     "check_scheduled": True,
@@ -1523,6 +1522,7 @@ def generate_blobs(
                 detailers=detailer_list,
                 note_block_size=True,
                 max_pair_time=max_pair_time,
+                nside=nside,
                 **blob_survey_params,
             )
         )
@@ -1634,7 +1634,7 @@ def generate_twilight_near_sun(
         # pair_time * 4 (for the quad)
         standard_mask_params["shadow_minutes"] = ideal_pair_time * 4
 
-    survey_name = "twilight_near_sun"
+    survey_name_base = "twilight_near_sun"
     observation_reason = "twilight_near_sun"
     footprint = ecliptic_area(nside=nside, mask=footprint_mask)
     constant_fp = ConstantFootprint(nside=nside)
@@ -1748,7 +1748,7 @@ def generate_twilight_near_sun(
                 ideal_pair_time=ideal_pair_time,
                 nside=nside,
                 exptime=exptime,
-                survey_name=survey_name,
+                survey_name=f"{survey_name_base} {bandname}",
                 ignore_obs=ignore_obs,
                 dither="night",
                 nexp=1,
