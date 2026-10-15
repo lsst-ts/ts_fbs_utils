@@ -34,7 +34,10 @@ from rubin_scheduler.scheduler.utils import (
 from rubin_scheduler.site_models import Almanac
 from rubin_scheduler.utils import DEFAULT_NSIDE
 
-SURVEY_START_MJD = Time("2026-10-15T12:00:00").mjd
+# SURVEY_START_MJD is used for the footprint goals and some basis functions,
+# including the value of the 'night'.
+# The footprint only functions as expected for dates > SURVEY_START_MJD.
+SURVEY_START_MJD = Time("2026-06-29T12:00:00").mjd
 
 
 def get_footprints(
