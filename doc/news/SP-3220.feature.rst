@@ -1,0 +1,8 @@
+* Rework lsst_surveys to support templates operating in various time windows  dynamically scaling pairs, cloud avoidance and best-choices in all surveys. Names for the twilight_neo_surveys include their bandpass, for easier identification in survey_lists.
+* Removes NEXP and U_NEXP so that each visits is only ever 1 snap (the biggest effect here is that it is not possible to accidentally get snaps from the ToO surveys).
+* Renames safety_masks to standard_masks, and updates usages of these.
+* Adds an lsst_footprints module, to clean up the implementation of the footprint in the matching ts_config_scheduler configuration file. This allows restriction to a subset of filters from ts_config_scheduler via kwarg.
+* Likewise, moves some utilities for reading the ddf prescheduled observation array out of the ts_config_scheduler configuration file and into utilities here.
+* The BandSubstituteDetailer is added to the ToO surveys that used z band. This allows use of y band if z is not available. The '_case_' in observation_reason and scheduler_note is also dropped, for shorter strings.
+* Removes SV survey support, to avoid confusion with similar sounding names.
+
