@@ -46,7 +46,6 @@ def gen_too_surveys(
     too_footprint: npt.NDArray | None = None,
     masks: list[bf.BaseBasisFunction] | None = None,
     science_program: str = SCIENCE_PROGRAM,
-    standard_mask_params: dict | None = None,
     for_simulation: bool = False,
 ) -> list[ToOScriptedSurvey]:
     """Generate a list of ToO surveys to follow up
@@ -62,6 +61,8 @@ def gen_too_surveys(
         Footprint to contain ToOs within (such as the lsst footprint).
     masks : `list` of `bf.BaseBasisFunction` or None
         A list of masks to apply to the ToO surveys.
+        The masks themselves are passed instead of the standard_mask_params
+        so that cloud avoidance can be added.
     science_program : `str`
         Metadata to identify the science program for the visit.
     for simulation : `bool`
