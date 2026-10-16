@@ -98,10 +98,6 @@ def get_footprints(
         # Don't mask based on bandpasses yet.
         footprints_hp[key] = footprints_hp_array[key]
 
-    # Set up a mask to contain some surveys within this region.
-    footprint_mask = footprints_hp["r"] * 0
-    footprint_mask[np.where(footprints_hp["r"] > 0)] = 1
-
     # Identify pixels for rolling
     roll_indx = np.where((labels == "lowdust") | (labels == "virgo"))[0]
     roll_footprint = footprints_hp_array["r"] * 0
