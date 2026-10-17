@@ -371,7 +371,7 @@ def gen_template_surveys(
     seeing_fwhm_max_zenith: dict = SEEING_FWHM_MAX_ZENITH_DEFAULT,
     median_cloud_limit: float = 1.5,
     band1s: list[str] = ["u", "g", "r", "i", "z", "y"],
-    band2s: list[str] = ["u", "g", "r", "i", "z", "y"],
+    band2s: list[str] | None | list[None] = ["u", "g", "r", "i", "z", "y"],
     dark_only: list[str] = ["u", "g"],
     ignore_obs: str | list[str] = ["DD", "twilight_near_sun"],
     camera_rot_limits: tuple[float, float] = CAMERA_ROT_LIMITS,
@@ -424,7 +424,7 @@ def gen_template_surveys(
         survey infeasible. Only applies if DREAM data available.
     band1s : `list` [`str`]
         The bandnames for the first band in a pair.
-    band2s : `list` of `str`
+    band2s : `list` [`str`] or None
         The band names for the second in the pair (None if unpaired).
     dark_only : `list` [ `str` ]
         The bands to only attempt during dark-time.
@@ -524,6 +524,11 @@ def gen_template_surveys(
         standard_mask_params["shadow_minutes"] = shadow_minutes
 
     surveys = []
+
+    if band2s is None:
+        band2s = [None] * len(band1s)
+    if len(band1s) != len(band2s):
+        raise ValueError("band1s and band2s must be the same length.")
 
     for bandname, bandname2 in zip(band1s, band2s):
 
@@ -662,8 +667,12 @@ def gen_template_surveys(
                 bf.RevHaMaskBasisFunction(ha_min=ha_min, ha_max=ha_max, nside=nside)
             )
 
-        survey_name = "templates %s%s" % (bandname, bandname2)
-        observation_reason = f"template_blob_{bandname}{bandname2}_{pair_time:.1f}"
+        if bandname2 is None:
+            survey_name = "template_%s" % (bandname)
+            observation_reason = f"template_{bandname}_{pair_time:.1f}"
+        else:
+            survey_name = "templates %s%s" % (bandname, bandname2)
+            observation_reason = f"template_blob_{bandname}{bandname2}_{pair_time:.1f}"
 
         surveys.append(
             BlobPairsSurvey(
@@ -695,7 +704,7 @@ def blob_for_long(
     footprints: Footprints,
     nside: int = DEFAULT_NSIDE,
     band1s: list[str] = ["g"],
-    band2s: list[str] = ["i"],
+    band2s: list[str] | None | list[None] = ["i"],
     ignore_obs: str | list[str] = ["DD", "twilight_near_sun", "ToO"],
     camera_rot_limits: tuple[float, float] = CAMERA_ROT_LIMITS,
     exptime: float = EXPTIME,
@@ -807,6 +816,11 @@ def blob_for_long(
 
     surveys = []
 
+    if band2s is None:
+        band2s = [None] * len(band1s)
+    if len(band1s) != len(band2s):
+        raise ValueError("band1s and band2s must be the same length.")
+
     for bandname, bandname2 in zip(band1s, band2s):
 
         # Detailers.
@@ -886,7 +900,12 @@ def blob_for_long(
             detailer_list.append(detailers.TakeAsPairsDetailer(bandname=bandname2))
 
         if observation_reason is None:
-            observation_reason = f"triplet_pairs_{bandname}{bandname2}_{pair_time:.1f}"
+            if bandname2 is None:
+                observation_reason = f"triplet_pairs_{bandname}_{pair_time:.1f}"
+            else:
+                observation_reason = (
+                    f"triplet_pairs_{bandname}{bandname2}_{pair_time:.1f}"
+                )
 
         surveys.append(
             BlobSurvey(
@@ -1251,7 +1270,7 @@ def generate_blobs(
         "i",
         "z",
     ],
-    band2s: list[str] = [
+    band2s: list[str] | None | list[None] = [
         "g",
         "r",
         "r",
@@ -1293,7 +1312,7 @@ def generate_blobs(
         The HEALpix nside to use. Default to DEFAULT_NSIDE.
     band1s : `list` [`str`]
         The bandnames for the first band in a pair.
-    band2s : `list` of `str`
+    band2s : `list` [`str`] or None
         The band names for the second in the pair (None if unpaired).
     ignore_obs : `str` or `list` of `str`
         Ignore observations by surveys that include the given substring(s).
@@ -1361,7 +1380,10 @@ def generate_blobs(
     else:
         standard_mask_params = copy.deepcopy(standard_mask_params)
 
-    shadow_minutes = pair_time * 2 + pair_pad
+    if band2s is None:
+        shadow_minutes = pair_time + pair_pad
+    else:
+        shadow_minutes = pair_time * 2 + pair_pad
     if (
         "shadow_minutes" not in standard_mask_params
         or standard_mask_params["shadow_minutes"] < shadow_minutes
@@ -1369,6 +1391,11 @@ def generate_blobs(
         standard_mask_params["shadow_minutes"] = shadow_minutes
 
     surveys = []
+
+    if band2s is None:
+        band2s = [None] * len(band1s)
+    if len(band1s) != len(band2s):
+        raise ValueError("band1s and band2s must be the same length.")
 
     for bandname, bandname2 in zip(band1s, band2s):
 
@@ -1421,53 +1448,36 @@ def generate_blobs(
         )
 
         # Get some high quality FWHM images each season, for deblending.
-        if bandname2 is not None:
-            if bandname in list(good_seeing.keys()):
-                bfs.append(
-                    (
-                        bf.NGoodSeeingBasisFunction(
-                            bandname=bandname,
-                            nside=nside,
-                            mjd_start=SURVEY_START_MJD,
-                            footprint=footprints.get_footprint(bandname),
-                            n_obs_desired=good_seeing[bandname],
-                            seeing_fwhm_max=seeing_fwhm_best,
-                            m5_penalty_max=m5_penalty_max,
-                        ),
-                        good_seeing_weight,
-                    )
+        if bandname in list(good_seeing.keys()):
+            bfs.append(
+                (
+                    bf.NGoodSeeingBasisFunction(
+                        bandname=bandname,
+                        nside=nside,
+                        mjd_start=SURVEY_START_MJD,
+                        footprint=footprints.get_footprint(bandname),
+                        n_obs_desired=good_seeing[bandname],
+                        seeing_fwhm_max=seeing_fwhm_best,
+                        m5_penalty_max=m5_penalty_max,
+                    ),
+                    good_seeing_weight,
                 )
-            if bandname2 in list(good_seeing.keys()):
-                bfs.append(
-                    (
-                        bf.NGoodSeeingBasisFunction(
-                            bandname=bandname2,
-                            nside=nside,
-                            mjd_start=SURVEY_START_MJD,
-                            footprint=footprints.get_footprint(bandname2),
-                            n_obs_desired=good_seeing[bandname2],
-                            seeing_fwhm_max=seeing_fwhm_best,
-                            m5_penalty_max=m5_penalty_max,
-                        ),
-                        good_seeing_weight,
-                    )
+            )
+        if bandname2 is not None and bandname2 in list(good_seeing.keys()):
+            bfs.append(
+                (
+                    bf.NGoodSeeingBasisFunction(
+                        bandname=bandname2,
+                        nside=nside,
+                        mjd_start=SURVEY_START_MJD,
+                        footprint=footprints.get_footprint(bandname2),
+                        n_obs_desired=good_seeing[bandname2],
+                        seeing_fwhm_max=seeing_fwhm_best,
+                        m5_penalty_max=m5_penalty_max,
+                    ),
+                    good_seeing_weight,
                 )
-        else:
-            if bandname in list(good_seeing.keys()):
-                bfs.append(
-                    (
-                        bf.NGoodSeeingBasisFunction(
-                            bandname=bandname,
-                            nside=nside,
-                            mjd_start=SURVEY_START_MJD,
-                            footprint=footprints.get_footprint(bandname),
-                            n_obs_desired=good_seeing[bandname],
-                            seeing_fwhm_max=seeing_fwhm_best,
-                            m5_penalty_max=m5_penalty_max,
-                        ),
-                        good_seeing_weight,
-                    )
-                )
+            )
 
         # Make sure we respect scheduled observations
         bfs.append((bf.TimeToScheduledBasisFunction(time_needed=scheduled_respect), 0))
@@ -1495,9 +1505,9 @@ def generate_blobs(
 
         # Set survey name
         if bandname2 is None:
-            survey_name = "pair_%i, %s" % (pair_time, bandname)
+            survey_name = "pair_%i %s" % (pair_time, bandname)
         else:
-            survey_name = "pair_%i, %s%s" % (pair_time, bandname, bandname2)
+            survey_name = "pair_%i %s%s" % (pair_time, bandname, bandname2)
         if bandname2 is not None:
             detailer_list.append(detailers.TakeAsPairsDetailer(bandname=bandname2))
 
