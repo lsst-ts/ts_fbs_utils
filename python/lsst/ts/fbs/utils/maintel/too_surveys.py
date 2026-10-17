@@ -197,7 +197,6 @@ def gen_too_surveys(
             bands_at_times=bands_at_times,
             nvis=nvis,
             exptimes=exptimes,
-            return_n_limit=100,
             detailers=deepcopy(detailer_list),
             too_types_to_follow=["GW_case_large"],
             survey_name="ToO, GW_large",
