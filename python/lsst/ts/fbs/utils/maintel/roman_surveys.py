@@ -39,9 +39,6 @@ def def_roman_info() -> dict:
     roman_info : `dict`
         Dictionary containing field location and expected observing seasons.
     """
-    # From the TVS Slack channel:
-    # spring 2027, fall 2027, spring 2028, then fall 2030,
-    # spring 2031, fall 2031
 
     roman_info = {}
     locations = special_locations()
@@ -49,7 +46,7 @@ def def_roman_info() -> dict:
     roman_info["RA"] = locations["Roman_bulge_location"][0]
     roman_info["dec"] = locations["Roman_bulge_location"][1]
 
-    # Guessing these from the notebook in same dir.
+    # The Roman on-season MJDs will need to be updated with new information.
     observing_season_mid_mjds = [61947.3, 62318.8, 62670.3, 63067.2, 63381.4, 63773.2]
 
     roman_info["seasons_on"] = [
