@@ -554,7 +554,8 @@ def gen_template_surveys(
         # For the bandpasses in use in this template survey,
         # find the seeing_fwhm_max using the minimum value for these bands.
         zenith_fwhm_max = min(
-            seeing_fwhm_max_zenith[bandname], seeing_fwhm_max_zenith[bandname2]
+            seeing_fwhm_max_zenith.get(bandname, SEEING_FWHM_MAX_ZENITH_DEFAULT["r"]),
+            seeing_fwhm_max_zenith.get(bandname2, SEEING_FWHM_MAX_ZENITH_DEFAULT["r"]),
         )
         # Calculate the seeing_fwhm_max array for the templates,
         # allowing for declination dependence.
