@@ -123,7 +123,7 @@ def generate_blob_survey(
     band_names: str,
     survey_name: str,
 ) -> BaseSurvey:
-    """Generate blob survey.
+    """Generate a generic (not FBS v5) blob survey.
 
     Parameters
     ----------
@@ -167,7 +167,7 @@ def generate_ddf_surveys(
     gap_min: float,
     survey_base_name: str,
 ) -> BaseSurvey:
-    """Generate DDF survey.
+    """Generate DDF survey (not FBS v5 survey).
 
     Parameters
     ----------
