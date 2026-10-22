@@ -734,6 +734,7 @@ def generate_ddf_scheduled_obs(
                     obs["alt_min"] = alt_min
                     obs["alt_max"] = alt_max
                     obs["sun_alt_max"] = sun_alt_max
+                    obs["moon_min_distance"] = moon_min_distance
                     all_scheduled_obs.append(obs)
 
                     obs = ScheduledObservationArray(
