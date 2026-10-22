@@ -522,7 +522,6 @@ def generate_ddf_scheduled_obs(
     moon_min_distance: float = 25.0,
     dist_tol: float = 3.0,
     bands: str = "ugrizy",
-    nsnaps: dict = {"u": 1, "g": 2, "r": 2, "i": 2, "z": 2, "y": 2},
     survey_start_mjd: float = SURVEY_START_MJD,
     survey_length: float = 10.0,
     low_season_frac: float = 0.0,
@@ -562,8 +561,6 @@ def generate_ddf_scheduled_obs(
         The number of visits to make per band
     bands : `str` (ugrizy)
         The band names.
-    nsnaps : `list of ints` ([1, 2, 2, 2, 2, 2])
-        The number of snaps to use per band
     survey_start_mjd : `float`
         Starting MJD of the survey. Default None, which calls
         rubin_sim.utils.SURVEY_START_MJD
@@ -645,9 +642,7 @@ def generate_ddf_scheduled_obs(
 
         for bandname in "ugrizy":
             sequence_dict[bandname] = row[bandname]
-            sequence_time += (expt[bandname] + overhead * nsnaps[bandname]) * row[
-                bandname
-            ]
+            sequence_time += (expt[bandname] + overhead) * row[bandname]
 
         mask_even_odd = None
         if row["even_odd"].strip() == "even":
@@ -723,7 +718,7 @@ def generate_ddf_scheduled_obs(
                     obs["flush_by_mjd"] = mjd + flush_length
                     obs["exptime"] = expt[bandname]
                     obs["band"] = bandname
-                    obs["nexp"] = nsnaps[bandname]
+                    obs["nexp"] = 1
                     obs["scheduler_note"] = "DD:%s" % ddf_name
                     obs["target_name"] = "ddf_" + ddf_name.lower()
                     obs["science_program"] = science_program
@@ -748,7 +743,7 @@ def generate_ddf_scheduled_obs(
                     obs["flush_by_mjd"] = mjd + flush_length
                     obs["exptime"] = expt[bandname]
                     obs["band"] = bandname
-                    obs["nexp"] = nsnaps[bandname]
+                    obs["nexp"] = 1
                     obs["scheduler_note"] = "DD:%s" % ddf_name.replace("_a", "_b")
                     obs["target_name"] = "ddf_" + ddf_name.replace("_a", "_b").lower()
                     obs["science_program"] = science_program
@@ -775,7 +770,7 @@ def generate_ddf_scheduled_obs(
                     obs["flush_by_mjd"] = mjd + flush_length
                     obs["exptime"] = expt[bandname]
                     obs["band"] = bandname
-                    obs["nexp"] = nsnaps[bandname]
+                    obs["nexp"] = 1
                     obs["scheduler_note"] = "DD:%s" % ddf_name
                     obs["target_name"] = "ddf_" + ddf_name.lower()
                     obs["science_program"] = science_program
