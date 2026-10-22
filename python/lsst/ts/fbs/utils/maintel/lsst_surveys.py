@@ -37,24 +37,32 @@ import numpy.typing as npt
 import rubin_scheduler.scheduler.basis_functions as bf
 import rubin_scheduler.scheduler.detailers as detailers
 from rubin_scheduler.scheduler.surveys import (
+    BlobPairsSurvey,
     BlobSurvey,
     GreedySurvey,
     LongGapSurvey,
     ScriptedSurvey,
 )
-from rubin_scheduler.scheduler.utils import (
-    ConstantFootprint,
-    Footprints,
-    ecliptic_area,
+from rubin_scheduler.scheduler.utils import ConstantFootprint, Footprints, ecliptic_area
+from rubin_scheduler.utils import (
+    DEFAULT_NSIDE,
+    declination_dependent_fwhm,
 )
-from rubin_scheduler.utils import DEFAULT_NSIDE
 
 from .lsst_footprints import SURVEY_START_MJD
 
 # Set up values to use as kwarg defaults.
 EXPTIME = 30.0
 U_EXPTIME = 38.0
-GOOD_SEEING_MAX = 1.3
+# For deciding if visit can be used for templates
+SEEING_FWHM_MAX_ZENITH_DEFAULT = {
+    "u": 1.2,
+    "g": 1.2,
+    "r": 1.2,
+    "i": 1.2,
+    "z": 1.2,
+    "y": 1.2,
+}
 CAMERA_ROT_LIMITS = (-80.0, 80.0)
 SCIENCE_PROGRAM = "BLOCK-407"
 
@@ -204,7 +212,7 @@ def standard_bf(
     stayband_weight: float = 3.0,
     footprints: Footprints | None = None,
     strict: bool = True,
-    seeing_fwhm_max: float | None = None,
+    seeing_fwhm_max: float | npt.NDArray | None = None,
 ) -> list[tuple[bf.BaseBasisFunction, float]]:
     """Generate the standard basis functions that are shared by blob surveys
 
@@ -240,7 +248,7 @@ def standard_bf(
         same bandpass as currently in-use, but also rewards visits in
         different filters if the moon rose/set or twilight ended/started,
         or if there was a large gap in observing.
-    seeing_fwhm_max : `float`
+    seeing_fwhm_max : `float` or `np.ndarray`
         Seeing limit to pass to the FootprintBasisFunction - visits
         with delivered image quality > seeing_fwhm_max will not be counted.
 
@@ -351,19 +359,27 @@ def standard_bf(
 def gen_template_surveys(
     footprints: Footprints,
     nside: int = DEFAULT_NSIDE,
-    seeing_fwhm_max: float = GOOD_SEEING_MAX,
+    seeing_fwhm_max_zenith: dict = SEEING_FWHM_MAX_ZENITH_DEFAULT,
+    median_cloud_limit: float = 1.5,
     band1s: list[str] = ["u", "g", "r", "i", "z", "y"],
+    band2s: list[str] | None | list[None] = ["u", "g", "r", "i", "z", "y"],
     dark_only: list[str] = ["u", "g"],
     ignore_obs: str | list[str] = ["DD", "twilight_near_sun"],
     camera_rot_limits: tuple[float, float] = CAMERA_ROT_LIMITS,
     exptime: float = EXPTIME,
     u_exptime: float = U_EXPTIME,
     n_obs_template: dict | None = None,
-    pair_time: float = 33.0,
+    pair_time: float = 25.0,
+    max_radius_peak: float = 90.0,
     area_required: float = 50.0,
     HA_min: float = 2.5,
     HA_max: float = 24 - 2.5,
     max_alt: float = 76.0,
+    additional_area_limits: tuple[float] = (10.0,),
+    extra_HA_mins: tuple[float] = (1.25,),
+    extra_HA_maxes: tuple[float] = (24.0 - 1.25,),
+    night_min: int = 0,
+    night_max: int = 365,
     m5_weight: float = 6.0,
     apply_clouds_m5: bool = True,
     extinction_limit: float | None = 1.0,
@@ -373,10 +389,14 @@ def gen_template_surveys(
     science_program: str = SCIENCE_PROGRAM,
     blob_survey_params: dict | None = None,
     standard_mask_params: dict | None = None,
+    pair_pad: float = 5.0,
+    reset_per_season: bool = False,
 ) -> list[BlobSurvey]:
-    """Coherent area surveys (BlobSurvey with single visit) that
-    are intended to acquire template visits in a convenient yet
-    aggressive manner.
+    """Surveys that are intended to acquire template visits in a convenient yet
+    aggressive manner. Visits are aquired in pairs, with shorter than standard
+    separation. There are additional constraints on delivered FWHM and
+    overall cloud coverage (assuming that clouds in the sky imply
+    that the sky background will be brighter due to scattering).
 
     Parameters
     ----------
@@ -384,12 +404,20 @@ def gen_template_surveys(
         The Footprints object for the Surveys.
     nside : `int`
         Nside for the surveys.
-    seeing_fwhm_max : `float`
+    seeing_fwhm_max_zenith : `dict` [ `str`, `float` ]
         The maximum (model delivered) seeing acceptable for the template
-        surveys. This limit is set to attempt to match the seeing limits
+        surveys, at zenith. In arcseconds, as a dictionary one value per band..
+        This limit is set to attempt to match the seeing limits
         used when building difference image coadds.
-    band1s : `list` [ `str` ]
-        The bands in which to obtain templates, within the Footprints.
+        When a template survey pair is composed of two different bandpasses,
+        the minimum value between the pair will be used.
+    median_cloud_limit : `float`
+        The median cloud extinction limit (over the whole sky) before marking
+        survey infeasible. Only applies if DREAM data available.
+    band1s : `list` [`str`]
+        The bandnames for the first band in a pair.
+    band2s : `list` [`str`] or None
+        The band names for the second in the pair (None if unpaired).
     dark_only : `list` [ `str` ]
         The bands to only attempt during dark-time.
     ignore_obs : `str` or `list` [ `str` ]
@@ -407,6 +435,9 @@ def gen_template_surveys(
         The time until the end of the first pass of the Blob.
         Since there is no second filter, this is the amount of time
         spent in the Blob.
+    max_radius_peak : `float`
+        Passed to survey, defines how far around the reward function
+        maximum to include (degrees).
     area_required : `float`
         The area required that needs templates, before the BlobSurvey will
         activate. Square degrees.
@@ -419,6 +450,24 @@ def gen_template_surveys(
         Typically for BlobSurveys this is set lower than the max available,
         to about 76 degrees, to avoid long dome slews near azimuth.
         This is masked separately from the `standard_masks`.
+    additional_area_limits : `tuple` [ `float` ]
+        If the original area_required is not met, then allow a fallback
+        to a second (smaller) area that will meet the additional_HA
+        specifications. This enables acquiring templates on small areas
+        that did not fit into the original larger area coverage.
+        Square degrees.
+    extra_HA_mins : `tuple` [ `float` ]
+        When cleaning up the smaller area, additional_area_limits,
+        these small areas must fall within these HA requirements.
+        Should be same length as additional_area_limits.
+    extra_HA_maxes : `tuple` [ `float` ]
+        When cleaning up the smaller area, additional_area_limits,
+        these small areas must fall within these HA requirements.
+        Should be same length as additional_area_limits.
+    night_min : `int`
+        The minimum number of nights after survey start to acquire templates.
+    night_max : `int`
+        The maximum number of nights after survey start to acquire templates.
     m5_weight : `float`
         The weight for the 5-sigma depth difference basis function.
     apply_clouds_m5 : `bool`
@@ -443,10 +492,13 @@ def gen_template_surveys(
         pair_time.
     standard_mask_params : `dict` or None
         A dictionary of additional kwargs to pass to the standard masks.
+    pair_pad : `float`
+        How much extra time (in minutes) to pad above the necessary pair time
+        for shadow basis function.
     """
 
     if n_obs_template is None:
-        n_obs_template = {"u": 4, "g": 4, "r": 4, "i": 4, "z": 4, "y": 4}
+        n_obs_template = {"u": 5, "g": 5, "r": 5, "i": 5, "z": 5, "y": 5}
 
     if blob_survey_params is None:
         blob_survey_params = BLOB_SURVEY_PARAMS_DEFAULTS
@@ -456,16 +508,27 @@ def gen_template_surveys(
         standard_mask_params["nside"] = nside
     else:
         standard_mask_params = copy.deepcopy(standard_mask_params)
+
+    # Templates are acquired in pairs. Shadow mask accordingly.
+    if band2s is None:
+        shadow_minutes = pair_time + pair_pad
+    else:
+        shadow_minutes = pair_time * 2 + pair_pad
     if (
         "shadow_minutes" not in standard_mask_params
-        or standard_mask_params["shadow_minutes"] < pair_time
+        or standard_mask_params["shadow_minutes"] < shadow_minutes
     ):
-        # Shadow minutes is only pair_time, only taking 1 image per field
-        standard_mask_params["shadow_minutes"] = pair_time
+        standard_mask_params["shadow_minutes"] = shadow_minutes
 
     surveys = []
 
-    for bandname in band1s:
+    if band2s is None:
+        band2s = [None] * len(band1s)
+    if len(band1s) != len(band2s):
+        raise ValueError("band1s and band2s must be the same length.")
+
+    for bandname, bandname2 in zip(band1s, band2s):
+
         # Set up Detailers for camera rotator and ordering in altitude.
         detailer_list = []
         detailer_list.append(
@@ -485,6 +548,18 @@ def gen_template_surveys(
                 detailers.ExtinctionLimitDetailer(extinction_limit=extinction_limit)
             )
 
+        # For the bandpasses in use in this template survey,
+        # find the seeing_fwhm_max using the minimum value for these bands.
+        zenith_fwhm_max = min(
+            seeing_fwhm_max_zenith.get(bandname, SEEING_FWHM_MAX_ZENITH_DEFAULT["r"]),
+            seeing_fwhm_max_zenith.get(bandname2, SEEING_FWHM_MAX_ZENITH_DEFAULT["r"]),
+        )
+        # Calculate the seeing_fwhm_max array for the templates,
+        # allowing for declination dependence.
+        dec_fwhm_max = declination_dependent_fwhm(
+            nside=nside, zenith_fwhm_limit=zenith_fwhm_max
+        )
+
         # List to hold tuples of (basis_function_object, weight)
         bfs = []
 
@@ -492,14 +567,14 @@ def gen_template_surveys(
             standard_bf(
                 nside,
                 bandname=bandname,
-                bandname2=None,
+                bandname2=bandname2,
                 footprints=footprints,
                 m5_weight=m5_weight,
                 apply_clouds_m5=apply_clouds_m5,
                 footprint_weight=footprint_weight,
                 slewtime_weight=slewtime_weight,
                 stayband_weight=stayband_weight,
-                seeing_fwhm_max=seeing_fwhm_max,
+                seeing_fwhm_max=dec_fwhm_max,
             )
         )
 
@@ -515,40 +590,61 @@ def gen_template_surveys(
         # not in twilight bf
         bfs.append((bf.TimeToTwilightBasisFunction(time_needed=pair_time), 0.0))
         bfs.append((bf.NotTwilightBasisFunction(), 0.0))
+        # Push observations toward the meridian more strongly.
         bfs.append(
             (bf.RevHaMaskBasisFunction(ha_min=HA_min, ha_max=HA_max, nside=nside), 0.0)
         )
 
-        # Need a once in night mask
+        # Need a once in night mask, so we spread epochs across many nights.
         bfs.append((bf.NInNightMaskBasisFunction(n_limit=1, nside=nside), 0.0))
 
-        # If u or g, only when moon is down
+        # If u or g, only when moon is down (twilight is already masked).
         if bandname in dark_only:
             bfs.append((bf.MoonAltLimitBasisFunction(alt_limit=-5), 0.0))
 
-        # limit to first year
-        bfs.append((bf.OnlyBeforeNightBasisFunction(night_max=366), 0.0))
+        # Limit to particular time period.
+        bfs.append(
+            (
+                bf.OnlyDuringNightsBasisFunction(
+                    night_min=night_min, night_max=night_max
+                ),
+                0.0,
+            )
+        )
 
         # Limit to only good seeing visits.
         bfs.append(
             (
                 bf.MaskPoorSeeing(
-                    bandname, nside=nside, seeing_fwhm_max=seeing_fwhm_max
+                    bandname,
+                    nside=nside,
+                    seeing_fwhm_max=dec_fwhm_max,
                 ),
                 0,
             )
         )
 
-        # Mask anything observed n_obs_template times reseting each season
+        # Mask anything observed n_obs_template times.
+        # Note that this only applies to the first band in the pair.
         bfs.append(
             (
                 bf.MaskAfterNObsSeeingBasisFunction(
                     nside=nside,
                     n_max=n_obs_template[bandname],
                     bandname=bandname,
-                    seeing_fwhm_max=seeing_fwhm_max,
+                    seeing_fwhm_max=dec_fwhm_max,
+                    mjd_start=SURVEY_START_MJD,
+                    reset_per_season=reset_per_season,
                 ),
                 0.0,
+            )
+        )
+
+        # Do not attempt if generally cloudy
+        bfs.append(
+            (
+                bf.CloudedOutMapBasisFunction(median_cloud_limit=median_cloud_limit),
+                0,
             )
         )
 
@@ -567,31 +663,46 @@ def gen_template_surveys(
                 )
             )
 
-        # unpack the basis functions and weights
+        # Unpack the basis functions and weights
         weights = [val[1] for val in bfs]
         basis_functions = [val[0] for val in bfs]
 
-        survey_name = "templates, %s" % bandname
+        # Additional masks - for the smaller additional_area_limits.
+        additional_masks = []
+        for ha_min, ha_max in zip(extra_HA_mins, extra_HA_maxes):
+            additional_masks.append(
+                bf.RevHaMaskBasisFunction(ha_min=ha_min, ha_max=ha_max, nside=nside)
+            )
+
+        if bandname2 is None:
+            survey_name = "template_%s" % (bandname)
+            observation_reason = f"template_{bandname}_{pair_time:.1f}"
+        else:
+            survey_name = "templates %s%s" % (bandname, bandname2)
+            observation_reason = f"template_blob_{bandname}{bandname2}_{pair_time:.1f}"
 
         surveys.append(
-            BlobSurvey(
+            BlobPairsSurvey(
                 basis_functions,
                 weights,
                 bandname1=bandname,
-                bandname2=None,
+                bandname2=bandname2,
                 exptime=exptime,
                 ideal_pair_time=pair_time,
+                max_radius_peak=max_radius_peak,
                 survey_name=survey_name,
                 science_program=science_program,
-                observation_reason=f"template_blob_{bandname}_{pair_time:.1f}",
+                observation_reason=observation_reason,
                 ignore_obs=ignore_obs,
                 nexp=1,
                 detailers=detailer_list,
                 area_required=area_required,
+                additional_masks=additional_masks,
+                additional_area_limits=additional_area_limits,
+                note_block_size=True,
                 **blob_survey_params,
             )
         )
-
     return surveys
 
 
