@@ -64,44 +64,37 @@ SEEING_FWHM_MAX_ZENITH_DEFAULT = {
     "y": 1.2,
 }
 CAMERA_ROT_LIMITS = (-80.0, 80.0)
-SCIENCE_PROGRAM = "BLOCK-407"
+# Science program should be overriden by config.
+SCIENCE_PROGRAM = "BLOCK-430"
 
 BLOB_SURVEY_PARAMS_DEFAULTS = {
-    "slew_approx": 7.5,
-    "band_change_approx": 140.0,
+    "slew_approx": 8.0,
+    "band_change_approx": 200.0,
     "read_approx": 3.07,
     "flush_time": 30.0,
     "smoothing_kernel": None,
-    "nside": DEFAULT_NSIDE,
     "seed": 42,
-    "dither": "night",
     "twilight_scale": True,
+    "check_scheduled": True,
 }
 
 
 def standard_masks(
     nside: int = DEFAULT_NSIDE,
-    moon_distance: float = 30,
-    wind_speed_maximum: float | None = 20.0,
-    min_alt: float = 20,
+    moon_distance: float = 30.0,
+    wind_speed_maximum: float = 40.0,
+    min_alt: float = 20.0,
     max_alt: float = 86.5,
-    min_az: float = 0,
-    max_az: float = 360,
-    shadow_minutes: float = 70,
-    min_az_sunrise: float = 120,
-    max_az_sunrise: float = 290,
+    min_az: float = 0.0,
+    max_az: float = 360.0,
+    shadow_minutes: float = 0.0,
+    apply_time_limited_shadow: bool = False,
+    min_az_sunrise: float = 120.0,
+    max_az_sunrise: float = 290.0,
     time_to_sunrise: float = 3.0,
-    apply_time_limited_shadow: bool = True,
     sun_alt_limit: float | None = None,
 ) -> list[bf.BaseBasisFunction]:
     """Basic standard mask basis functions.
-
-    Avoids the moon, bright planets, high wind, and
-    areas on the sky out of bounds, using
-    the MoonAvoidanceBasisFunction, PlanetMaskBasisFunction,
-    MaskDirectWindBasisFunction, and the AltAzShadowMaskBasisFunction.
-    Adds the default AltAzShadowMaskTimeLimited basis function to avoid
-    pointing toward sunrise late in the night during commissioning.
 
     Parameters
     ----------
@@ -110,10 +103,9 @@ def standard_masks(
         Default of None uses rubin_scheduler.utils.get_default_nside.
     moon_distance : `float`, optional
         Moon avoidance distance, in degrees.
-    wind_speed_maximum : `float` or None. optional
+    wind_speed_maximum : `float`, optional
         Wind speed maximum to apply to the wind avoidance basis function,
-        in m/s. If None, the MaskDirectWindBasisFunction basis function
-        will not be used.
+        in m/s.
     min_alt : `float`, optional
         Minimum altitude (in degrees) to observe.
     max_alt : `float`, optional
@@ -127,6 +119,8 @@ def standard_masks(
         which will move into those regions within `shadow_minutes` (minutes).
         Should be set to the expected time needed to execute the
         observing block associated with the survey.
+    apply_time_limited_shadow : `bool`, optional
+        Flag for whether to apply the morning (time_to_sunrise) azimuth mask.
     min_az_sunrise : `float`, optional
         Minimum azimuth angle (in degrees) to observe during time period
         at the end of the night (during time_to_sunrise).
@@ -136,8 +130,6 @@ def standard_masks(
     time_to_sunrise : `float`, optional
         Hours before daybreak (sun @ alt=0) to start the azimuth avoidance
         mask.
-    apply_time_limited_shadow : `bool`, optional
-        Flag for whether to apply the morning (time_to_sunrise) azimuth mask.
     sun_alt_limit : `float` or None, optional
         Maximum sun altitude (deg) required before proposing targets.
 
@@ -147,22 +139,39 @@ def standard_masks(
         Mask basis functions should always be used with a weight of 0.
         The masked (np.nan or -np.inf) regions will remain masked,
         but the basis function values won't influence the reward.
+
+
+    Notes
+    -----
+    Avoids the moon, bright planets, high wind, and
+    areas on the sky out of bounds, using
+    the MoonAvoidanceBasisFunction, PlanetMaskBasisFunction,
+    MaskDirectWindBasisFunction, and the AltAzShadowMaskBasisFunction.
+
+    If specified, sun_alt_limit will enforce only operating while the sun is
+    below the sun_alt_limit (in degrees).
+
+    No cloud avoidance will be done here (instead specify per-survey).
+    Note though that the MaskCloudMapBasisFunction can be useful for this,
+    but potentially has more complicated interactions with the QueueManager.
+
+    Optionally, adds the default AltAzShadowMaskTimeLimited basis function
+    to avoid pointing toward sunrise during the last 3 hours of the night.
+    This is now primarily used when the observatory is on generator power.
     """
     mask_bfs = []
     # Avoid the moon - too close to the moon will trip the REBs
     mask_bfs.append(
         bf.MoonAvoidanceBasisFunction(nside=nside, moon_distance=moon_distance)
     )
-    # Avoid bright planets
+    # Avoid fast moving bright planets
     mask_bfs.append(bf.PlanetMaskBasisFunction(nside=nside))
-
-    # Avoid the wind if not None
-    if wind_speed_maximum is not None:
-        mask_bfs.append(
-            bf.MaskDirectWindBasisFunction(
-                nside=nside, wind_speed_maximum=wind_speed_maximum
-            )
+    # Avoid the wind (mask only)
+    mask_bfs.append(
+        bf.MaskDirectWindBasisFunction(
+            nside=nside, wind_speed_maximum=wind_speed_maximum
         )
+    )
     # Avoid the alt/az limits - this will pick up limits from the
     # yaml file configurations for the summit as well
     mask_bfs.append(
@@ -374,7 +383,6 @@ def gen_template_surveys(
     area_required: float = 50.0,
     HA_min: float = 2.5,
     HA_max: float = 24 - 2.5,
-    max_alt: float = 76.0,
     additional_area_limits: tuple[float] = (10.0,),
     extra_HA_mins: tuple[float] = (1.25,),
     extra_HA_maxes: tuple[float] = (24.0 - 1.25,),
@@ -445,11 +453,6 @@ def gen_template_surveys(
         The minimum HA to consider when considering template area.
     HA_max : `float`
         The maximum HA to consider when considering template area.
-    max_alt : `float`
-        The maximum altitude to use for the Surveys.
-        Typically for BlobSurveys this is set lower than the max available,
-        to about 76 degrees, to avoid long dome slews near azimuth.
-        This is masked separately from the `standard_masks`.
     additional_area_limits : `tuple` [ `float` ]
         If the original area_required is not met, then allow a fallback
         to a second (smaller) area that will meet the additional_HA
@@ -502,6 +505,9 @@ def gen_template_surveys(
 
     if blob_survey_params is None:
         blob_survey_params = BLOB_SURVEY_PARAMS_DEFAULTS
+    # Dither templates on every call (unless overridden) and make sure
+    # the survey nside matches the basis functions.
+    blob_survey_params = {"dither": "call", **blob_survey_params, "nside": nside}
 
     if standard_mask_params is None:
         standard_mask_params = {}
@@ -577,17 +583,7 @@ def gen_template_surveys(
                 seeing_fwhm_max=dec_fwhm_max,
             )
         )
-
-        bfs.append(
-            (
-                bf.AltAzShadowMaskBasisFunction(
-                    nside=nside, shadow_minutes=pair_time, max_alt=max_alt, pad=3.0
-                ),
-                0,
-            )
-        )
-
-        # not in twilight bf
+        # Add constraints around twilight.
         bfs.append((bf.TimeToTwilightBasisFunction(time_needed=pair_time), 0.0))
         bfs.append((bf.NotTwilightBasisFunction(), 0.0))
         # Push observations toward the meridian more strongly.
@@ -718,7 +714,6 @@ def blob_for_long(
     pair_time: float = 33.0,
     HA_min: float = 12,
     HA_max: float = 24 - 3.5,
-    max_alt: float = 76.0,
     m5_weight: float = 6.0,
     apply_clouds_m5: bool = True,
     extinction_limit: float | None = None,
@@ -765,12 +760,6 @@ def blob_for_long(
         The minimum HA to consider when considering template area.
     HA_max : `float`
         The maximum HA to consider when considering template area.
-    max_alt : `float`
-        The maximium altitude to use when masking zenith (degrees).
-        Typically for BlobSurveys this is set lower than the max available,
-        to about 76 degrees, to avoid long dome slews near azimuth.
-        This is masked separately from the `standard_masks`.
-        Default 76.
     m5_weight : `float`
         The weight for the 5-sigma depth difference basis function.
     apply_clouds_m5 : `bool`
@@ -810,6 +799,8 @@ def blob_for_long(
 
     if blob_survey_params is None:
         blob_survey_params = BLOB_SURVEY_PARAMS_DEFAULTS
+    # Make sure the survey nside matches the basis functions.
+    blob_survey_params = {**blob_survey_params, "nside": nside}
     if standard_mask_params is None:
         standard_mask_params = {}
         standard_mask_params["nside"] = nside
@@ -873,15 +864,6 @@ def blob_for_long(
 
         # Make sure we respect scheduled observations
         bfs.append((bf.TimeToScheduledBasisFunction(time_needed=scheduled_respect), 0))
-
-        bfs.append(
-            (
-                bf.AltAzShadowMaskBasisFunction(
-                    nside=nside, shadow_minutes=shadow_minutes, max_alt=max_alt, pad=3.0
-                ),
-                0.0,
-            )
-        )
         # Add constraints around twilight
         bfs.append((bf.TimeToTwilightBasisFunction(time_needed=scheduled_respect), 0.0))
         bfs.append((bf.NotTwilightBasisFunction(), 0.0))
@@ -1112,7 +1094,6 @@ def gen_greedy_surveys(
     exptime: float = EXPTIME,
     u_exptime: float = U_EXPTIME,
     shadow_minutes: float = 15.0,
-    max_alt: float = 76.0,
     m5_weight: float = 3.0,
     apply_clouds_m5: bool = True,
     extinction_limit: float | None = None,
@@ -1147,8 +1128,6 @@ def gen_greedy_surveys(
         The exposure time for u band visits.
     shadow_minutes : `float`
         Used to mask regions around zenith (minutes).
-    max_alt : `float`
-        The maximium altitude to use when masking zenith (degrees).
     m5_weight : `float`
         The weight for the 5-sigma depth difference basis function.
     apply_clouds_m5 : `bool`
@@ -1239,15 +1218,6 @@ def gen_greedy_surveys(
                 repeat_weight,
             )
         )
-        # Masks, give these 0 weight
-        bfs.append(
-            (
-                bf.AltAzShadowMaskBasisFunction(
-                    nside=nside, shadow_minutes=shadow_minutes, max_alt=max_alt, pad=3.0
-                ),
-                0,
-            )
-        )
 
         if bandname in dark_only:
             # Add some basis functions to block dark_only bandpasses from
@@ -1317,7 +1287,6 @@ def generate_blobs(
     exptime: float = EXPTIME,
     u_exptime: float = U_EXPTIME,
     pair_time: float = 33.0,
-    max_alt: float = 76.0,
     max_pair_time: float = 40.0,
     m5_weight: float = 6.0,
     apply_clouds_m5: bool = True,
@@ -1361,11 +1330,6 @@ def generate_blobs(
     max_pair_time : `float`
         The maximum time between pairs (minutes).
         The dynamic scaling won't scale blobs beyond this.
-    max_alt : `float`
-        The maximum altitude to use for the Surveys.
-        Typically for BlobSurveys this is set lower than the max available,
-        to about 76 degrees, to avoid long dome slews near azimuth.
-        This is masked separately from the `standard_masks`.
     m5_weight : `float`
         The weight for the 5-sigma depth difference basis function.
     apply_clouds_m5 : `bool`
@@ -1413,6 +1377,9 @@ def generate_blobs(
     """
     if blob_survey_params is None:
         blob_survey_params = BLOB_SURVEY_PARAMS_DEFAULTS
+    # Make sure the survey nside matches the basis functions.
+    blob_survey_params = {**blob_survey_params, "nside": nside}
+
     if standard_mask_params is None:
         standard_mask_params = {"nside": nside}
     else:
@@ -1427,8 +1394,6 @@ def generate_blobs(
         or standard_mask_params["shadow_minutes"] < shadow_minutes
     ):
         standard_mask_params["shadow_minutes"] = shadow_minutes
-    if "max_alt" in standard_mask_params and standard_mask_params["max_alt"] > max_alt:
-        standard_mask_params["max_alt"] = max_alt
 
     surveys = []
 
