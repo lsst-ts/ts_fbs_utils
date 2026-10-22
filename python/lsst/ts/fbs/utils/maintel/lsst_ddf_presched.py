@@ -513,7 +513,7 @@ def generate_ddf_scheduled_obs(
     configs_df: pd.DataFrame,
     data_file: str | None = None,
     mjd_tol: float = 15.0,
-    expt: dict = {"u": 38.0, "g": 29.2, "r": 29.2, "i": 29.2, "z": 29.2, "y": 29.2},
+    expt: dict = {"u": 38.0, "g": 30.0, "r": 30.0, "i": 30.0, "z": 30.0, "y": 30.0},
     alt_min: float = 25.0,
     alt_max: float = 85.0,
     HA_min: float = 21.0,
@@ -546,7 +546,7 @@ def generate_ddf_scheduled_obs(
     mjd_tol : `float` (15)
         How close an observation must be in time to be considered
         matching a scheduled observation (minutes).
-    expt : `float` (30)
+    expt : `dict`[`str`, `float`]
         Total exposure time per visit (seconds).
     alt_min/max : `float` (25, 85)
         The minimum and maximum altitudes to permit observations to
