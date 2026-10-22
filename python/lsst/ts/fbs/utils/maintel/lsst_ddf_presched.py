@@ -793,4 +793,16 @@ def generate_ddf_scheduled_obs(
                     all_scheduled_obs.append(obs)
 
     result = np.concatenate(all_scheduled_obs)
+    # add an index per dayobs
+    u_notes = np.unique(result["scheduler_note"])
+    for note in u_notes:
+        indx = np.where(result["scheduler_note"] == note)[0]
+        tag = np.arange(np.size(indx)).astype(str)
+        result["scheduler_note"][indx] = np.char.add(
+            result["scheduler_note"][indx], ", "
+        )
+        result["scheduler_note"][indx] = np.char.add(
+            result["scheduler_note"][indx], tag
+        )
+
     return result
