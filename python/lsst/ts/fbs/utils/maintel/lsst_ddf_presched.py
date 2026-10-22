@@ -20,6 +20,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 __all__ = (
+    "read_ddf_obs_array",
     "generate_ddf_scheduled_obs",
     "ddf_slopes",
     "match_cumulative",
@@ -37,7 +38,43 @@ import pandas as pd
 from rubin_scheduler.data import get_data_dir
 from rubin_scheduler.scheduler.utils import ScheduledObservationArray
 from rubin_scheduler.site_models import Almanac
-from rubin_scheduler.utils import SURVEY_START_MJD, calc_season, ddf_locations
+from rubin_scheduler.utils import (
+    SURVEY_START_MJD,
+    calc_season,
+    ddf_locations,
+)
+
+
+def read_ddf_obs_array(expected_hex_digest: str) -> ScheduledObservationArray:
+    """Given the hash of a known pre-calculated DDF observation array,
+    read and return the ScheduledObservationArray.
+    """
+    pre_comp_file = (
+        Path(get_data_dir()) / "scheduler" / f"ts_ddf_array_{expected_hex_digest}.npz"
+    )
+    if os.path.exists(pre_comp_file):
+        loaded = np.load(pre_comp_file, allow_pickle=True)
+        hash_object = hashlib.sha256()
+        hash_object.update(loaded["hash_digest"])
+        hex_digest = hash_object.hexdigest()[:7]
+        if hex_digest == expected_hex_digest:
+            obs_array_loaded = loaded["obs_array"]
+            obs_array = ScheduledObservationArray(obs_array_loaded.size)
+            for key in obs_array_loaded.dtype.names:
+                obs_array[key] = obs_array_loaded[key]
+        else:
+            raise RuntimeError(
+                f"Provided hash {expected_hex_digest} does not match loaded file hash {hex_digest}. "
+                "Reach out for support so they can help you generate the correct file."
+            )
+        loaded.close()
+    else:
+        raise RuntimeError(
+            f"Pre-computed DDF files {pre_comp_file} not available. "
+            "Reach out for support so they can help execute the script "
+            "that will generate this file before proceeding."
+        )
+    return obs_array
 
 
 def calculate_checksum(filenames: list[str]) -> bytes:
