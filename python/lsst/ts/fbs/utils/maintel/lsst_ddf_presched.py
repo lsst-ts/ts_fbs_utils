@@ -42,6 +42,7 @@ from rubin_scheduler.utils import (
     SURVEY_START_MJD,
     calc_season,
     ddf_locations,
+    mjd2dayobs,
 )
 
 
@@ -707,6 +708,7 @@ def generate_ddf_scheduled_obs(
             )[0]
 
         for mjd in mjds:
+            dayobs_string = mjd2dayobs(mjd)
             for bandname in sequence_dict:
                 if "EDFS" in ddf_name:
                     obs = ScheduledObservationArray(
@@ -719,7 +721,7 @@ def generate_ddf_scheduled_obs(
                     obs["exptime"] = expt[bandname]
                     obs["band"] = bandname
                     obs["nexp"] = 1
-                    obs["scheduler_note"] = "DD:%s" % ddf_name
+                    obs["scheduler_note"] = f"DD:{ddf_name}, {dayobs_string}"
                     obs["target_name"] = "ddf_" + ddf_name.lower()
                     obs["science_program"] = science_program
                     obs["observation_reason"] = "ddf_" + ddf_name.lower()
@@ -744,7 +746,9 @@ def generate_ddf_scheduled_obs(
                     obs["exptime"] = expt[bandname]
                     obs["band"] = bandname
                     obs["nexp"] = 1
-                    obs["scheduler_note"] = "DD:%s" % ddf_name.replace("_a", "_b")
+                    obs["scheduler_note"] = (
+                        f"DD:{ddf_name.replace("_a", "_b")}, {dayobs_string}"
+                    )
                     obs["target_name"] = "ddf_" + ddf_name.replace("_a", "_b").lower()
                     obs["science_program"] = science_program
                     obs["observation_reason"] = (
@@ -771,7 +775,7 @@ def generate_ddf_scheduled_obs(
                     obs["exptime"] = expt[bandname]
                     obs["band"] = bandname
                     obs["nexp"] = 1
-                    obs["scheduler_note"] = "DD:%s" % ddf_name
+                    obs["scheduler_note"] = f"DD:{ddf_name}, {dayobs_string}"
                     obs["target_name"] = "ddf_" + ddf_name.lower()
                     obs["science_program"] = science_program
                     obs["observation_reason"] = "ddf_" + ddf_name.lower()
