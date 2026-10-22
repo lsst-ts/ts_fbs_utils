@@ -198,6 +198,7 @@ def standard_bf(
     bandname2: str | None = "i",
     m5_weight: float = 6.0,
     fiducial_fwhm: float = 1.3,
+    apply_clouds_m5: bool = True,
     footprint_weight: float = 1.5,
     slewtime_weight: float = 3.0,
     stayband_weight: float = 3.0,
@@ -220,6 +221,9 @@ def standard_bf(
         The weight for the 5-sigma depth difference basis function.
     fiducial_fwhm : `float`
         The fiducial FWHM for the M5Diff Basis function.
+    apply_clouds_m5 : `bool`
+        Turn the cloud extinction flag on (True) or off (False) in the M5Diff
+        basis function.
     footprint_weight : `float`
         The weight on the survey footprint basis function.
     slewtime_weight : `float`
@@ -254,7 +258,10 @@ def standard_bf(
         bfs.append(
             (
                 bf.M5DiffBasisFunction(
-                    bandname=bandname, nside=nside, fiducial_FWHMEff=fiducial_fwhm
+                    bandname=bandname,
+                    nside=nside,
+                    fiducial_FWHMEff=fiducial_fwhm,
+                    apply_cloud_extinction=apply_clouds_m5,
                 ),
                 m5_weight / 2.0,
             )
@@ -262,7 +269,10 @@ def standard_bf(
         bfs.append(
             (
                 bf.M5DiffBasisFunction(
-                    bandname=bandname2, nside=nside, fiducial_FWHMEff=fiducial_fwhm
+                    bandname=bandname2,
+                    nside=nside,
+                    fiducial_FWHMEff=fiducial_fwhm,
+                    apply_cloud_extinction=apply_clouds_m5,
                 ),
                 m5_weight / 2.0,
             )
@@ -272,7 +282,10 @@ def standard_bf(
         bfs.append(
             (
                 bf.M5DiffBasisFunction(
-                    bandname=bandname, nside=nside, fiducial_FWHMEff=fiducial_fwhm
+                    bandname=bandname,
+                    nside=nside,
+                    fiducial_FWHMEff=fiducial_fwhm,
+                    apply_cloud_extinction=apply_clouds_m5,
                 ),
                 m5_weight,
             )
@@ -352,6 +365,8 @@ def gen_template_surveys(
     HA_max: float = 24 - 2.5,
     max_alt: float = 76.0,
     m5_weight: float = 6.0,
+    apply_clouds_m5: bool = True,
+    extinction_limit: float | None = 1.0,
     footprint_weight: float = 1.5,
     slewtime_weight: float = 3.0,
     stayband_weight: float = 3.0,
@@ -406,6 +421,13 @@ def gen_template_surveys(
         This is masked separately from the `standard_masks`.
     m5_weight : `float`
         The weight for the 5-sigma depth difference basis function.
+    apply_clouds_m5 : `bool`
+        Turn the cloud extinction flag on (True) or off (False) in the M5Diff
+        basis function in the standard basis functions.
+    extinction_limit : `float` | None
+        The cloud extinction limit to use for cloud masking in the survey
+        and queue manager (queue manager via the detailer).
+        Use None for no masking.
     footprint_weight : `float`
         The weight on the survey footprint basis function.
     slewtime_weight : `float`
@@ -457,6 +479,11 @@ def gen_template_surveys(
             detailers.BandNexp(bandname="u", nexp=1, exptime=u_exptime)
         )
         detailer_list.append(detailers.LabelRegionsAndDDFs())
+        # Add extinction_limit detailer for cloud masking in queue_manager.
+        if extinction_limit is not None:
+            detailer_list.append(
+                detailers.ExtinctionLimitDetailer(extinction_limit=extinction_limit)
+            )
 
         # List to hold tuples of (basis_function_object, weight)
         bfs = []
@@ -468,6 +495,7 @@ def gen_template_surveys(
                 bandname2=None,
                 footprints=footprints,
                 m5_weight=m5_weight,
+                apply_clouds_m5=apply_clouds_m5,
                 footprint_weight=footprint_weight,
                 slewtime_weight=slewtime_weight,
                 stayband_weight=stayband_weight,
@@ -528,6 +556,16 @@ def gen_template_surveys(
         masks = standard_masks(**standard_mask_params)
         for m in masks:
             bfs.append((m, 0))
+        # Add cloud extinction mask.
+        if extinction_limit is not None:
+            bfs.append(
+                (
+                    bf.MaskCloudMapBasisFunction(
+                        nside=nside, extinction_limit=extinction_limit
+                    ),
+                    0,
+                )
+            )
 
         # unpack the basis functions and weights
         weights = [val[1] for val in bfs]
@@ -571,6 +609,8 @@ def blob_for_long(
     HA_max: float = 24 - 3.5,
     max_alt: float = 76.0,
     m5_weight: float = 6.0,
+    apply_clouds_m5: bool = True,
+    extinction_limit: float | None = None,
     footprint_weight: float = 1.5,
     slewtime_weight: float = 3.0,
     stayband_weight: float = 3.0,
@@ -619,6 +659,12 @@ def blob_for_long(
         Default 76.
     m5_weight : `float`
         The weight for the 5-sigma depth difference basis function.
+    apply_clouds_m5 : `bool`
+        Flag to include cloud extinction into M5Diff basis function.
+    extinction_limit : `float` | None
+        The cloud extinction limit to use for cloud masking in the survey
+        and queue manager (queue manager via the detailer).
+        Use None for no masking.
     footprint_weight : `float`
         The weight on the survey footprint basis function.
     slewtime_weight : `float`
@@ -678,6 +724,11 @@ def blob_for_long(
             detailers.BandNexp(bandname="u", nexp=1, exptime=u_exptime)
         )
         detailer_list.append(detailers.LabelRegionsAndDDFs())
+        if extinction_limit is not None:
+            # Add extinction_limit detailer for cloud masking in queue_manager.
+            detailer_list.append(
+                detailers.ExtinctionLimitDetailer(extinction_limit=extinction_limit)
+            )
 
         # List to hold tuples of (basis_function_object, weight)
         bfs = []
@@ -688,6 +739,7 @@ def blob_for_long(
                 bandname=bandname,
                 bandname2=bandname2,
                 m5_weight=m5_weight,
+                apply_clouds_m5=apply_clouds_m5,
                 footprint_weight=footprint_weight,
                 slewtime_weight=slewtime_weight,
                 stayband_weight=stayband_weight,
@@ -725,6 +777,16 @@ def blob_for_long(
         masks = standard_masks(**standard_mask_params)
         for m in masks:
             bfs.append((m, 0))
+        # Add cloud extinction mask.
+        if extinction_limit is not None:
+            bfs.append(
+                (
+                    bf.MaskCloudMapBasisFunction(
+                        nside=nside, extinction_limit=extinction_limit
+                    ),
+                    0,
+                )
+            )
 
         # unpack the basis functions and weights
         weights = [val[1] for val in bfs]
@@ -773,6 +835,8 @@ def gen_long_gaps_survey(
     HA_max: float = 24 - 3.5,
     time_after_twi: float = 120,
     m5_weight: float = 6.0,
+    apply_clouds_m5: bool = True,
+    extinction_limit: float | None = None,
     footprint_weight: float = 1.5,
     slewtime_weight: float = 3.0,
     stayband_weight: float = 3.0,
@@ -809,6 +873,12 @@ def gen_long_gaps_survey(
         The time after evening twilight to attempt long gaps (minutes).
     m5_weight : `float`
         The weight for the 5-sigma depth difference basis function.
+    apply_clouds_m5 : `bool`
+        Flag to include cloud extinction into M5Diff basis function.
+    extinction_limit : `float` | None
+        The cloud extinction limit to use for cloud masking in the survey
+        and queue manager (queue manager via the detailer).
+        Use None for no masking.
     footprint_weight : `float`
         The weight on the survey footprint basis function.
     slewtime_weight : `float`
@@ -864,6 +934,8 @@ def gen_long_gaps_survey(
             HA_min=HA_min,
             HA_max=HA_max,
             m5_weight=m5_weight,
+            apply_clouds_m5=apply_clouds_m5,
+            extinction_limit=extinction_limit,
             footprint_weight=footprint_weight,
             slewtime_weight=slewtime_weight,
             stayband_weight=stayband_weight,
@@ -876,12 +948,24 @@ def gen_long_gaps_survey(
 
         # Set up followup scripted visits.
         masks = standard_masks(**standard_mask_params_scripted)
+        detailer_list = [detailers.LabelRegionsAndDDFs()]
+        # Add cloud extinction mask.
+        if extinction_limit is not None:
+            masks.append(
+                bf.MaskCloudMapBasisFunction(
+                    nside=nside, extinction_limit=extinction_limit
+                )
+            )
+            # Add extinction_limit detailer for cloud masking in queue_manager.
+            detailer_list.append(
+                detailers.ExtinctionLimitDetailer(extinction_limit=extinction_limit)
+            )
         scripted = ScriptedSurvey(
             masks,
             nside=nside,
             ignore_obs=["blob", "DDF", "twi", "pair", "templates", "ToO"],
             science_program=science_program,
-            detailers=[detailers.LabelRegionsAndDDFs()],
+            detailers=detailer_list,
         )
         surveys.append(
             LongGapSurvey(blob[0], scripted, gap_range=gap_range, avoid_zenith=True)
@@ -900,6 +984,8 @@ def gen_greedy_surveys(
     shadow_minutes: float = 15.0,
     max_alt: float = 76.0,
     m5_weight: float = 3.0,
+    apply_clouds_m5: bool = True,
+    extinction_limit: float | None = None,
     footprint_weight: float = 0.75,
     slewtime_weight: float = 3.0,
     stayband_weight: float = 100.0,
@@ -932,6 +1018,12 @@ def gen_greedy_surveys(
         The maximium altitude to use when masking zenith (degrees).
     m5_weight : `float`
         The weight for the 5-sigma depth difference basis function.
+    apply_clouds_m5 : `bool`
+        Flag to include cloud extinction into M5Diff basis function.
+    extinction_limit : `float` | None
+        The cloud extinction limit to use for cloud masking in the survey
+        and queue manager (queue manager via the detailer).
+        Use None for no masking.
     footprint_weight : `float`
         The weight on the survey footprint basis function.
     slewtime_weight : `float`
@@ -966,6 +1058,8 @@ def gen_greedy_surveys(
         or standard_mask_params["shadow_minutes"] < shadow_minutes
     ):
         standard_mask_params["shadow_minutes"] = shadow_minutes
+    # The greedy survey could potentially add a cloud mask here.
+    # However we should probably not, to avoid losing this backup tier.
 
     surveys = []
     detailer_list = [
@@ -974,6 +1068,12 @@ def gen_greedy_surveys(
         )
     ]
     detailer_list.append(detailers.LabelRegionsAndDDFs())
+    # This is probably False (to allow greedy survey to always run).
+    if extinction_limit is not None:
+        # Add extinction_limit detailer for cloud masking in queue_manager.
+        detailer_list.append(
+            detailers.ExtinctionLimitDetailer(extinction_limit=extinction_limit)
+        )
 
     if "u" in bands:
         detailer_list.append(
@@ -988,6 +1088,7 @@ def gen_greedy_surveys(
                 bandname=bandname,
                 bandname2=None,
                 m5_weight=m5_weight,
+                apply_clouds_m5=apply_clouds_m5,
                 footprint_weight=footprint_weight,
                 slewtime_weight=slewtime_weight,
                 stayband_weight=stayband_weight,
@@ -1018,6 +1119,16 @@ def gen_greedy_surveys(
         masks = standard_masks(nside=nside, shadow_minutes=shadow_minutes)
         for m in masks:
             bfs.append((m, 0))
+        # Add cloud extinction mask.
+        if extinction_limit is not None:
+            bfs.append(
+                (
+                    bf.MaskCloudMapBasisFunction(
+                        nside=nside, extinction_limit=extinction_limit
+                    ),
+                    0,
+                )
+            )
 
         weights = [val[1] for val in bfs]
         basis_functions = [val[0] for val in bfs]
@@ -1055,6 +1166,8 @@ def generate_blobs(
     seeing_fwhm_best: float = 0.8,
     m5_penalty_max: float = 0.5,
     m5_weight: float = 6.0,
+    apply_clouds_m5: bool = True,
+    extinction_limit: float | None = 2.0,
     footprint_weight: float = 1.5,
     slewtime_weight: float = 3.0,
     stayband_weight: float = 3.0,
@@ -1102,6 +1215,12 @@ def generate_blobs(
         still good for template building. Default 0.5 (mags).
     m5_weight : `float`
         The weight for the 5-sigma depth difference basis function.
+    apply_clouds_m5 : `bool`
+        Flag to include cloud extinction into M5Diff basis function.
+    extinction_limit : `float` | None
+        The cloud extinction limit to use for cloud masking in the survey
+        and queue manager (queue manager via the detailer).
+        Use None for no masking.
     footprint_weight : `float`
         The weight on the survey footprint basis function.
     slewtime_weight : `float`
@@ -1165,6 +1284,12 @@ def generate_blobs(
             )
         detailer_list.append(detailers.FlushForSchedDetailer())
         detailer_list.append(detailers.LabelRegionsAndDDFs())
+        if extinction_limit is not None:
+            # Add extinction_limit detailer for cloud masking in queue_manager.
+            detailer_list.append(
+                detailers.ExtinctionLimitDetailer(extinction_limit=extinction_limit)
+            )
+
         # List to hold tuples of (basis_function_object, weight)
         bfs = []
 
@@ -1174,6 +1299,7 @@ def generate_blobs(
                 bandname=bandname,
                 bandname2=bandname2,
                 m5_weight=m5_weight,
+                apply_clouds_m5=apply_clouds_m5,
                 footprint_weight=footprint_weight,
                 slewtime_weight=slewtime_weight,
                 stayband_weight=stayband_weight,
@@ -1256,6 +1382,16 @@ def generate_blobs(
         masks = standard_masks(**standard_mask_params)
         for m in masks:
             bfs.append((m, 0))
+        # Add cloud extinction mask.
+        if extinction_limit is not None:
+            bfs.append(
+                (
+                    bf.MaskCloudMapBasisFunction(
+                        nside=nside, extinction_limit=extinction_limit
+                    ),
+                    0,
+                )
+            )
 
         # unpack the basis functions and weights
         weights = [val[1] for val in bfs]
@@ -1318,6 +1454,7 @@ def generate_twilight_near_sun(
     ignore_obs: list[str] = ["DD", "pair", "long", "blob", "greedy", "template", "ToO"],
     science_program: str = SCIENCE_PROGRAM,
     standard_mask_params: dict | None = None,
+    extinction_limit: float | None = 2.0,
 ) -> list[BlobSurvey]:
     """Generate a survey for observing NEO objects in twilight.
 
@@ -1382,6 +1519,10 @@ def generate_twilight_near_sun(
         Ignore observations by surveys that include the given substring(s).
     standard_mask_params : `dict` or None
         A dictionary of additional kwargs to pass to the standard masks.
+    extinction_limit : `float` | None
+        The cloud extinction limit to use for cloud masking in the survey
+        and queue manager (queue manager via the detailer).
+        Use None for no masking.
     """
     if standard_mask_params is None:
         standard_mask_params = {"nside": nside}
@@ -1418,6 +1559,12 @@ def generate_twilight_near_sun(
         )
         detailer_list.append(detailers.RandomBandDetailer(bands=bands))
         detailer_list.append(detailers.LabelRegionsAndDDFs())
+        if extinction_limit is not None:
+            # Add extinction_limit detailer for cloud masking in queue_manager.
+            detailer_list.append(
+                detailers.ExtinctionLimitDetailer(extinction_limit=extinction_limit)
+            )
+
         bfs = []
 
         bfs.append(
@@ -1476,6 +1623,16 @@ def generate_twilight_near_sun(
         masks = standard_masks(**standard_mask_params)
         for m in masks:
             bfs.append((m, 0))
+        # Add cloud extinction mask.
+        if extinction_limit is not None:
+            bfs.append(
+                (
+                    bf.MaskCloudMapBasisFunction(
+                        nside=nside, extinction_limit=extinction_limit
+                    ),
+                    0,
+                )
+            )
 
         # unpack the basis functions and weights
         weights = [val[1] for val in bfs]
