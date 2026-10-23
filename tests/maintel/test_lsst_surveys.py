@@ -21,6 +21,7 @@
 
 import unittest
 
+import healpy as hp
 import lsst.ts.fbs.utils.maintel.lsst_footprints as lsst_footprints
 import lsst.ts.fbs.utils.maintel.lsst_surveys as lsst_surveys
 import lsst.ts.fbs.utils.maintel.roman_surveys as roman_surveys
@@ -38,6 +39,30 @@ class Test_lsst_Surveys(unittest.TestCase):
         self.footprints, self.template_fp, self.footprint_mask = (
             lsst_footprints.get_footprints(self.nside)
         )
+
+    def test_footprints(self) -> None:
+        footprints, template_fp, footprint_mask = (
+            self.footprints,
+            self.template_fp,
+            self.footprint_mask,
+        )
+        assert len(footprints.footprints[0]) == hp.nside2npix(self.nside)
+        # Check that all bands are present in footprints and template_fp
+        for band in "ugrizy":
+            assert band in self.footprints.bands
+            assert band in self.template_fp.bands
+        # Check that only the bands in the bandpasses are actually non-zero
+        footprints, template_fp, footprint_mask = lsst_footprints.get_footprints(
+            self.nside, bandpasses=("g", "r")
+        )
+        for band in "gr":
+            idx = footprints.bands[band]
+            assert np.nanmax(footprints.footprints[idx]) > 0
+            assert np.nanmax(template_fp.footprints[idx]) > 0
+        for band in "uizy":
+            idx = footprints.bands[band]
+            assert np.nanmax(footprints.footprints[idx]) == 0
+            assert np.nanmax(template_fp.footprints[idx]) == 0
 
     def test_standard_masks(self) -> None:
         masks = lsst_surveys.standard_masks(nside=self.nside)
