@@ -1,0 +1,1 @@
+In ``maintel/lsst_surveys.py``, remove ``generate_short_blobs``, ``GOOD_SEEING_MAX`` (replaced by ``SEEING_FWHM_MAX_ZENITH_DEFAULT``), and the unused ``season*``, ``n_obs_template``, ``survey_start`` and ``max_alt`` arguments.

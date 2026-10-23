@@ -1,0 +1,1 @@
+In ``maintel/lsst_ddf_presched.py``, add ``read_ddf_obs_array`` to read the pre-computed DDF observations array, and update ``generate_ddf_scheduled_obs`` to use the v5.3 default exposure times, add the dayobs and a per-dayobs index to ``scheduler_note``, and set a minimum moon distance on the observations.

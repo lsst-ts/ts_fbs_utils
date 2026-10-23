@@ -21,58 +21,52 @@
 
 import unittest
 
+import healpy as hp
+import lsst.ts.fbs.utils.maintel.lsst_footprints as lsst_footprints
 import lsst.ts.fbs.utils.maintel.lsst_surveys as lsst_surveys
 import lsst.ts.fbs.utils.maintel.roman_surveys as roman_surveys
 import lsst.ts.fbs.utils.maintel.too_surveys as too_surveys
 import numpy as np
 import rubin_scheduler.scheduler.basis_functions as basis_functions
-from rubin_scheduler.scheduler.surveys import LongGapSurvey
-from rubin_scheduler.scheduler.utils import CurrentAreaMap, make_rolling_footprints
-from rubin_scheduler.site_models import Almanac
-from rubin_scheduler.utils import SURVEY_START_MJD
+import rubin_scheduler.scheduler.detailers as detailers
+from rubin_scheduler.scheduler.surveys import BaseSurvey, LongGapSurvey
+from rubin_scheduler.scheduler.utils import CurrentAreaMap
 
 
 class Test_lsst_Surveys(unittest.TestCase):
     def setUp(self) -> None:
-        # Generate footprint over the sky
+        # Generate footprints over the sky
         self.nside = 32
-        sky = CurrentAreaMap(nside=self.nside)
-        footprints_hp_array, labels = sky.return_maps()
-        # Identify pixels for rolling
-        roll_indx = np.where((labels == "lowdust") | (labels == "virgo"))[0]
-        roll_footprint = footprints_hp_array["r"] * 0
-        roll_footprint[roll_indx] = 1
-
-        footprints_hp = {}
-        for key in footprints_hp_array.dtype.names:
-            footprints_hp[key] = footprints_hp_array[key]
-
-        # Set up a mask to contain some surveys within this region
-        footprint_mask = footprints_hp["r"] * 0
-        footprint_mask[np.where(footprints_hp["r"] > 0)] = 1
-
-        # Use Almanac to find the position of the sun at the start of survey
-        almanac = Almanac(mjd_start=SURVEY_START_MJD)
-        sun_moon_info = almanac.get_sun_moon_positions(SURVEY_START_MJD)
-        sun_ra_start = sun_moon_info["sun_RA"].copy()
-
-        # Define the rolling footprint
-        footprints = make_rolling_footprints(
-            fp_hp=footprints_hp,
-            mjd_start=SURVEY_START_MJD,
-            sun_ra_start=sun_ra_start,
-            nslice=2,
-            scale=0.9,
-            nside=self.nside,
-            wfd_indx=roll_indx,
-            order_roll=1,
-            n_cycles=3,
-            uniform=True,
+        self.footprints, self.template_fp, self.footprint_mask = (
+            lsst_footprints.get_footprints(self.nside)
         )
-        self.footprints = footprints
 
-    def test_safety_masks(self) -> None:
-        masks = lsst_surveys.safety_masks(nside=self.nside)
+    def test_footprints(self) -> None:
+        footprints, template_fp, footprint_mask = (
+            self.footprints,
+            self.template_fp,
+            self.footprint_mask,
+        )
+        assert len(footprints.footprints[0]) == hp.nside2npix(self.nside)
+        # Check that all bands are present in footprints and template_fp
+        for band in "ugrizy":
+            assert band in self.footprints.bands
+            assert band in self.template_fp.bands
+        # Check that only the bands in the bandpasses are actually non-zero
+        footprints, template_fp, footprint_mask = lsst_footprints.get_footprints(
+            self.nside, bandpasses=("g", "r")
+        )
+        for band in "gr":
+            idx = footprints.bands[band]
+            assert np.nanmax(footprints.footprints[idx]) > 0
+            assert np.nanmax(template_fp.footprints[idx]) > 0
+        for band in "uizy":
+            idx = footprints.bands[band]
+            assert np.nanmax(footprints.footprints[idx]) == 0
+            assert np.nanmax(template_fp.footprints[idx]) == 0
+
+    def test_standard_masks(self) -> None:
+        masks = lsst_surveys.standard_masks(nside=self.nside)
         assert len(masks) > 0
         required_masks = [
             basis_functions.MoonAvoidanceBasisFunction,
@@ -95,13 +89,6 @@ class Test_lsst_Surveys(unittest.TestCase):
     def test_generate_blobs(self) -> None:
         surveys = lsst_surveys.generate_blobs(
             footprints=self.footprints, nside=self.nside
-        )
-        assert len(surveys) > 0
-
-    def test_generate_short_blobs(self) -> None:
-        surveys = lsst_surveys.generate_short_blobs(
-            footprints=self.footprints,
-            nside=self.nside,
         )
         assert len(surveys) > 0
 
@@ -133,6 +120,142 @@ class Test_lsst_Surveys(unittest.TestCase):
             footprints=self.footprints, nside=self.nside
         )
         assert len(surveys) > 0
+
+    def test_standard_masks_time_limited_shadow(self) -> None:
+        masks = lsst_surveys.standard_masks(nside=self.nside)
+        assert not any(
+            isinstance(m, basis_functions.AltAzShadowTimeLimitedBasisFunction)
+            for m in masks
+        )
+
+        masks = lsst_surveys.standard_masks(
+            nside=self.nside, apply_time_limited_shadow=True
+        )
+        assert any(
+            isinstance(m, basis_functions.AltAzShadowTimeLimitedBasisFunction)
+            for m in masks
+        )
+
+    def test_non_default_nside(self) -> None:
+        nside = 16
+        footprints, _, _ = lsst_footprints.get_footprints(nside)
+
+        surveys = (
+            lsst_surveys.gen_template_surveys(
+                footprints=footprints, nside=nside, band1s=["g"], band2s=["r"]
+            )
+            + lsst_surveys.generate_blobs(
+                footprints=footprints, nside=nside, band1s=["g"], band2s=["r"]
+            )
+            + lsst_surveys.blob_for_long(footprints=footprints, nside=nside)
+        )
+        for survey in surveys:
+            assert survey.nside == nside, survey.survey_name
+
+    def test_unpaired_bands(self) -> None:
+        templates = lsst_surveys.gen_template_surveys(
+            footprints=self.footprints,
+            nside=self.nside,
+            band1s=["u", "g"],
+            band2s=None,
+        )
+        assert [s.survey_name for s in templates] == ["template_u", "template_g"]
+
+        blobs = lsst_surveys.generate_blobs(
+            footprints=self.footprints,
+            nside=self.nside,
+            band1s=["r", "i"],
+            band2s=None,
+        )
+        assert [s.survey_name for s in blobs] == ["pair_33 r", "pair_33 i"]
+
+    def test_mismatched_band_lengths(self) -> None:
+        for generator in (
+            lsst_surveys.gen_template_surveys,
+            lsst_surveys.generate_blobs,
+            lsst_surveys.blob_for_long,
+        ):
+            with self.subTest(generator=generator.__name__):
+                with self.assertRaises(ValueError):
+                    generator(
+                        footprints=self.footprints,
+                        nside=self.nside,
+                        band1s=["g", "r"],
+                        band2s=["i"],
+                    )
+
+    def test_extinction_limit(self) -> None:
+        def has_cloud_handling(survey: BaseSurvey) -> tuple[bool, bool]:
+            has_mask = any(
+                isinstance(bf, basis_functions.MaskCloudMapBasisFunction)
+                for bf in survey.basis_functions
+            )
+            has_detailer = any(
+                isinstance(det, detailers.ExtinctionLimitDetailer)
+                for det in survey.detailers
+            )
+            return has_mask, has_detailer
+
+        generators = {
+            "templates": lambda **kw: lsst_surveys.gen_template_surveys(
+                footprints=self.footprints,
+                nside=self.nside,
+                band1s=["g"],
+                band2s=["r"],
+                **kw,
+            ),
+            "blobs": lambda **kw: lsst_surveys.generate_blobs(
+                footprints=self.footprints,
+                nside=self.nside,
+                band1s=["g"],
+                band2s=["r"],
+                **kw,
+            ),
+            "greedy": lambda **kw: lsst_surveys.gen_greedy_surveys(
+                footprints=self.footprints, nside=self.nside, **kw
+            ),
+            "twilight_near_sun": lambda **kw: (
+                lsst_surveys.generate_twilight_near_sun(nside=self.nside, **kw)
+            ),
+        }
+        for name, generator in generators.items():
+            with self.subTest(generator=name):
+                for survey in generator(extinction_limit=1.5):
+                    assert has_cloud_handling(survey) == (True, True)
+                for survey in generator(extinction_limit=None):
+                    assert has_cloud_handling(survey) == (False, False)
+
+    def test_template_dither(self) -> None:
+        surveys = lsst_surveys.gen_template_surveys(
+            footprints=self.footprints, nside=self.nside, band1s=["g"], band2s=["r"]
+        )
+        assert all(s.dither == "call" for s in surveys)
+
+        blob_survey_params = dict(lsst_surveys.BLOB_SURVEY_PARAMS_DEFAULTS)
+        blob_survey_params["dither"] = "night"
+        surveys = lsst_surveys.gen_template_surveys(
+            footprints=self.footprints,
+            nside=self.nside,
+            band1s=["g"],
+            band2s=["r"],
+            blob_survey_params=blob_survey_params,
+        )
+        assert all(s.dither == "night" for s in surveys)
+
+    def test_blob_for_long_observation_reason(self) -> None:
+        surveys = lsst_surveys.blob_for_long(
+            footprints=self.footprints,
+            nside=self.nside,
+            band1s=["g", "r"],
+            band2s=["i", "z"],
+        )
+        reasons = [
+            det.observation_reason
+            for survey in surveys
+            for det in survey.detailers
+            if isinstance(det, detailers.TrackingInfoDetailer)
+        ]
+        assert reasons == ["triplet_pairs_gi_33.0", "triplet_pairs_rz_33.0"]
 
 
 class Test_too_Surveys(unittest.TestCase):

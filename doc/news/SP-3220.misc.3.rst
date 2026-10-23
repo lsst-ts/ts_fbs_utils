@@ -1,0 +1,1 @@
+Add unit tests for ``lsst_footprints``, the new ``lsst_surveys`` behaviour and ``stability_surveys``.

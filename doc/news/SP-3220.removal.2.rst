@@ -1,0 +1,1 @@
+Remove support for multiple snaps: the ``NEXP``/``U_NEXP`` constants and all ``nexp``/``u_nexp``/``n_snaps`` arguments in ``lsst_surveys``, ``roman_surveys`` and ``too_surveys``, and ``nsnaps`` in ``generate_ddf_scheduled_obs``. Every visit is now a single exposure.

@@ -1,0 +1,1 @@
+Rename ``safety_masks`` to ``standard_masks`` in ``maintel/lsst_surveys.py``, and the ``safety_mask_params`` arguments to ``standard_mask_params`` in ``lsst_surveys``, ``roman_surveys`` and ``stability_surveys``.
