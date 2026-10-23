@@ -168,6 +168,21 @@ class Test_lsst_Surveys(unittest.TestCase):
         )
         assert [s.survey_name for s in blobs] == ["pair_33 r", "pair_33 i"]
 
+    def test_mismatched_band_lengths(self) -> None:
+        for generator in (
+            lsst_surveys.gen_template_surveys,
+            lsst_surveys.generate_blobs,
+            lsst_surveys.blob_for_long,
+        ):
+            with self.subTest(generator=generator.__name__):
+                with self.assertRaises(ValueError):
+                    generator(
+                        footprints=self.footprints,
+                        nside=self.nside,
+                        band1s=["g", "r"],
+                        band2s=["i"],
+                    )
+
 
 class Test_too_Surveys(unittest.TestCase):
     def test_too(self) -> None:
