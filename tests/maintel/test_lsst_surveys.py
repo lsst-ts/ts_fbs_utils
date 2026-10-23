@@ -225,6 +225,23 @@ class Test_lsst_Surveys(unittest.TestCase):
                 for survey in generator(extinction_limit=None):
                     assert has_cloud_handling(survey) == (False, False)
 
+    def test_template_dither(self) -> None:
+        surveys = lsst_surveys.gen_template_surveys(
+            footprints=self.footprints, nside=self.nside, band1s=["g"], band2s=["r"]
+        )
+        assert all(s.dither == "call" for s in surveys)
+
+        blob_survey_params = dict(lsst_surveys.BLOB_SURVEY_PARAMS_DEFAULTS)
+        blob_survey_params["dither"] = "night"
+        surveys = lsst_surveys.gen_template_surveys(
+            footprints=self.footprints,
+            nside=self.nside,
+            band1s=["g"],
+            band2s=["r"],
+            blob_survey_params=blob_survey_params,
+        )
+        assert all(s.dither == "night" for s in surveys)
+
 
 class Test_too_Surveys(unittest.TestCase):
     def test_too(self) -> None:
