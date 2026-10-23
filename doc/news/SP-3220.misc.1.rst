@@ -1,0 +1,1 @@
+Update the ``lsst_surveys`` defaults for survey strategy v5.3: ``standard_masks`` always applies the wind mask (40 m/s) with no shadow time or time-limited shadow by default, the separate 76 degree zenith mask is removed, ``SCIENCE_PROGRAM`` is ``BLOCK-430``, and the blob survey slew and band-change estimates are updated.

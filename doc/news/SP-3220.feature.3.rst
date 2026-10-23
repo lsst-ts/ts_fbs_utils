@@ -1,0 +1,1 @@
+In ``maintel/lsst_surveys.py``, add cloud handling to all survey generators: ``apply_clouds_m5`` includes cloud extinction in the 5-sigma depth basis function, and ``extinction_limit`` adds a cloud mask and an ``ExtinctionLimitDetailer``. ``maintel/roman_surveys.py`` also gets ``extinction_limit``, and an ``ignore_obs`` argument.

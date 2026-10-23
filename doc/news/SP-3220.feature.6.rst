@@ -1,0 +1,1 @@
+In ``maintel/too_surveys.py``, add a ``BandSubstituteDetailer`` to the ToO surveys that use z band, so y band (i band for SSO twilight) is used when z is not available, and add a ``for_simulation`` argument.

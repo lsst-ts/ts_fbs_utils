@@ -1,0 +1,1 @@
+In ``maintel/lsst_surveys.py``, fix ``blob_for_long`` reusing the first band pair's ``observation_reason`` for every later band pair.

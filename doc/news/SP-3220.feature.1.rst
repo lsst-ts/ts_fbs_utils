@@ -1,0 +1,1 @@
+Add the ``maintel/lsst_footprints.py`` module with ``get_footprints``, which builds the LSST rolling-cadence footprints, the template footprint and the ToO/microsurvey mask, and ``SURVEY_START_MJD``. The ``bandpasses`` argument restricts the footprints to a subset of bands.

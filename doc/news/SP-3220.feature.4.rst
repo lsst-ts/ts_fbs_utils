@@ -1,0 +1,1 @@
+In ``maintel/lsst_surveys.py``, rework ``gen_template_surveys`` to take templates in pairs (``BlobPairsSurvey``) with a per-band, declination-dependent seeing limit, a whole-sky cloud limit, fallback smaller areas and a configurable night window.

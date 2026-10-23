@@ -1,0 +1,1 @@
+Remove the science verification (SV) surveys (``sv_config``, ``sv_ddf_presched`` and ``sv_surveys``).

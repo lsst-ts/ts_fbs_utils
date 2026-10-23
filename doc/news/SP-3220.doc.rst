@@ -1,0 +1,1 @@
+Clarify in ``maintel/basis_functions.py`` and ``maintel/surveys.py`` that the blob and DDF helpers are only used by ``MakeScheduler``, and fix the ``generate_ddf_surveys`` return annotation.

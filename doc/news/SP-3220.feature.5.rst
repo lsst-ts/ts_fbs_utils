@@ -1,0 +1,1 @@
+In ``maintel/lsst_surveys.py``, update the blob, long-gaps, greedy and twilight-near-sun surveys: support unpaired bands (``band2s=None``), scale blob pair times up to ``max_pair_time``, add u and g to the greedy surveys during dark time, and include the band in the twilight-near-sun survey names.

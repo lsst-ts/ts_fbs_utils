@@ -1,0 +1,1 @@
+In ``maintel/too_surveys.py``, ``gen_too_surveys`` now takes its masks through the ``masks`` argument instead of building them from ``safety_mask_params``, and the ``split_long``/``long_exp_nsnaps`` arguments are removed. The GW survey names, target names and observation reasons drop ``case`` (e.g. ``GW_case_A`` -> ``GW_A``).
