@@ -151,6 +151,23 @@ class Test_lsst_Surveys(unittest.TestCase):
         for survey in surveys:
             assert survey.nside == nside, survey.survey_name
 
+    def test_unpaired_bands(self) -> None:
+        templates = lsst_surveys.gen_template_surveys(
+            footprints=self.footprints,
+            nside=self.nside,
+            band1s=["u", "g"],
+            band2s=None,
+        )
+        assert [s.survey_name for s in templates] == ["template_u", "template_g"]
+
+        blobs = lsst_surveys.generate_blobs(
+            footprints=self.footprints,
+            nside=self.nside,
+            band1s=["r", "i"],
+            band2s=None,
+        )
+        assert [s.survey_name for s in blobs] == ["pair_33 r", "pair_33 i"]
+
 
 class Test_too_Surveys(unittest.TestCase):
     def test_too(self) -> None:
