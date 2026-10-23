@@ -537,30 +537,31 @@ def generate_ddf_scheduled_obs(
     ----------
     configs_df : `pd.DataFrame`
         A DataFrame containing rows of DDF sequences to schedule
-    data_file : `path` (None)
-        The data file to use for DDF airmass, m5, etc. Defaults to
+    data_file : `path`
+        The data file to use for DDF airmass, m5, etc.
+        If None, defaults to
         using whatever is in rubin_sim_data/scheduler directory.
-    flush_length : `float` (2)
+    flush_length : `float`
         How long to keep a scheduled observation around before it is
         considered failed and flushed (days).
-    mjd_tol : `float` (15)
+    mjd_tol : `float`
         How close an observation must be in time to be considered
         matching a scheduled observation (minutes).
     expt : `dict`[`str`, `float`]
         Total exposure time per visit (seconds).
-    alt_min/max : `float` (25, 85)
+    alt_min/max : `float`
         The minimum and maximum altitudes to permit observations to
         happen (degrees).
-    HA_min/max : `float` (21, 3)
+    HA_min/max : `float`
         The hour angle limits to permit observations to happen (hours).
     moon_min_distance : `float`
         The minimum distance to demand from the moon (degrees).
-    dist_tol : `float` (3)
+    dist_tol : `float`
         The distance tolerance for a visit to be considered matching a
         scheduled observation (degrees).
-    nvis_master : list of ints ([8, 10, 20, 20, 24, 18])
+    nvis_master : `list` [`int`]
         The number of visits to make per band
-    bands : `str` (ugrizy)
+    bands : `str`
         The band names.
     survey_start_mjd : `float`
         Starting MJD of the survey. Default None, which calls
