@@ -28,7 +28,8 @@ import lsst.ts.fbs.utils.maintel.roman_surveys as roman_surveys
 import lsst.ts.fbs.utils.maintel.too_surveys as too_surveys
 import numpy as np
 import rubin_scheduler.scheduler.basis_functions as basis_functions
-from rubin_scheduler.scheduler.surveys import LongGapSurvey
+import rubin_scheduler.scheduler.detailers as detailers
+from rubin_scheduler.scheduler.surveys import BaseSurvey, LongGapSurvey
 from rubin_scheduler.scheduler.utils import CurrentAreaMap
 
 
@@ -182,6 +183,47 @@ class Test_lsst_Surveys(unittest.TestCase):
                         band1s=["g", "r"],
                         band2s=["i"],
                     )
+
+    def test_extinction_limit(self) -> None:
+        def has_cloud_handling(survey: BaseSurvey) -> tuple[bool, bool]:
+            has_mask = any(
+                isinstance(bf, basis_functions.MaskCloudMapBasisFunction)
+                for bf in survey.basis_functions
+            )
+            has_detailer = any(
+                isinstance(det, detailers.ExtinctionLimitDetailer)
+                for det in survey.detailers
+            )
+            return has_mask, has_detailer
+
+        generators = {
+            "templates": lambda **kw: lsst_surveys.gen_template_surveys(
+                footprints=self.footprints,
+                nside=self.nside,
+                band1s=["g"],
+                band2s=["r"],
+                **kw,
+            ),
+            "blobs": lambda **kw: lsst_surveys.generate_blobs(
+                footprints=self.footprints,
+                nside=self.nside,
+                band1s=["g"],
+                band2s=["r"],
+                **kw,
+            ),
+            "greedy": lambda **kw: lsst_surveys.gen_greedy_surveys(
+                footprints=self.footprints, nside=self.nside, **kw
+            ),
+            "twilight_near_sun": lambda **kw: (
+                lsst_surveys.generate_twilight_near_sun(nside=self.nside, **kw)
+            ),
+        }
+        for name, generator in generators.items():
+            with self.subTest(generator=name):
+                for survey in generator(extinction_limit=1.5):
+                    assert has_cloud_handling(survey) == (True, True)
+                for survey in generator(extinction_limit=None):
+                    assert has_cloud_handling(survey) == (False, False)
 
 
 class Test_too_Surveys(unittest.TestCase):
