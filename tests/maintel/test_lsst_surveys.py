@@ -242,6 +242,21 @@ class Test_lsst_Surveys(unittest.TestCase):
         )
         assert all(s.dither == "night" for s in surveys)
 
+    def test_blob_for_long_observation_reason(self) -> None:
+        surveys = lsst_surveys.blob_for_long(
+            footprints=self.footprints,
+            nside=self.nside,
+            band1s=["g", "r"],
+            band2s=["i", "z"],
+        )
+        reasons = [
+            det.observation_reason
+            for survey in surveys
+            for det in survey.detailers
+            if isinstance(det, detailers.TrackingInfoDetailer)
+        ]
+        assert reasons == ["triplet_pairs_gi_33.0", "triplet_pairs_rz_33.0"]
+
 
 class Test_too_Surveys(unittest.TestCase):
     def test_too(self) -> None:
