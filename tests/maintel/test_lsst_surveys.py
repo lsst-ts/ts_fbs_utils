@@ -120,6 +120,21 @@ class Test_lsst_Surveys(unittest.TestCase):
         )
         assert len(surveys) > 0
 
+    def test_standard_masks_time_limited_shadow(self) -> None:
+        masks = lsst_surveys.standard_masks(nside=self.nside)
+        assert not any(
+            isinstance(m, basis_functions.AltAzShadowTimeLimitedBasisFunction)
+            for m in masks
+        )
+
+        masks = lsst_surveys.standard_masks(
+            nside=self.nside, apply_time_limited_shadow=True
+        )
+        assert any(
+            isinstance(m, basis_functions.AltAzShadowTimeLimitedBasisFunction)
+            for m in masks
+        )
+
 
 class Test_too_Surveys(unittest.TestCase):
     def test_too(self) -> None:
