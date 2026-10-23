@@ -105,7 +105,8 @@ def get_basis_functions_blob_survey(
     wind_speed_maximum: float,
     footprint: object,
 ) -> list[basis_functions.BaseBasisFunction]:
-    """Get the basis functions for the blob survey.
+    """Get the basis functions for the simple blob survey used by
+    `MakeScheduler`.
 
     Parameters
     ----------
@@ -120,6 +121,12 @@ def get_basis_functions_blob_survey(
     Returns
     -------
     `list` of `basis_functions.BaseBasisFunction`
+
+    Notes
+    -----
+    Only used to build the system-integration-test scheduler in
+    `MakeScheduler`. Not used for the LSST survey, which is configured
+    with the `lsst_surveys` module.
     """
 
     sun_alt_limit = -12.0
@@ -150,7 +157,8 @@ def get_basis_functions_ddf_survey(
     wind_speed_maximum: float,
     gap_min: float,
 ) -> list[basis_functions.BaseBasisFunction]:
-    """Get the basis functions for the DDF survey.
+    """Get the basis functions for the simple DDF survey used by
+    `MakeScheduler`.
 
     Parameters
     ----------
@@ -171,6 +179,12 @@ def get_basis_functions_ddf_survey(
     Returns
     -------
     `list` of `basis_functions.BaseBasisFunction`
+
+    Notes
+    -----
+    Only used to build the system-integration-test scheduler in
+    `MakeScheduler`. Not used for the LSST survey, which is configured
+    with the `lsst_surveys` module.
     """
     sun_alt_limit = -12.0
 
