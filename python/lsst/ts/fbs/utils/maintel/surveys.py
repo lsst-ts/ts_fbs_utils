@@ -123,7 +123,7 @@ def generate_blob_survey(
     band_names: str,
     survey_name: str,
 ) -> BaseSurvey:
-    """Generate blob survey.
+    """Generate the simple blob survey used by `MakeScheduler`.
 
     Parameters
     ----------
@@ -142,6 +142,12 @@ def generate_blob_survey(
     -------
     blob_survey : `BlobSurvey`
         Blob survey.
+
+    Notes
+    -----
+    Only used to build the system-integration-test scheduler in
+    `MakeScheduler`. Not used for the LSST survey, which is configured
+    with the `lsst_surveys` module.
     """
 
     basis_functions = get_basis_functions_blob_survey(
@@ -166,8 +172,8 @@ def generate_ddf_surveys(
     wind_speed_maximum: float,
     gap_min: float,
     survey_base_name: str,
-) -> BaseSurvey:
-    """Generate DDF survey.
+) -> list[BaseSurvey]:
+    """Generate the simple DDF surveys used by `MakeScheduler`.
 
     Parameters
     ----------
@@ -182,8 +188,14 @@ def generate_ddf_surveys(
 
     Returns
     -------
-    ddf_survey : `DeepDrillingSurvey`
-        DDF survey as a DeepDrillingSurvey object.
+    ddf_surveys : `list` [`DeepDrillingSurvey`]
+        The two DDF surveys, as DeepDrillingSurvey objects.
+
+    Notes
+    -----
+    Only used to build the system-integration-test scheduler in
+    `MakeScheduler`. Not used for the LSST survey, which is configured
+    with the `lsst_surveys` module.
     """
 
     locations = ddf_locations()
