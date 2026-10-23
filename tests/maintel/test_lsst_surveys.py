@@ -135,6 +135,22 @@ class Test_lsst_Surveys(unittest.TestCase):
             for m in masks
         )
 
+    def test_non_default_nside(self) -> None:
+        nside = 16
+        footprints, _, _ = lsst_footprints.get_footprints(nside)
+
+        surveys = (
+            lsst_surveys.gen_template_surveys(
+                footprints=footprints, nside=nside, band1s=["g"], band2s=["r"]
+            )
+            + lsst_surveys.generate_blobs(
+                footprints=footprints, nside=nside, band1s=["g"], band2s=["r"]
+            )
+            + lsst_surveys.blob_for_long(footprints=footprints, nside=nside)
+        )
+        for survey in surveys:
+            assert survey.nside == nside, survey.survey_name
+
 
 class Test_too_Surveys(unittest.TestCase):
     def test_too(self) -> None:
